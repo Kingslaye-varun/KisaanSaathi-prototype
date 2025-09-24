@@ -165,16 +165,16 @@ class AppLocalizations {
   // Language names in their respective languages
   Map<String, String> get languageNames {
     return {
-      'en': 'English',
+      'en': 'English', // English
+      'hi': 'हिन्दी', // Hindi
       'ml': 'മലയാളം', // Malayalam
       'kn': 'ಕನ್ನಡ', // Kannada
-      'hi': 'हिन्दी',
-      'pa': 'ਪੰਜਾਬੀ',
-      'bn': 'বাংলা',
-      'ta': 'தமிழ்',
-      'te': 'తెలుగు',
-      'mr': 'मराठी',
-      'gu': 'ગુજરાતી',
+      'pa': 'ਪੰਜਾਬੀ', // Punjabi
+      'bn': 'বাংলা', // Bengali
+      'ta': 'தமிழ்', // Tamil
+      'te': 'తెలుగు', // Telugu
+      'mr': 'मराठी', // Marathi
+      'gu': 'ગુજરાતી', // Gujarati
     };
   }
 
@@ -1053,50 +1053,50 @@ class AppLocalizations {
 
   String get aadharRequired {
     switch (locale.languageCode) {
-      case 'ml': // Malayalam
-        return 'ആധാർ ആവശ്യമാണ്';
+      case 'bn': // Bengali
+        return 'আধার প্রয়োজন';
+      case 'gu': // Gujarati
+        return 'આધાર જરૂરી';
+      case 'hi': // Hindi
+        return 'आधार आवश्यक';
       case 'kn': // Kannada
         return 'ಆಧಾರ್ ಅಗತ್ಯವಿದೆ';
-      case 'hi':
+      case 'ml': // Malayalam
+        return 'ആധാർ ആവശ്യമാണ്';
+      case 'mr': // Marathi
         return 'आधार आवश्यक';
-      case 'pa':
+      case 'pa': // Punjabi
         return 'ਆਧਾਰ ਲੋੜੀਂਦਾ';
-      case 'bn':
-        return 'আধার প্রয়োজন';
-      case 'ta':
+      case 'ta': // Tamil
         return 'ஆதார் தேவை';
-      case 'te':
+      case 'te': // Telugu
         return 'ఆధార్ అవసరం';
-      case 'mr':
-        return 'आधार आवश्यक';
-      case 'gu':
-        return 'આધાર જરૂરી';
-      default:
+      default: // English
         return 'Aadhar Required';
     }
   }
 
   String get aadharNotRequired {
     switch (locale.languageCode) {
-      case 'ml': // Malayalam
-        return 'ആധാർ ആവശ്യമില്ല';
+      case 'bn': // Bengali
+        return 'আধার প্রয়োজন নেই';
+      case 'gu': // Gujarati
+        return 'આધાર જરૂરી નથી';
+      case 'hi': // Hindi
+        return 'आधार आवश्यक नहीं';
       case 'kn': // Kannada
         return 'ಆಧಾರ್ ಅಗತ್ಯವಿಲ್ಲ';
-      case 'hi':
-        return 'आधार आवश्यक नहीं';
-      case 'pa':
-        return 'ਆਧਾਰ ਲੋੜੀਂਦਾ ਨਹੀਂ';
-      case 'bn':
-        return 'আধার প্রয়োজন নেই';
-      case 'ta':
-        return 'ஆதார் தேவையில்லை';
-      case 'te':
-        return 'ఆధార్ అవసరం లేదు';
-      case 'mr':
+      case 'ml': // Malayalam
+        return 'ആധാർ ആവശ്യമില്ല';
+      case 'mr': // Marathi
         return 'आधार आवश्यक नाही';
-      case 'gu':
-        return 'આધાર જરૂરી નથી';
-      default:
+      case 'pa': // Punjabi
+        return 'ਆਧਾਰ ਲੋੜੀਂਦਾ ਨਹੀਂ';
+      case 'ta': // Tamil
+        return 'ஆதார் தேவையில்லை';
+      case 'te': // Telugu
+        return 'ఆధార్ అవసరం లేదు';
+      default: // English
         return 'Aadhar Not Required';
     }
   }

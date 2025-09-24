@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:kisaansaathi/services/prompt_template.dart';
+
 class ApiService {
   // Weather API - OpenWeatherMap (using your existing key)
   static final String _weatherApiKey = "7e3cac2d274dba29e7551e1f3b582971";
@@ -33,7 +34,7 @@ class ApiService {
   final Map<String, String> _languagePrompts = {
     'english': 'Please respond in English.',
     'hindi': 'कृपया हिंदी में जवाब दें।',
-    'malayalam': 'കृപയാണ് മലയാളത്തിൽ ഉത്തരം നൽകുക.',
+    'malayalam': 'ദയവായി മലയാളത്തിൽ ഉത്തരം നൽകുക.',
     'tamil': 'தயவுசெய்து தமிழில் பதிலளிக்கவும்.',
     'telugu': 'దయచేసి తెలుగులో సమాధానం ఇవ్వండి.',
     'kannada': 'ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರ ನೀಡಿ.',
@@ -42,6 +43,7 @@ class ApiService {
     'marathi': 'कृपया मराठीत उत्तर द्या.',
     'gujarati': 'કૃપા કરીને ગુજરાતીમાં જવાબ આપો.',
   };
+
   Future<String> getChatbotResponse(
     String message, {
     double? latitude,
@@ -96,21 +98,20 @@ class ApiService {
 
       // Language-specific customization for farmers
       final Map<String, String> farmingTerminology = {
-        'english':  
+        'english':
             'Use simple farming terminology. Avoid complex technical jargon.',
         'hindi': 'सरल कृषि शब्दावली का उपयोग करें। जटिल तकनीकी शब्दों से बचें।',
-        'malayalam': 'സാധനക്കാരൻ കृषി ശബ്ദാവലിയിൽ ഉപയോഗിക്കുക. ജടല് तकനിക് ശബ്ദങ്ങളിൽ നിന്ന് बचുക.',
-        'tamil': 'எளிய விவசாய சொற்களைப் பயன்படுத்துங்கள். சிக்கலான தொழில்நுட்ப சொற்களைத் தவிர்க்கவும்.',
-        'telugu': 'సరళమైన వ్యవసాయ పదజాలాన్ని ఉపయోగించండి. క్లిష్టమైన సాంకేతిక పదాలను నివారించండి.',
-        'kannada': 'ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರ ನೀಡಿ.',
-        'punjabi':
-            'ਸਧਾਰਨ ਖੇਤੀਬਾੜੀ ਸ਼ਬਦਾਵਲੀ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਗੁੰਝਲਦਾਰ ਤਕਨੀਕੀ ਸ਼ਬਦਾਂ ਤੋਂ ਬਚੋ।',
-        'bengali':
-            'সরল কৃষি শব্দভাণ্ডার ব্যবহার করুন। জটিল কারিগরি শব্দ এড়িয়ে চলুন।',
+        'malayalam':
+            'ലളിതമായ കൃഷി പദാവലി ഉപയോഗിക്കുക. സങ്കീർണ്ണ സാങ്കേതിക പദങ്ങൾ ഒഴിവാക്കുക.',
         'tamil':
             'எளிய விவசாய சொற்களைப் பயன்படுத்துங்கள். சிக்கலான தொழில்நுட்ப சொற்களைத் தவிர்க்கவும்.',
         'telugu':
             'సరళమైన వ్యవసాయ పదజాలాన్ని ఉపయోగించండి. క్లిష్టమైన సాంకేతిక పదాలను నివారించండి.',
+        'kannada': 'ಸರಳ ಕೃಷಿ ಪದಗಳನ್ನು ಬಳಸಿ. ಸಂಕೀರ್ಣ ತಾಂತ್ರಿಕ ಪದಗಳನ್ನು ತಪ್ಪಿಸಿ.',
+        'punjabi':
+            'ਸਧਾਰਨ ਖੇਤੀਬਾੜੀ ਸ਼ਬਦਾਵਲੀ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਗੁੰਝਲਦਾਰ ਤਕਨੀਕੀ ਸ਼ਬਦਾਂ ਤੋਂ ਬਚੋ।',
+        'bengali':
+            'সরল কৃষি শব্দভাণ্ডার ব্যবহার করুন। জটিল কারিগরি শব্দ এড়িয়ে চলুন।',
         'marathi':
             'साधी शेती शब्दावली वापरा. जटिल तांत्रिक शब्दांपासून दूर रहा.',
         'gujarati':
@@ -129,10 +130,9 @@ class ApiService {
       String conversationContext = '';
       if (conversationHistory != null && conversationHistory.isNotEmpty) {
         // Format the most recent conversation history (last 5 messages) for context
-        final recentHistory =
-            conversationHistory.length > 10
-                ? conversationHistory.sublist(conversationHistory.length - 10)
-                : conversationHistory;
+        final recentHistory = conversationHistory.length > 10
+            ? conversationHistory.sublist(conversationHistory.length - 10)
+            : conversationHistory;
 
         conversationContext = 'Previous conversation:\n';
         for (var message in recentHistory) {
@@ -150,7 +150,8 @@ class ApiService {
             {
               'parts': [
                 {
-                  'text': '''Help the farmer with their query: $message
+                  'text':
+                      '''Help the farmer with their query: $message
 
 LOCATION AND WEATHER CONTEXT:
 $locationContext
@@ -209,20 +210,22 @@ ${PromptTemplate.kisaanSetuPrompt}''',
             'Sorry, there was an error processing your request. Please try again later.',
         'hindi':
             'क्षमा करें, आपके अनुरोध को संसाधित करने में एक त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।',
-        'malayalam': 'സാധനക്കാരൻ കൃഷി ശബ്ദാവലിയിൽ ഉപയോഗിക്കുക. ജടല് तकനിക് ശബ്ദങ്ങളിൽ നിന്ന് बचുക.',
-        'kannada': 'ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರ ನೀಡಿ.',
+        'malayalam':
+            'ക്ഷമിക്കണം, നിങ്ങളുടെ അഭ്യർത്ഥന പ്രോസസ്സ് ചെയ്യുന്നതിനിടെ ഒരു പിശക് സംഭവിച്ചു. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.',
+        'kannada':
+            'ಕ್ಷಮಿಸಿ, ನಿಮ್ಮ ವಿನಂತಿಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವಲ್ಲಿ ದೋಷ ಉಂಟಾಯಿತು. ದಯವಿಟ್ಟು ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
         'punjabi':
             'ਮੁਆਫ਼ ਕਰਨਾ, ਤੁਹਾਡੀ ਬੇਨਤੀ ਨੂੰ ਪ੍ਰੋਸੈਸ ਕਰਨ ਵਿੱਚ ਇੱਕ ਗਲਤੀ ਹੋਈ ਸੀ। ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
         'bengali':
-            'দুঃখিত, আপনার অনুরোধ প্রক্রিয়া করতে একটি ত্রুটি ছিল। পরে আবার চেষ্টা করুন।',
+            'দুঃখিত, আপনার অনুরোধ প্রক্রিয়া করতে একটি ত্রুটি ঘটেছে। পরে আবার চেষ্টা করুন।',
         'tamil':
             'மன்னிக்கவும், உங்கள் கோரிக்கையை செயலாக்குவதில் பிழை ஏற்பட்டது. பிறகு மீண்டும் முயற்சிக்கவும்.',
         'telugu':
-            'క్షమించండి, మీ అభ్యర్థనను ప్రాసెస్ చేయడంలో లోపం ఉంది. దయచేసి తర్వాత మళ్లీ ప్రయత్నించండి.',
+            'క్షమించండి, మీ అభ్యర్థనను ప్రాసెస్ చేయడంలో లోపం వచ్చింది. దయచేసి తరువాత మళ్లీ ప్రయత్నించండి.',
         'marathi':
             'क्षमस्व, आपल्या विनंतीवर प्रक्रिया करताना त्रुटी आली. कृपया नंतर पुन्हा प्रयत्न करा.',
         'gujarati':
-            'માફ કરશો, તમારી વિનંતી પર પ્રક્રિયા કરવામાં ભૂલ આવી. કૃપા કરીને પછીથી ફરી પ્રયાસ કરો.',
+            'માફ કરશો, તમારી વિનંતી પર પ્રક્રિયા કરતી વખતે ભૂલ આવી. કૃપા કરીને પછીથી ફરી પ્રયાસ કરો.',
       };
 
       final errorMessage =
@@ -268,7 +271,8 @@ ${PromptTemplate.kisaanSetuPrompt}''',
           _languagePrompts['english']!;
 
       // Prepare the specialized crop recommendation prompt
-      final cropPrompt = '''
+      final cropPrompt =
+          '''
 You are an expert agricultural assistant specialized in crop recommendations. 
 Provide detailed crop suggestions based on the following information:
 
@@ -336,17 +340,17 @@ ${PromptTemplate.kisaanSetuPrompt}
         'hindi':
             'क्षमा करें, फसल सिफारिशें उत्पन्न करने में एक त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।',
         'malayalam':
-            'ക്ഷമിക്കുക, ഫസല സിഫാരശുകൾ സൃഷ്ടിക്കുന്നതിൽ ഒരു പിശക് സംഭവിച്ചു. ക്രിപ്പ് കൂടുതൽ ശ്രമിക്കുക.',
+            'ക്ഷമിക്കണം, വിള ശുപാർശകൾ സൃഷ്ടിക്കുന്നതിനിടെ ഒരു പിശക് സംഭവിച്ചു. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.',
         'kannada':
-            'ಕ್ಷಮಿಸಿ, ಫಸಲ್ ಸಿಫಾರ್ಷು ಸೃಷ್ಟಿಕೊಳ್ಳುವಲ್ಲಿ ಒಂದು ಗಲ್ಟಿ ಸಂಭವಿಸಿದೆ. ಕ್ರಿಪ್ಪ್ ಕಡಿಮೆ ಮಾಡಿಕೊಳ್ಳಿ.',
+            'ಕ್ಷಮಿಸಿ, ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ರಚಿಸುವಲ್ಲಿ ದೋಷ ಉಂಟಾಯಿತು. ದಯವಿಟ್ಟು ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
         'punjabi':
             'ਮੁਆਫ਼ ਕਰਨਾ, ਫਸਲ ਦੀਆਂ ਸਿਫਾਰਸ਼ਾਂ ਬਣਾਉਣ ਵਿੱਚ ਇੱਕ ਗਲਤੀ ਆਈ ਸੀ। ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
         'bengali':
-            'দুঃখিত, ফসলের সুপারিশ তৈরি করতে একটি ত্রুটি হয়েছিল। পরে আবার চেষ্টা করুন।',
+            'দুঃখিত, ফসলের সুপারিশ তৈরি করতে একটি ত্রুটি হয়েছে। পরে আবার চেষ্টা করুন।',
         'tamil':
             'மன்னிக்கவும், பயிர் பரிந்துரைகளை உருவாக்குவதில் பிழை ஏற்பட்டது. பிறகு மீண்டும் முயற்சிக்கவும்.',
         'telugu':
-            'క్షమించండి, పంట సిఫారసులను రూపొందించడంలో లోపం ఏర్పడింది. దయచేసి తర్వాత మళ్లీ ప్రయత్నించండి.',
+            'క్షమించండి, పంట సిఫారసులను రూపొందించడంలో లోపం ఏర్పడింది. దయచేసి తరువాత మళ్లీ ప్రయత్నించండి.',
         'marathi':
             'क्षमस्व, पिकाच्या शिफारसी तयार करताना त्रुटी आली. कृपया नंतर पुन्हा प्रयत्न करा.',
         'gujarati':
