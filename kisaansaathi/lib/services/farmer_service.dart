@@ -316,6 +316,8 @@ class FarmerService {
       return null;
     }
   }
+
+  static Future getFarmerById(String farmerId) async {}
 }
 
 // Unified response class for better type safety
