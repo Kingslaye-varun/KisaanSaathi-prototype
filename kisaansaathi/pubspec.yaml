@@ -75,6 +75,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - assets/gov_schemes/
     - assets/farm_background.jpg
     - assets/logo.jpg
     - assets/icon/app_icon.png
@@ -84,6 +85,30 @@ flutter:
     - assets/vermicompost.jpg
     - assets/sprayer_pump.jpg
     - assets/tomato_seeds.jpg
+    - assets/gov_schemes/pmkisaan.png
+    - assets/gov_schemes/pmfasal.png
+    - assets/gov_schemes/pmkrishi.jpeg
+    - assets/gov_schemes/kcc.jpeg
+    - assets/gov_schemes/krishivikas.jpeg
+    - assets/gov_schemes/nmsa.png
+    - assets/gov_schemes/nlm.jpeg
+    - assets/gov_schemes/pmkmy.jpeg
+    - assets/gov_schemes/mif.jpeg
+    - assets/gov_schemes/midh.jpeg
+    - assets/gov_schemes/rkvy.jpeg
+    - assets/gov_schemes/pmmsy.jpeg
+    - assets/gov_schemes/aif.jpeg
+    - assets/gov_schemes/smam.jpeg
+    - assets/gov_schemes/nbhm.jpeg
+    - assets/gov_schemes/fpo.jpeg
+    - assets/gov_schemes/pmfme.png
+    - assets/gov_schemes/soilhealth.png
+    - assets/gov_schemes/movcdner.jpeg
+    - assets/gov_schemes/deds.jpeg
+
+
+
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
