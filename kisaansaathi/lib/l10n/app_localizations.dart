@@ -87,6 +87,39 @@ class AppLocalizations {
     }
   }
 
+  String get galleryOption {
+    switch (locale.languageCode) {
+      case 'ml': return 'ഗ്യാലറി'; // Malayalam
+      case 'kn': return 'ಗ್ಯಾಲರಿ'; // Kannada
+      case 'hi': return 'गैलरी'; // Hindi
+      case 'pa': return 'ਗੈਲਰੀ'; // Punjabi
+      case 'bn': return 'গ্যালারি'; // Bengali
+      case 'gu': return 'ગેલરી'; // Gujarati
+      case 'mr': return 'गॅलरी'; // Marathi
+      case 'te': return 'గ్యాలరీ'; // Telugu
+      case 'ta': return 'கேலரி'; // Tamil
+      case 'en': return 'Gallery'; // English
+      default: return 'Gallery';
+    }
+  }
+
+  // New: Camera option
+  String get cameraOption {
+    switch (locale.languageCode) {
+      case 'ml': return 'ക്യാമറ'; // Malayalam
+      case 'kn': return 'ಕ್ಯಾಮೆರಾ'; // Kannada
+      case 'hi': return 'कैमरा'; // Hindi
+      case 'pa': return 'ਕੈਮਰਾ'; // Punjabi
+      case 'bn': return 'ক্যামেরা'; // Bengali
+      case 'gu': return 'કૅમેરા'; // Gujarati
+      case 'mr': return 'कॅमेरा'; // Marathi
+      case 'te': return 'కెమెరా'; // Telugu
+      case 'ta': return 'கேமரா'; // Tamil
+      case 'en': return 'Camera'; // English
+      default: return 'Camera';
+    }
+  }
+
   String get nearbyStores {
     switch (locale.languageCode) {
       case 'ml': // Malayalam

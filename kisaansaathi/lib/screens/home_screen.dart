@@ -4,7 +4,7 @@ import 'package:kisaansaathi/main.dart';
 import 'package:kisaansaathi/screens/agristore_screen.dart';
 import 'package:kisaansaathi/screens/chatbot_screen.dart';
 import 'package:kisaansaathi/screens/dealercontactscreen.dart';
-import 'package:kisaansaathi/screens/disease_screen.dart';
+import 'package:kisaansaathi/screens/community_screen.dart';
 import 'package:kisaansaathi/screens/fertilizer_recommendation.dart';
 import 'package:kisaansaathi/screens/government_schemes.dart';
 import 'package:kisaansaathi/screens/nearby_store_screen.dart';
@@ -27,8 +27,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Language selection variables
-  late String selectedLanguage;
+  // Language selection variables - FIXED: Initialize with default value
+  String selectedLanguage = 'English';
   final List<String> languageOptions = [
     'English',
     'Malayalam',
@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Bengali': Locale('bn'),
     'Marathi': Locale('mr'),
   };
+  
   // Weather data variables
   bool isLoading = true;
   String temperature = '--';
@@ -72,22 +73,40 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadWeatherData();
   }
 
-  // Load initial language from SharedPreferences
+  // Load initial language from SharedPreferences - FIXED: Better error handling
   Future<void> _loadInitialLanguage() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      selectedLanguage = prefs.getString('selectedLanguage') ?? 'English';
-    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        selectedLanguage = prefs.getString('selectedLanguage') ?? 'English';
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading language: $e');
+      }
+      setState(() {
+        selectedLanguage = 'English';
+      });
+    }
   }
 
   // Save selected language to SharedPreferences
   Future<void> _saveLanguage(String language) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selectedLanguage', language);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('selectedLanguage', language);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving language: $e');
+      }
+    }
   }
 
   // Method to get user's location and fetch weather data
   Future<void> _loadWeatherData() async {
+    // Check if widget is still mounted before updating state
+    if (!mounted) return;
+    
     setState(() {
       isLoading = true;
     });
@@ -99,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
         status = await Permission.location.request();
         if (!status.isGranted) {
           // Handle permission denied case
+          if (!mounted) return;
           setState(() {
             isLoading = false;
             weatherCondition = 'Location access denied';
@@ -120,6 +140,9 @@ class _HomeScreenState extends State<HomeScreen> {
         longitude: position.longitude,
       );
 
+      // Check if widget is still mounted before updating state
+      if (!mounted) return;
+      
       // Update UI with weather data
       setState(() {
         isLoading = false;
@@ -148,6 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (kDebugMode) {
         print('Error loading weather data: $e');
       }
+      // Check if widget is still mounted before updating state
+      if (!mounted) return;
       setState(() {
         isLoading = false;
         weatherCondition = 'Error loading weather';
@@ -196,53 +221,52 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'KisaanSetu',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.green.shade600,
+        backgroundColor: Colors.green,
+        elevation: 0,
         actions: [
           DropdownButton<String>(
             value: selectedLanguage,
             icon: const Icon(Icons.language, color: Colors.white),
             dropdownColor: Colors.green.shade700,
             underline: Container(),
-            onChanged: (String? newValue) {
+            onChanged: (String? newValue) async {
               if (newValue != null) {
                 setState(() {
                   selectedLanguage = newValue;
                 });
 
                 // Save selected language
-                _saveLanguage(newValue);
+                await _saveLanguage(newValue);
 
                 // Change app locale
-                final locale = languageToLocaleMap[newValue] ?? Locale('en');
+                final locale = languageToLocaleMap[newValue] ?? const Locale('en');
                 KisaanSetuApp.of(context).setLocale(locale);
               }
             },
-            items:
-                languageOptions.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(
-                      value,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  );
-                }).toList(),
+            items: languageOptions.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              );
+            }).toList(),
           ),
           const SizedBox(width: 10),
         ],
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/farm_background.jpg'),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              // ignore: deprecated_member_use
-              Colors.white.withOpacity(0.8),
+              Colors.white,
               BlendMode.lighten,
             ),
           ),
@@ -267,8 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            localizations
-                                .todaysWeather, // Replace with localized key when available
+                            localizations.todaysWeather,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -312,9 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                       const SizedBox(height: 10),
                       CustomButton(
-                        text:
-                            localizations
-                                .detailedWeather, // Replace with localized key when available
+                        text: localizations.detailedWeather,
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -342,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildFeatureCard(
                       context,
                       localizations.aiAssistant,
-                      Icons.smart_toy, // Better icon for AI assistant
+                      Icons.smart_toy,
                       Colors.green.shade700,
                       () {
                         Navigator.push(
@@ -355,22 +376,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     _buildFeatureCard(
                       context,
-                      localizations.diseaseDetection,
-                      Icons.health_and_safety, // Better for disease detection
-                      Colors.red.shade700,
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DiseaseDetectionScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildFeatureCard(
-                      context,
                       localizations.cropRecommendations,
-                      Icons.spa, // Better for crops
+                      Icons.spa,
                       Colors.teal.shade700,
                       () {
                         Navigator.push(
@@ -384,28 +391,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildFeatureCard(
                       context,
                       localizations.governmentSchemes,
-                      Icons.account_balance, // Better for government schemes
+                      Icons.account_balance,
                       Colors.indigo.shade700,
                       () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (context) => const GovernmentSchemesScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildFeatureCard(
-                      context,
-                      localizations.agriStore,
-                      Icons.shopping_cart, // Better for store
-                      Colors.orange.shade700,
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AgriStoreScreen(),
+                            builder: (context) => const GovernmentSchemesScreen(),
                           ),
                         );
                       },
@@ -413,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildFeatureCard(
                       context,
                       localizations.nearbyStores,
-                      Icons.store_mall_directory, // Better for physical stores
+                      Icons.store_mall_directory,
                       Colors.blue.shade700,
                       () {
                         Navigator.push(
@@ -427,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildFeatureCard(
                       context,
                       localizations.nearbyTraders,
-                      Icons.people_alt, // Better for traders
+                      Icons.people_alt,
                       Colors.brown.shade700,
                       () {
                         Navigator.push(
@@ -441,15 +433,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildFeatureCard(
                       context,
                       localizations.fertilizerRecommendation,
-                      Icons.eco, // Better for fertilizer
+                      Icons.eco,
                       Colors.lightGreen.shade700,
                       () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    const FertilizerRecommendationScreen(),
+                            builder: (context) => const FertilizerRecommendationScreen(),
                           ),
                         );
                       },
@@ -457,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildFeatureCard(
                       context,
                       localizations.marketPrices,
-                      Icons.attach_money, // Better for market prices
+                      Icons.attach_money,
                       Colors.purple.shade700,
                       () {
                         Navigator.push(
@@ -471,7 +461,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildFeatureCard(
                       context,
                       localizations.newsScreen,
-                      Icons.newspaper, // Better for news
+                      Icons.newspaper,
                       Colors.blueGrey.shade700,
                       () {
                         Navigator.push(
