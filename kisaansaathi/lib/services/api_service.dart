@@ -2,25 +2,30 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:kisaansaathi/services/prompt_template.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kisaansaathi/config/secrets.dart';
 
 class ApiService {
   // Weather API - OpenWeatherMap (using your existing key)
-  static final String _weatherApiKey = "7e3cac2d274dba29e7551e1f3b582971";
+  static final String _weatherApiKey = Secrets.weatherApiKey;
   static const String _weatherBaseUrl =
       'https://api.openweathermap.org/data/2.5';
 
   static String get weatherApiKey => _weatherApiKey;
 
   // Gemini API - Using your existing Gemini key
-  static final String _geminiApiKey = 'AIzaSyCdoMX-rv2O4N0NzaSLsU2bQ_FbbpM4aCs';
-  static final String _geminiApiKey2 =
-      'AIzaSyAM_B2UajrTC3nhcwe-K4VbqUAa6CSyLs0';
+  static final String _geminiApiKey = Secrets.geminiApiKey;
+  static final String _geminiApiKey2 = Secrets.geminiApiKey2;
   static const String _geminiBaseUrl =
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
+  // Flask backend (from Farmer.ipynb). Using the same host as disease detection
+  // Update this IP if your Flask server runs elsewhere
+  static const String _flaskBaseUrl = 'http://10.28.91.180:5000';
+  static const String _flaskSessionKey = 'flask_session_id';
+
   // Free farming API alternatives
-  static final String _agriApiKey =
-      '579b464db66ec23bdd000001217d96c60c1646086c4cc3cc5dfc348d'; // Will explain in comments how to get this
+  static final String _agriApiKey = Secrets.agriApiKey; // Provided via secrets
 
   // Market prices API - Farmers Portal API from data.gov.in
   static const String _marketPricesApi =
@@ -53,6 +58,12 @@ class ApiService {
     List<Map<String, String>>? conversationHistory,
   }) async {
     try {
+      // Try Flask first
+      final flaskAnswer = await _askFlask(message);
+      if (flaskAnswer != null && flaskAnswer.trim().isNotEmpty) {
+        return flaskAnswer;
+      }
+
       // Get weather data if coordinates are provided but weather data isn't
       Map<String, dynamic> currentWeather = {};
       if (latitude != null && longitude != null && weatherData == null) {
@@ -233,6 +244,38 @@ ${PromptTemplate.kisaanSetuPrompt}''',
 
       return errorMessage;
     }
+  }
+
+  Future<String?> _askFlask(String message) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? sessionId = prefs.getString(_flaskSessionKey);
+
+      final uri = Uri.parse('$_flaskBaseUrl/api/ask');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'query': message,
+          if (sessionId != null) 'session_id': sessionId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is Map && (data['success'] == true)) {
+          final newSession = data['session_id'] as String?;
+          if (newSession != null && newSession.isNotEmpty && newSession != sessionId) {
+            await prefs.setString(_flaskSessionKey, newSession);
+          }
+          final answer = data['answer'] as String?;
+          return answer;
+        }
+      }
+    } catch (e) {
+      debugPrint('Flask ask error: $e');
+    }
+    return null;
   }
 
   Future<String> getCropResponse(
