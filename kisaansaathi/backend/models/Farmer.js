@@ -18,6 +18,24 @@ const farmerSchema = new mongoose.Schema({
       message: props => `${props.value} is not a valid phone number! Must be 10 digits.`
     }
   },
+  farmerId: {
+    type: String,
+    trim: true,
+    sparse: true,
+    validate: {
+      validator: function(v) {
+        // If not provided, skip validation
+        if (!v) return true;
+        // Format: KL + 11 digits + 1 checksum digit
+        return /^KL\d{12}$/.test(v);
+      },
+      message: props => `${props.value} is not a valid Farmer ID! Must be in format KL + 12 digits.`
+    }
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
   language: {
     type: String,
     required: [true, 'Language preference is required'],

@@ -19,6 +19,7 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _farmerIdController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String _selectedLanguage = 'English';
@@ -134,6 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
         phoneNumber: _phoneController.text.trim(),
         language: _selectedLanguage,
         profileImage: _profileImage,
+        farmerId: _farmerIdController.text.trim().isNotEmpty ? _farmerIdController.text.trim() : null,
       );
 
       if (result.success) {
@@ -450,7 +452,54 @@ class _SignupScreenState extends State<SignupScreen> {
                         },
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
+                    
+                    // Farmer ID field (optional)
+                    Text(
+                      "Farmer Unique ID (Optional)",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            spreadRadius: 1,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextFormField(
+                        controller: _farmerIdController,
+                        decoration: InputDecoration(
+                          hintText: "Enter your KL-format Farmer ID",
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                          helperText: "Enter to get verified farmer status",
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return null; // Optional field
+                          }
+                          if (!RegExp(r'^KL\d{12}$').hasMatch(value)) {
+                            return "Invalid format. Must be KL followed by 12 digits";
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
 
                     // Continue button
                     _isLoading

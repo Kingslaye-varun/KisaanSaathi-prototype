@@ -41,6 +41,7 @@ class FarmerService {
     required String phoneNumber,
     required String language,
     File? profileImage,
+    String? farmerId,
   }) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/register'));
@@ -49,6 +50,11 @@ class FarmerService {
       request.fields['name'] = name;
       request.fields['phoneNumber'] = phoneNumber;
       request.fields['language'] = language;
+      
+      // Add farmerId if provided
+      if (farmerId != null && farmerId.isNotEmpty) {
+        request.fields['farmerId'] = farmerId;
+      }
       
       // Add profile image if provided
       if (profileImage != null) {
@@ -134,6 +140,7 @@ class FarmerService {
     String? name,
     String? language,
     File? profileImage,
+    String? farmerId,
   }) async {
     try {
       var request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/$phoneNumber'));
@@ -141,6 +148,7 @@ class FarmerService {
       // Add text fields if provided
       if (name != null) request.fields['name'] = name;
       if (language != null) request.fields['language'] = language;
+      if (farmerId != null && farmerId.isNotEmpty) request.fields['farmerId'] = farmerId;
       
       // Add profile image if available
       if (profileImage != null) {

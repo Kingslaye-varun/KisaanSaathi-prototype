@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/farmer_service.dart';
+import '../utils/farmer_id_utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -93,10 +94,17 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
         
+        // Check if farmer is verified (has farmerId)
+        final farmerData = result.data;
+        final bool isVerified = farmerData != null && 
+            farmerData['farmerId'] != null && 
+            farmerData['farmerId'].toString().isNotEmpty;
+        
         // Save login preference
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('keepMeLoggedIn', _keepMeLoggedIn);
         await prefs.setString('selectedLanguage', _selectedLanguage);
+        await prefs.setBool('isVerifiedFarmer', isVerified);
         
         // Update app locale
         Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');

@@ -8,7 +8,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Register a new farmer
 router.post('/register', upload.single('profileImage'), async (req, res) => {
   try {
-    const { name, phoneNumber, language } = req.body;
+    const { name, phoneNumber, language, farmerId } = req.body;
     
     // Check if farmer already exists
     const existingFarmer = await Farmer.findOne({ phoneNumber });
@@ -18,6 +18,17 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
         message: 'Farmer already registered',
         data: existingFarmer
       });
+    }
+    
+    // Check if farmerId is already in use (if provided)
+    if (farmerId) {
+      const existingFarmerWithId = await Farmer.findOne({ farmerId });
+      if (existingFarmerWithId) {
+        return res.status(400).json({
+          success: false,
+          message: 'This Farmer ID is already registered with another account'
+        });
+      }
     }
     
     let profileImageData = {
@@ -43,11 +54,13 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
       };
     }
     
-    // Create new farmer
+    // Create new farmer with verification status
     const farmer = await Farmer.create({
       name,
       phoneNumber,
       language,
+      farmerId: farmerId || null,
+      isVerified: farmerId ? true : false,
       profileImage: profileImageData
     });
     
