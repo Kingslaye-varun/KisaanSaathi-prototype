@@ -116,38 +116,33 @@ class _CommunityScreenState extends State<CommunityScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
       final result = await _postService.getPosts(
         page: _currentPage,
-        tag: _selectedTag,
+        tag: _selectedTag == 'All' ? null : _selectedTag,
       );
 
-      // Check if widget is still mounted before updating state
-      if (mounted) {
-        setState(() {
-          _posts = result['posts'];
-          _totalPages = result['totalPages'];
-          _hasMore = _currentPage < _totalPages;
-          _isLoading = false;
-        });
+      // Safely handle the posts data
+      List<Post> posts = [];
+      if (result['posts'] != null) {
+        posts = List<Post>.from(result['posts']);
       }
+
+      setState(() {
+        _posts = posts;
+        _totalPages = result['totalPages'] ?? 1;
+        _hasMore = _currentPage < _totalPages;
+        _isLoading = false;
+      });
     } catch (e) {
-      // Check if widget is still mounted before updating state
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading posts: $e'))
-        );
-      }
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading posts: $e'))
+      );
     }
   }
-
   Future<void> _loadMorePosts() async {
     if (_isLoadingMore || !_hasMore) return;
 
@@ -159,15 +154,19 @@ class _CommunityScreenState extends State<CommunityScreen> {
       final nextPage = _currentPage + 1;
       final result = await _postService.getPosts(
         page: nextPage,
-        tag: _selectedTag,
+        tag: _selectedTag == 'All' ? null : _selectedTag,
       );
 
-      final newPosts = result['posts'];
+      // Safely handle the posts data
+      List<Post> newPosts = [];
+      if (result['posts'] != null) {
+        newPosts = List<Post>.from(result['posts']);
+      }
 
       setState(() {
         _posts.addAll(newPosts);
         _currentPage = nextPage;
-        _hasMore = nextPage < result['totalPages'];
+        _hasMore = nextPage < (result['totalPages'] ?? 1);
         _isLoadingMore = false;
       });
     } catch (e) {
@@ -183,8 +182,17 @@ class _CommunityScreenState extends State<CommunityScreen> {
   Future<void> _refreshPosts() async {
     setState(() {
       _currentPage = 1;
+      _posts = [];
+      _hasMore = true;
+      _selectedTag = 'All'; // Reset to All to ensure we see all posts
     });
+    
+    // Add a small delay to ensure state is updated
+    await Future.delayed(const Duration(milliseconds: 100));
     await _loadPosts();
+    
+    // Print debug info
+    print('Posts refreshed. Total posts: ${_posts.length}');
   }
 
   Future<void> _pickImage() async {
@@ -277,9 +285,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
         ),
       );
 
-      // Refresh posts after creating a new one
-      await Future.delayed(const Duration(milliseconds: 500));
-      _refreshIndicatorKey.currentState?.show();
+      // Reset to first page and refresh posts after creating a new one
+      setState(() {
+        _currentPage = 1;
+        _selectedTag = null; // Set to null to show all posts including the new one
+      });
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _refreshPosts(); // Explicitly refresh posts to show the new one
     } on SocketException {
       setState(() {
         _isCreatingPost = false;

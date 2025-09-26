@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Farmer = require('../models/Farmer');
 const cloudinary = require('../utils/cloudinary');
 const multer = require('multer');
@@ -113,6 +114,9 @@ router.put('/:id', upload.single('profileImage'), async (req, res) => {
     const { name, language } = req.body;
     const farmerId = req.params.id;
     
+    // Check if farmerId is a valid MongoDB ObjectId or a phone number
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(farmerId);
+    
     const updateData = {
       name,
       language
@@ -136,17 +140,33 @@ router.put('/:id', upload.single('profileImage'), async (req, res) => {
       };
       
       // Delete old image if exists
-      const farmer = await Farmer.findById(farmerId);
-      if (farmer.profileImage && farmer.profileImage.public_id) {
+      let farmer;
+      if (isValidObjectId) {
+        farmer = await Farmer.findById(farmerId);
+      } else {
+        farmer = await Farmer.findOne({ phoneNumber: farmerId });
+      }
+      
+      if (farmer && farmer.profileImage && farmer.profileImage.public_id) {
         await cloudinary.uploader.destroy(farmer.profileImage.public_id);
       }
     }
     
-    const updatedFarmer = await Farmer.findByIdAndUpdate(
-      farmerId,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    // Use the appropriate query based on the ID type
+    let updatedFarmer;
+    if (isValidObjectId) {
+      updatedFarmer = await Farmer.findByIdAndUpdate(
+        farmerId,
+        updateData,
+        { new: true, runValidators: true }
+      );
+    } else {
+      updatedFarmer = await Farmer.findOneAndUpdate(
+        { phoneNumber: farmerId },
+        updateData,
+        { new: true, runValidators: true }
+      );
+    }
     
     if (!updatedFarmer) {
       return res.status(404).json({

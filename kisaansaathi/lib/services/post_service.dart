@@ -82,21 +82,26 @@ class Comment {
 }
 
 class PostService {
-  // Use localhost for web, 10.0.2.2 for Android emulator
-  final String baseUrl = 'http://10.99.111.81:5000/api';
+  // Use localhost for web, 10.0.2.2 for Android emulator, or direct IP
+  final String baseUrl = 'http://10.99.111.81:5000/api'; // Using direct IP for better connectivity
 
   // Get all posts with pagination
   Future<Map<String, dynamic>> getPosts({int page = 1, int limit = 10, String? tag}) async {
     try {
       String url = '$baseUrl/posts?page=$page&limit=$limit';
-      if (tag != null && tag != 'All' && tag.isNotEmpty) {
+      if (tag != null && tag.isNotEmpty) {
         url += '&tag=$tag';
       }
+      
+      print('Fetching posts from URL: $url');
 
       // Add timeout to prevent long waiting times
-      final response = await http.get(Uri.parse(url))
-          .timeout(const Duration(seconds: 10), onTimeout: () {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 15), onTimeout: () {
         // Return mock data on timeout for better user experience
+        print('API request timed out, returning mock data');
         return http.Response(
           json.encode({
             'posts': [],
@@ -107,11 +112,16 @@ class PostService {
         );
       });
 
+      print('API Response status: ${response.statusCode}');
+      print('API Response body: ${response.body.substring(0, response.body.length > 100 ? 100 : response.body.length)}...');
+      
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         final List<Post> posts = List<Post>.from(
           (data['posts'] ?? []).map((post) => Post.fromJson(post)),
         );
+        
+        print('Loaded ${posts.length} posts, total pages: ${data['totalPages'] ?? 1}');
 
         return {
           'posts': posts,
@@ -120,29 +130,71 @@ class PostService {
         };
       } else if (response.statusCode == 404) {
         // No posts found, return empty list instead of throwing error
+        print('No posts found (404)');
         return {
           'posts': [],
           'totalPages': 0,
           'currentPage': page,
         };
       } else if (response.statusCode == 401) {
+        print('Unauthorized access (401)');
         throw Exception('Authentication error. Please login again.');
       } else {
-        throw Exception('Failed to load posts: ${response.statusCode}');
+        print('Failed to load posts: ${response.statusCode}');
+        // Return empty list instead of throwing exception for better UX
+        return {
+          'posts': [],
+          'totalPages': 0,
+          'currentPage': page,
+        };
       }
     } catch (e) {
-      // Return mock data instead of empty data for better user experience
+      // Return mock data for better user experience
       print('Error fetching posts: ${e.toString()}');
       
-      // Create mock posts for demonstration
-      final List<Post> mockPosts = _createMockPosts();
-      
+      // Return mock data for better user experience
       return {
-        'posts': mockPosts,
+        'posts': _getMockPosts(),
         'totalPages': 1,
         'currentPage': page,
       };
     }
+  }
+  
+  // Mock data for testing and fallback
+  List<Post> _getMockPosts() {
+    return [
+      Post(
+        id: '1',
+        content: 'Tips for better crop yield this season! Make sure to use proper fertilizers.',
+        authorId: 'farmer1',
+        authorName: 'Ramesh Kumar',
+        tags: ['Crops', 'Tips'],
+        likes: ['user1', 'user2'],
+        comments: [],
+        createdAt: DateTime.now().subtract(const Duration(days: 2)),
+      ),
+      Post(
+        id: '2',
+        content: 'Weather forecast shows rain next week. Prepare your fields!',
+        authorId: 'farmer2',
+        authorName: 'Suresh Patel',
+        tags: ['Weather', 'Planning'],
+        likes: ['user3'],
+        comments: [],
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+      Post(
+        id: '3',
+        content: 'Looking for advice on pest control for rice crops. Any suggestions?',
+        authorId: 'farmer3',
+        authorName: 'Anita Singh',
+        tags: ['Question', 'Pests'],
+        likes: [],
+        comments: [],
+        createdAt: DateTime.now().subtract(const Duration(hours: 5)),
+      ),
+    ];
   }
 
   // Create a new post
