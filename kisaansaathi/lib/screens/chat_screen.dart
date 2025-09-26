@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../services/chat_service.dart';
+import '../services/notification_service.dart';
+
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final Map<String, dynamic>? chatPartner;
+  final String? conversationId;
+
+  const ChatScreen({
+    super.key, 
+    this.chatPartner,
+    this.conversationId
+  });
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -21,6 +31,86 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _loadCurrentFarmer();
+    
+    // If chatPartner is provided from constructor, use it
+    if (widget.chatPartner != null) {
+      setState(() {
+        _chatPartner = widget.chatPartner;
+      });
+    } else {
+      // For testing farmer-to-farmer chat, create dummy farmer data if no chat partner
+      _createDummyFarmerData();
+    }
+    
+    // Load conversation if conversationId is provided
+    if (widget.conversationId != null) {
+      _loadConversation(widget.conversationId!);
+    }
+  }
+  
+  // Create dummy farmer data for testing
+  void _createDummyFarmerData() {
+    if (_currentFarmer == null) {
+      _currentFarmer = {
+        '_id': 'farmer1',
+        'name': 'Rajesh Kumar',
+        'userType': 'farmer',
+        'location': 'Punjab',
+        'crops': ['wheat', 'rice', 'vegetables'],
+      };
+    }
+    
+    if (_chatPartner == null) {
+      _chatPartner = {
+        '_id': 'farmer2',
+        'name': 'Suresh Singh',
+        'userType': 'farmer',
+        'location': 'Haryana',
+        'crops': ['tomatoes', 'potatoes', 'onions'],
+      };
+      
+      // Load messages for this dummy farmer chat
+      _loadMessages();
+    }
+  }
+  
+  // Load conversation using conversationId
+  Future<void> _loadConversation(String conversationId) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      
+      // Here you would typically fetch messages from your backend using the conversationId
+      // For now, we'll just simulate loading with some delay
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Add some dummy messages for testing
+      setState(() {
+        _messages.clear();
+        _messages.addAll([
+          {
+            'senderId': _currentFarmer?['_id'] ?? 'farmer1',
+            'text': 'Hello, I received your notification!',
+            'timestamp': DateTime.now().subtract(const Duration(minutes: 5)).toString(),
+          },
+          {
+            'senderId': _chatPartner?['_id'] ?? 'farmer2',
+            'text': 'Great! Let\'s discuss our farming issues.',
+            'timestamp': DateTime.now().toString(),
+          },
+        ]);
+        _isLoading = false;
+      });
+      
+      // Scroll to bottom after messages load
+      Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error loading conversation: $e');
+    }
   }
 
   Future<void> _loadCurrentFarmer() async {
@@ -54,6 +144,8 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  
+
   Future<void> _loadMessages() async {
     // This would normally fetch messages from an API
     // For now, we'll use dummy data
@@ -64,24 +156,17 @@ class _ChatScreenState extends State<ChatScreen> {
     await Future.delayed(const Duration(milliseconds: 800));
     
     if (_chatPartner != null) {
+      // Check if this is a farmer-to-farmer conversation
+      final bool isFarmerToFarmer = _chatPartner!['userType'] == 'farmer';
+      
       setState(() {
-        _messages.addAll([
-          {
-            'senderId': _chatPartner!['_id'],
-            'text': 'Hello, how can I help you with your farming needs?',
-            'timestamp': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
-          },
-          {
-            'senderId': _currentFarmer!['_id'],
-            'text': 'I\'m looking for advice on organic pest control for my tomato plants.',
-            'timestamp': DateTime.now().subtract(const Duration(hours: 23)).toIso8601String(),
-          },
-          {
-            'senderId': _chatPartner!['_id'],
-            'text': 'I recommend using neem oil spray. It\'s effective and completely organic.',
-            'timestamp': DateTime.now().subtract(const Duration(hours: 22)).toIso8601String(),
-          },
-        ]);
+        if (isFarmerToFarmer) {
+          // Farmer-to-farmer conversation messages
+          _messages.addAll(_getFarmerToFarmerDummyMessages());
+        } else {
+          // Regular support conversation messages
+          _messages.addAll(_getDummyMessages());
+        }
         _isLoading = false;
       });
       
@@ -91,14 +176,63 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     }
   }
+  
+  // Helper method to get dummy messages for testing
+  List<Map<String, dynamic>> _getDummyMessages() {
+    final now = DateTime.now();
+    
+    return [
+      {
+        'senderId': _chatPartner!['_id'],
+        'text': 'Hello, how can I help you with your farming needs?',
+        'timestamp': now.subtract(const Duration(days: 1)).toIso8601String(),
+      },
+      {
+        'senderId': _currentFarmer!['_id'],
+        'text': 'I\'m looking for advice on organic pest control for my tomato plants.',
+        'timestamp': now.subtract(const Duration(hours: 23)).toIso8601String(),
+      },
+      {
+        'senderId': _chatPartner!['_id'],
+        'text': 'I recommend using neem oil spray. It\'s effective and completely organic.',
+        'timestamp': now.subtract(const Duration(hours: 22)).toIso8601String(),
+      },
+    ];
+  }
+  
+  // Helper method to get farmer-to-farmer dummy messages for testing
+  List<Map<String, dynamic>> _getFarmerToFarmerDummyMessages() {
+    final now = DateTime.now();
+    
+    return [
+      {
+        'senderId': _chatPartner!['_id'],
+        'text': 'Hi there! I saw you grow tomatoes too. How\'s your crop doing this season?',  
+        'timestamp': now.subtract(const Duration(days: 1)).toIso8601String(),
+      },
+      {
+        'senderId': _currentFarmer!['_id'],
+        'text': 'Having some issues with pests. Do you have any organic solutions?',
+        'timestamp': now.subtract(const Duration(hours: 23)).toIso8601String(),
+      },
+      {
+        'senderId': _chatPartner!['_id'],
+        'text': 'I use neem oil mixed with a bit of soap. Works great for my farm!',
+        'timestamp': now.subtract(const Duration(hours: 22)).toIso8601String(),
+      },
+    ];
+  }
 
   void _sendMessage() {
     if (_messageController.text.trim().isEmpty) return;
     
+    final messageText = _messageController.text.trim();
+    final bool isFarmerToFarmer = _chatPartner != null && _chatPartner!['userType'] == 'farmer';
+    
     setState(() {
       _messages.add({
         'senderId': _currentFarmer!['_id'],
-        'text': _messageController.text,
+        'text': messageText,
         'timestamp': DateTime.now().toIso8601String(),
       });
     });
@@ -110,9 +244,13 @@ class _ChatScreenState extends State<ChatScreen> {
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
+          String replyText = isFarmerToFarmer
+              ? 'Thanks for sharing! I\'ll try that solution on my farm too.'
+              : 'Thanks for your message! I\'ll get back to you soon.';
+              
           _messages.add({
             'senderId': _chatPartner!['_id'],
-            'text': 'Thanks for your message! I\'ll get back to you soon.',
+            'text': replyText,
             'timestamp': DateTime.now().toIso8601String(),
           });
         });

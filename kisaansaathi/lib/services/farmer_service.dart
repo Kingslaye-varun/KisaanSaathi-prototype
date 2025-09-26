@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class FarmerService {
   // Configuration constants
-  static const String baseUrl = 'http://10.28.91.180:5000/api/farmers';
+  static const String baseUrl = 'http://10.99.111.81:5000/api/farmers';
   static const Duration timeoutDuration = Duration(seconds: 30);
   static const Map<String, String> defaultHeaders = {
     'Content-Type': 'application/json',

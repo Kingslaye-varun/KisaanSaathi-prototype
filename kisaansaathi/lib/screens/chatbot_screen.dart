@@ -376,7 +376,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://10.28.91.180:5000/predict'),
+        Uri.parse('http://10.99.111.81:5000/predict'),
       );
 
       request.files.add(

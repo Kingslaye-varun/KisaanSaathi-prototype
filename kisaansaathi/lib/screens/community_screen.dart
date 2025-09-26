@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../services/post_service.dart';
+import '../screens/notification_screen.dart';
+import '../services/notification_service.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({Key? key}) : super(key: key);
@@ -114,25 +116,35 @@ class _CommunityScreenState extends State<CommunityScreen> {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final result = await _postService.getPosts(
         page: _currentPage,
         tag: _selectedTag,
       );
 
-      setState(() {
-        _posts = result['posts'];
-        _totalPages = result['totalPages'];
-        _hasMore = _currentPage < _totalPages;
-        _isLoading = false;
-      });
+      // Check if widget is still mounted before updating state
+      if (mounted) {
+        setState(() {
+          _posts = result['posts'];
+          _totalPages = result['totalPages'];
+          _hasMore = _currentPage < _totalPages;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading posts: $e'))
-      );
+      // Check if widget is still mounted before updating state
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading posts: $e'))
+        );
+      }
     }
   }
 
@@ -334,9 +346,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
   }
 
   void _navigateToChat(String farmerId) {
-    // This will be implemented later
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Chat screen will be implemented soon')),
+    Navigator.pushNamed(
+      context,
+      '/chat',
+      arguments: {
+        'farmerId': farmerId,
+        'userType': 'farmer',
+      },
     );
   }
 
@@ -561,6 +577,54 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
+  Widget _buildNotificationIcon() {
+    return StreamBuilder<int>(
+      stream: NotificationService().unreadCountStream,
+      initialData: 0,
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+        
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chat),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationScreen(),
+                  ),
+                );
+              },
+            ),
+            if (count > 0)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    count > 9 ? '9+' : count.toString(),
+                    style: const TextStyle(fontSize: 10, color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -572,14 +636,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
         backgroundColor: Colors.green,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.pushNamed(context, '/profile');
-            },
-            tooltip: 'Profile',
-          ),
-        ],
+            _buildNotificationIcon(),
+          ],
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
@@ -765,7 +823,13 @@ class PostCard extends StatelessWidget {
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: onProfileTap,
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/farmer_profile',
+                          arguments: post.authorId,
+                        );
+                      },
                       child: CircleAvatar(
                         radius: 24,
                         backgroundColor: Colors.green.shade100,
@@ -783,7 +847,13 @@ class PostCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           GestureDetector(
-                            onTap: onProfileTap,
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/farmer_profile',
+                                arguments: post.authorId,
+                              );
+                            },
                             child: Text(
                               post.authorName,
                               style: const TextStyle(

@@ -117,6 +117,35 @@ class _FarmerProfileViewState extends State<FarmerProfileView> {
                           color: Colors.grey,
                         ),
                       ),
+                      
+                      // Chat Button (only show if not current user)
+                      if (!_isCurrentUser) ...[
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.chat),
+                          label: const Text('Chat with Farmer'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context, 
+                              '/chat',
+                              arguments: {
+                                '_id': _farmerData!['_id'],
+                                'name': _farmerData!['name'],
+                                'profileImage': _farmerData?['profileImage']?['url'],
+                                'userType': 'farmer',
+                              },
+                            );
+                          },
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       
                       // Farmer Details Card
