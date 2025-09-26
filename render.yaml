@@ -12,7 +12,7 @@ services:
         value: 3.9.0
       - key: PORT
         value: 5000
-      - key: NODE_BACKEND_URL
+      - key: FLASK_MODEL_URL
         sync: false
 
   # Node.js Backend
@@ -38,5 +38,5 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
-      - key: FLASK_MODEL_URL
+      - key: NODE_BACKEND_URL
         sync: false
