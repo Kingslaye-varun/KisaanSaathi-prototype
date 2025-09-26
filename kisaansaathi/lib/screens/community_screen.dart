@@ -117,12 +117,12 @@ class _CommunityScreenState extends State<CommunityScreen> {
     try {
       final result = await _postService.getPosts(
         page: _currentPage,
-        tag: _selectedTag,
+        tag: _selectedTag == 'All' ? null : _selectedTag,
       );
 
       setState(() {
-        _posts = result['posts'];
-        _totalPages = result['totalPages'];
+        _posts = result['posts'] ?? [];
+        _totalPages = result['totalPages'] ?? 1;
         _hasMore = _currentPage < _totalPages;
         _isLoading = false;
       });
@@ -147,15 +147,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
       final nextPage = _currentPage + 1;
       final result = await _postService.getPosts(
         page: nextPage,
-        tag: _selectedTag,
+        tag: _selectedTag == 'All' ? null : _selectedTag,
       );
 
-      final newPosts = result['posts'];
+      final newPosts = result['posts'] ?? [];
 
       setState(() {
         _posts.addAll(newPosts);
         _currentPage = nextPage;
-        _hasMore = nextPage < result['totalPages'];
+        _hasMore = nextPage < (result['totalPages'] ?? 1);
         _isLoadingMore = false;
       });
     } catch (e) {
