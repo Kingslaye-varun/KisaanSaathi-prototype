@@ -6,6 +6,7 @@ from tensorflow.keras.preprocessing.image import img_to_array, load_img  # type:
 import werkzeug  # type: ignore
 from flask_cors import CORS
 from dotenv import load_dotenv
+import tensorflow as tf
 
 # Load environment variables
 load_dotenv()
@@ -14,8 +15,14 @@ load_dotenv()
 IMG_SIZE = (224, 224)  # Image size for the model
 MODEL_PATH = 'best_model.keras'  # Path to your fine-tuned model
 
-# Load the trained model
-model = load_model(MODEL_PATH)
+# Set Keras compatibility options
+tf.keras.utils.set_random_seed(1337)
+options = tf.saved_model.LoadOptions(
+    experimental_io_device='/job:localhost'
+)
+
+# Load the trained model with custom options
+model = load_model(MODEL_PATH, compile=False, options=options)
 
 # Define the class mapping with additional information
 class_info = {
@@ -596,7 +603,7 @@ if __name__ == '__main__':
     if not os.path.exists('static'):
         os.makedirs('static')
     
-app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 
 # from flask import Flask, request, jsonify

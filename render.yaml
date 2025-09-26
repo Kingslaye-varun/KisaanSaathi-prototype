@@ -6,14 +6,14 @@ services:
     region: singapore
     plan: free
     buildCommand: cd kisaansaathi/flask-model-server && pip install -r requirements.txt
-    startCommand: cd kisaansaathi/flask-model-server && gunicorn app:app
+    startCommand: cd kisaansaathi/flask-model-server && python app.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
       - key: PORT
         value: 5000
       - key: FLASK_MODEL_URL
-        sync: false
+        value: 8024c403e41348da188d0320bd122dff
 
   # Node.js Backend
   - type: web
@@ -37,4 +37,4 @@ services:
       - key: CLOUDINARY_API_SECRET
         sync: false
       - key: NODE_BACKEND_URL
-        sync: false
+        value: 3e032a8f70944852cf3d8e62dbf729f4
