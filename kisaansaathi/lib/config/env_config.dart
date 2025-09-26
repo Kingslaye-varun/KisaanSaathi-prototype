@@ -7,6 +7,6 @@ class EnvConfig {
   
   static const String nodeApiUrl = String.fromEnvironment(
     'NODE_API_URL',
-    defaultValue: 'https://kisaansaathi-backend.onrender.com',
+    defaultValue: 'https://kisaansaathi-backend-sq7f.onrender.com',
   );
 }
