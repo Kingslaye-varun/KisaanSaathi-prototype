@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config/env_config.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({Key? key}) : super(key: key);
@@ -376,7 +377,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://10.28.91.180:5000/predict'),
+        Uri.parse('${EnvConfig.flaskApiUrl}/predict'),
       );
 
       request.files.add(

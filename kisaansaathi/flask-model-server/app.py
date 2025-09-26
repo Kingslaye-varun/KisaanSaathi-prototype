@@ -4,6 +4,11 @@ import os
 from tensorflow.keras.models import load_model  # type: ignore
 from tensorflow.keras.preprocessing.image import img_to_array, load_img  # type: ignore
 import werkzeug  # type: ignore
+from flask_cors import CORS
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Configuration
 IMG_SIZE = (224, 224)  # Image size for the model

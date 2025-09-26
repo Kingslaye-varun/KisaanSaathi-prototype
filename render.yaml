@@ -1,0 +1,42 @@
+services:
+  # Flask Model Server
+  - type: web
+    name: kisaansaathi-flask
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: cd kisaansaathi/flask-model-server && pip install -r requirements.txt
+    startCommand: cd kisaansaathi/flask-model-server && gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: PORT
+        value: 5000
+      - key: NODE_BACKEND_URL
+        sync: false
+
+  # Node.js Backend
+  - type: web
+    name: kisaansaathi-backend
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: cd kisaansaathi/backend && npm install
+    startCommand: cd kisaansaathi/backend && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: FLASK_MODEL_URL
+        sync: false

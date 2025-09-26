@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http_parser/http_parser.dart';
+import '../config/env_config.dart';
 
 class Post {
   final String id;
@@ -83,11 +84,15 @@ class Comment {
 
 class PostService {
   // Use localhost for web, 10.0.2.2 for Android emulator
-  final String baseUrl = 'http://10.28.91.180:5000/api';
+  final String baseUrl = 'http://10.99.111.180:5000/api';
 
   // Get all posts with pagination
   Future<Map<String, dynamic>> getPosts({int page = 1, int limit = 10, String? tag}) async {
     try {
+      final String baseUrl = '${EnvConfig.nodeApiUrl}/api';
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? token = prefs.getString('token');
+      
       String url = '$baseUrl/posts?page=$page&limit=$limit';
       if (tag != null && tag != 'All' && tag.isNotEmpty) {
         url += '&tag=$tag';
