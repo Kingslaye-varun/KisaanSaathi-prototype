@@ -70,24 +70,42 @@ class FarmerService {
         return await http.Response.fromStream(await request.send());
       });
 
-      final responseData = json.decode(streamedResponse.body);
-      
-      if (streamedResponse.statusCode == 201 || streamedResponse.statusCode == 200) {
-        await _saveFarmerToPrefs(responseData['data'], token: responseData['token']);
-        
-        return ServiceResponse.success(
-          data: responseData['data'],
-          message: responseData['message'],
-          token: responseData['token'],
-        );
-      } else {
+      // Check if response is HTML instead of JSON (common with server errors)
+      if (streamedResponse.body.trim().startsWith('<!DOCTYPE html>') || 
+          streamedResponse.body.trim().startsWith('<html>')) {
         return ServiceResponse.error(
-          message: responseData['message'] ?? 'Failed to register farmer',
+          message: 'Server returned HTML instead of JSON. The server might be down or experiencing issues.',
+          statusCode: streamedResponse.statusCode,
+        );
+      }
+      
+      try {
+        final responseData = json.decode(streamedResponse.body);
+        
+        if (streamedResponse.statusCode == 201 || streamedResponse.statusCode == 200) {
+          await _saveFarmerToPrefs(responseData['data'], token: responseData['token']);
+          
+          return ServiceResponse.success(
+            data: responseData['data'],
+            message: responseData['message'],
+            token: responseData['token'],
+          );
+        } else {
+          return ServiceResponse.error(
+            message: responseData['message'] ?? 'Failed to register farmer',
+            statusCode: streamedResponse.statusCode,
+          );
+        }
+      } catch (e) {
+        return ServiceResponse.error(
+          message: 'Failed to parse server response: ${e.toString()}. Response body: ${streamedResponse.body.substring(0, streamedResponse.body.length > 100 ? 100 : streamedResponse.body.length)}...',
           statusCode: streamedResponse.statusCode,
         );
       }
     } on TimeoutException catch (e) {
       return ServiceResponse.error(message: e.message ?? 'Request timed out');
+    } on FormatException catch (e) {
+      return ServiceResponse.error(message: 'Invalid response format. The server might be down or experiencing issues.');
     } catch (e) {
       return ServiceResponse.error(message: e.toString());
     }
@@ -101,30 +119,46 @@ class FarmerService {
         headers: defaultHeaders,
       ));
 
-      final responseData = json.decode(response.body);
-      
-      if (response.statusCode == 200) {
-        await _saveFarmerToPrefs(responseData['data']);
-        
-        return ServiceResponse.success(
-          data: responseData['data'],
-          message: 'Farmer retrieved successfully',
-        );
-      } else {
-        String message;
-        switch (response.statusCode) {
-          case 404:
-            message = 'Farmer not found. Please check your phone number or register.';
-            break;
-          case 401:
-            message = 'Authentication error. Please login again.';
-            break;
-          default:
-            message = responseData['message'] ?? 'Failed to get farmer: HTTP ${response.statusCode}';
-        }
-        
+      // Check if response is HTML instead of JSON
+      if (response.body.trim().startsWith('<!DOCTYPE html>') || 
+          response.body.trim().startsWith('<html>')) {
         return ServiceResponse.error(
-          message: message,
+          message: 'Server returned HTML instead of JSON. The server might be down or experiencing issues.',
+          statusCode: response.statusCode,
+        );
+      }
+      
+      try {
+        final responseData = json.decode(response.body);
+        
+        if (response.statusCode == 200) {
+          await _saveFarmerToPrefs(responseData['data']);
+          
+          return ServiceResponse.success(
+            data: responseData['data'],
+            message: 'Farmer retrieved successfully',
+          );
+        } else {
+          String message;
+          switch (response.statusCode) {
+            case 404:
+              message = 'Farmer not found. Please check your phone number or register.';
+              break;
+            case 401:
+              message = 'Authentication error. Please login again.';
+              break;
+            default:
+              message = responseData['message'] ?? 'Failed to get farmer: HTTP ${response.statusCode}';
+          }
+          
+          return ServiceResponse.error(
+            message: message,
+            statusCode: response.statusCode,
+          );
+        }
+      } catch (e) {
+        return ServiceResponse.error(
+          message: 'Failed to parse server response: ${e.toString()}',
           statusCode: response.statusCode,
         );
       }
