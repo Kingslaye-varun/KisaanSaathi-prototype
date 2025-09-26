@@ -120,8 +120,14 @@ class _CommunityScreenState extends State<CommunityScreen> {
         tag: _selectedTag == 'All' ? null : _selectedTag,
       );
 
+      // Safely handle the posts data
+      List<Post> posts = [];
+      if (result['posts'] != null) {
+        posts = List<Post>.from(result['posts']);
+      }
+
       setState(() {
-        _posts = result['posts'] ?? [];
+        _posts = posts;
         _totalPages = result['totalPages'] ?? 1;
         _hasMore = _currentPage < _totalPages;
         _isLoading = false;
@@ -150,7 +156,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
         tag: _selectedTag == 'All' ? null : _selectedTag,
       );
 
-      final newPosts = result['posts'] ?? [];
+      // Safely handle the posts data
+      List<Post> newPosts = [];
+      if (result['posts'] != null) {
+        newPosts = List<Post>.from(result['posts']);
+      }
 
       setState(() {
         _posts.addAll(newPosts);

@@ -37,18 +37,49 @@ class Post {
         json['comments'].map((comment) => Comment.fromJson(comment)),
       );
     }
-
+    
+    // Handle different schema formats (farmer app vs other app)
+    String authorId = '';
+    String authorName = '';
+    String? authorProfileImage;
+    
+    // Handle author field which could be from farmer app
+    if (json['author'] != null) {
+      if (json['author'] is Map) {
+        authorId = json['author']['_id'] ?? '';
+        authorName = json['author']['name'] ?? 'Farmer';
+        authorProfileImage = json['author']['profileImage']?['url'];
+      } else {
+        // If author is just an ID string
+        authorId = json['author'].toString();
+        authorName = 'Farmer';
+      }
+    } 
+    // Handle user field which could be from other app
+    else if (json['user'] != null) {
+      if (json['user'] is Map) {
+        authorId = json['user']['_id'] ?? '';
+        authorName = json['username'] ?? 'Farmer';
+      } else {
+        authorId = json['user'].toString();
+        authorName = json['username'] ?? 'Farmer';
+      }
+    }
+    
+    // Get content from either content or caption field
+    String content = json['content'] ?? json['caption'] ?? '';
+    
     return Post(
-      id: json['_id'],
-      content: json['content'],
-      authorId: json['author']['_id'],
-      authorName: json['author']['name'],
-      authorProfileImage: json['author']['profileImage']?['url'],
+      id: json['_id'] ?? '',
+      content: content,
+      authorId: authorId,
+      authorName: authorName,
+      authorProfileImage: authorProfileImage,
       imageUrl: json['imageUrl'],
       tags: List<String>.from(json['tags'] ?? []),
       likes: List<String>.from(json['likes'] ?? []),
       comments: commentsList,
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
     );
   }
 }
@@ -71,13 +102,43 @@ class Comment {
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
+    // Handle different schema formats
+    String authorId = '';
+    String authorName = '';
+    String? authorProfileImage;
+    String content = '';
+    
+    // Handle author field (farmer app)
+    if (json['author'] != null) {
+      if (json['author'] is Map) {
+        authorId = json['author']['_id'] ?? '';
+        authorName = json['author']['name'] ?? 'Farmer';
+        authorProfileImage = json['author']['profileImage']?['url'];
+      } else {
+        authorId = json['author'].toString();
+        authorName = 'Farmer';
+      }
+    } 
+    // Handle user field (other app)
+    else if (json['user'] != null) {
+      if (json['user'] is Map) {
+        authorId = json['user']['_id'] ?? '';
+      } else {
+        authorId = json['user'].toString();
+      }
+      authorName = json['username'] ?? 'Farmer';
+    }
+    
+    // Get content from either content or text field
+    content = json['content'] ?? json['text'] ?? '';
+    
     return Comment(
-      id: json['_id'],
-      content: json['content'],
-      authorId: json['author']['_id'],
-      authorName: json['author']['name'],
-      authorProfileImage: json['author']['profileImage']?['url'],
-      createdAt: DateTime.parse(json['createdAt']),
+      id: json['_id'] ?? '',
+      content: content,
+      authorId: authorId,
+      authorName: authorName,
+      authorProfileImage: authorProfileImage,
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
     );
   }
 }
@@ -98,18 +159,38 @@ class PostService {
         url += '&tag=$tag';
       }
 
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(
+        Uri.parse(url),
+        headers: token != null ? {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        } : null,
+      );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        final List<Post> posts = List<Post>.from(
-          data['posts'].map((post) => Post.fromJson(post)),
-        );
+        
+        // Handle case where posts might be null or not an array
+        List<dynamic> postsData = [];
+        if (data['posts'] != null && data['posts'] is List) {
+          postsData = data['posts'];
+        }
+        
+        // Safely convert to Post objects with error handling for each post
+        final List<Post> posts = [];
+        for (var postData in postsData) {
+          try {
+            posts.add(Post.fromJson(postData));
+          } catch (e) {
+            print('Error parsing post: $e');
+            // Continue to next post if one fails
+          }
+        }
 
         return {
           'posts': posts,
-          'totalPages': data['totalPages'],
-          'currentPage': data['currentPage'],
+          'totalPages': data['totalPages'] ?? 1,
+          'currentPage': data['currentPage'] ?? 1,
         };
       } else if (response.statusCode == 404) {
         // No posts found, return empty list instead of throwing error
@@ -124,7 +205,13 @@ class PostService {
         throw Exception('Failed to load posts: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Error fetching posts: ${e.toString()}');
+      print('Error getting posts: $e');
+      // Return empty data instead of rethrowing to prevent app crashes
+      return {
+        'posts': [],
+        'totalPages': 1,
+        'currentPage': 1,
+      };
     }
   }
 
