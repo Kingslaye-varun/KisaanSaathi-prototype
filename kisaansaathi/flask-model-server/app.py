@@ -17,12 +17,9 @@ MODEL_PATH = 'best_model.keras'  # Path to your fine-tuned model
 
 # Set Keras compatibility options
 tf.keras.utils.set_random_seed(1337)
-options = tf.saved_model.LoadOptions(
-    experimental_io_device='/job:localhost'
-)
 
-# Load the trained model with custom options
-model = load_model(MODEL_PATH, compile=False, options=options)
+# Load the trained model with simpler options
+model = load_model(MODEL_PATH, compile=False)
 
 # Define the class mapping with additional information
 class_info = {
