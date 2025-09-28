@@ -2,15 +2,13 @@ from flask import Flask, request, jsonify
 import numpy as np
 import tensorflow as tf
 import google.generativeai as genai
-from template_1 import build_disease_prompt
+from template_1 import generate_prompt
 from PIL import Image
 
 # -------------------------
 # Config Gemini
 # -------------------------
-GEMINI_API_KEY = "AIzaSyAh0SIXTzZPacd_vNI3neBm-1gkV1m9a-U"
-genai.configure(api_key=GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+
 
 # -------------------------
 # Load Plant Disease CNN
