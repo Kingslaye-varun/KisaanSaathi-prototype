@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import numpy as np
 import tensorflow as tf
@@ -6,15 +8,38 @@ from template_1 import generate_prompt
 from PIL import Image
 
 # -------------------------
+# Load environment variables
+# -------------------------
+load_dotenv()
+
+# -------------------------
 # Config Gemini
 # -------------------------
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in environment variables")
 
+genai.configure(api_key=GEMINI_API_KEY)
+gemini_model = genai.GenerativeModel('gemini-pro')
 
 # -------------------------
 # Load Plant Disease CNN
 # -------------------------
-MODEL_PATH = "best_model.keras"
-model = tf.keras.models.load_model(MODEL_PATH)
+import os
+
+# Get the directory where the current script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(SCRIPT_DIR, "best_model.keras")
+
+# Check if model file exists
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError(f"Model file not found at: {MODEL_PATH}")
+
+# Load model without optimizer state to avoid warnings
+model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+
+# Compile the model with default optimizer and loss if needed
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Class labels (in the same order used during training!)
 CLASS_NAMES = ['Apple___Apple_scab',
@@ -63,10 +88,30 @@ CLASS_NAMES = ['Apple___Apple_scab',
 # -------------------------
 app = Flask(__name__)
 
-def preprocess_image(image_file, target_size=(224, 224)):
+# Define image dimensions
+IMG_HEIGHT = 224
+IMG_WIDTH = 224
+
+def preprocess_image(image_file):
+    """
+    Preprocess the input image for model prediction.
+    
+    Args:
+        image_file: File object or path to the image
+        
+    Returns:
+        Preprocessed image as a numpy array with shape (1, 224, 224, 3)
+    """
+    # Open and convert image to RGB
     img = Image.open(image_file).convert("RGB")
-    img = img.resize(target_size)
+    
+    # Resize to expected input shape
+    img = img.resize((IMG_WIDTH, IMG_HEIGHT))
+    
+    # Convert to numpy array and normalize pixel values to [0, 1]
     img_array = np.array(img) / 255.0
+    
+    # Add batch dimension and return
     return np.expand_dims(img_array, axis=0)
 
 @app.route("/predict", methods=["POST"])
@@ -84,7 +129,7 @@ def predict():
     disease_name = CLASS_NAMES[idx]
 
     # Build Gemini prompt
-    prompt = build_disease_prompt(disease_name, confidence, lang)
+    prompt = generate_prompt(disease_name, confidence, lang)
 
     # Get Gemini explanation
     response = gemini_model.generate_content(prompt)
