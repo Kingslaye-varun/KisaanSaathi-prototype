@@ -418,6 +418,10 @@ class AppLocalizations {
         return 'ഇന്നത്തെ കാലാവസ്ഥ';
       case 'kn': // Kannada
         return 'ಇಂದಿನ ಹವಾಮಾನ';
+      case 'ta':
+        return 'இன்று வானம்';
+      case 'te':
+        return 'ఇప్పుడు ప్రస్తుతం';
       case 'hi':
         return 'आज का मौसम';
       case 'pa':
@@ -432,6 +436,80 @@ class AppLocalizations {
         return 'Today\'s Weather';
     }
   }
+ String get humidityLabel {
+  switch (locale.languageCode) {
+    case 'ml': // Malayalam
+      return 'ആർദ്രത';
+    case 'kn': // Kannada
+      return 'ಆರ್ದ್ರತೆ';
+    case 'ta': // Tamil
+      return 'ஈரப்பதம்';
+    case 'te': // Telugu
+      return 'తేమ';
+    case 'hi': // Hindi
+      return 'आर्द्रता';
+    case 'pa': // Punjabi
+      return 'ਨਮੀ';
+    case 'bn': // Bengali
+      return 'আর্দ্রতা';
+    case 'gu': // Gujarati
+      return 'આર્દ્રતા';
+    case 'mr': // Marathi
+      return 'आर्द्रता';
+    default:
+      return 'Humidity';
+  }
+}
+
+String get windSpeedLabel {
+  switch (locale.languageCode) {
+    case 'ml': // Malayalam
+      return 'കാറ്റിൻ്റെ വേഗത';
+    case 'kn': // Kannada
+      return 'ಗಾಳಿಯ ವೇಗ';
+    case 'ta': // Tamil
+      return 'காற்றின் வேகம்';
+    case 'te': // Telugu
+      return 'గాలి వేగం';
+    case 'hi': // Hindi
+      return 'हवा की गति';
+    case 'pa': // Punjabi
+      return 'ਹਵਾ ਦੀ ਗਤੀ';
+    case 'bn': // Bengali
+      return 'বাতাসের গতি';
+    case 'gu': // Gujarati
+      return 'પવનની ગતિ';
+    case 'mr': // Marathi
+      return 'वारा वेग';
+    default:
+      return 'Wind Speed';
+  }
+}
+
+String get rainChanceLabel {
+  switch (locale.languageCode) {
+    case 'ml': // Malayalam
+      return 'മഴ സാധ്യത';
+    case 'kn': // Kannada
+      return 'ಮಳೆ ಸಾಧ್ಯತೆ';
+    case 'ta': // Tamil
+      return 'மழை வாய்ப்பு';
+    case 'te': // Telugu
+      return 'వర్షపు అవకాశం';
+    case 'hi': // Hindi
+      return 'बारिश की संभावना';
+    case 'pa': // Punjabi
+      return 'ਬਾਰਸ਼ ਦੀ ਸੰਭਾਵਨਾ';
+    case 'bn': // Bengali
+      return 'বৃষ্টির সম্ভাবনা';
+    case 'gu': // Gujarati
+      return 'વરસાદની સંભાવના';
+    case 'mr': // Marathi
+      return 'पाऊस संभावना';
+    default:
+      return 'Rain Chance';
+  }
+}
 
   String get detailedWeather {
     switch (locale.languageCode) {
@@ -439,6 +517,10 @@ class AppLocalizations {
         return 'വിശദമായ കാലാവസ്ഥ';
       case 'kn': // Kannada
         return 'ವಿವರವಾದ ಹವಾಮಾನ';
+      case 'ta':
+        return 'இன்று வானம்';
+      case 'te':
+        return 'ఇప్పుడు ప్రస్తుతం';
       case 'hi':
         return 'विस्तृत मौसम';
       case 'pa':
@@ -460,6 +542,10 @@ class AppLocalizations {
         return 'AI അസിസ്റ്റന്റ്';
       case 'kn': // Kannada
         return 'AI ಸಹಾಯಕ';
+      case 'ta':
+        return 'இன்று வானம்';
+      case 'te':
+        return 'ఇప్పుడు ప్రస్తుతం';
       case 'hi':
         return 'एआई सहायक';
       case 'pa':
@@ -501,7 +587,11 @@ class AppLocalizations {
       case 'ml': // Malayalam
         return 'വിള ശുപാർശകൾ';
       case 'kn': // Kannada
-        return 'ಬೆಳೆ ಶಿಫಾರಸುಗಳು';
+        return 'ಬೆಳೆ ಶಿಫಾರಸுகளು';
+      case 'ta':
+        return 'இன்று வானம்';
+      case 'te':
+        return 'ఇప్పుడు ప్రస్తుతం';
       case 'hi':
         return 'फसल सिफारिशें';
       case 'pa':
@@ -523,6 +613,10 @@ class AppLocalizations {
         return 'വിപണി വിലകൾ';
       case 'kn': // Kannada
         return 'ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು';
+      case 'ta':
+        return 'இன்று வானம்';
+      case 'te':
+        return 'ఇప్పుడు ప్రస్తుతం';
       case 'hi':
         return 'बाजार भाव';
       case 'pa':
@@ -544,6 +638,10 @@ class AppLocalizations {
         return 'സർക്കാർ പദ്ധതികൾ';
       case 'kn': // Kannada
         return 'ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು';
+      case 'ta':
+        return 'இன்று வானம்';
+      case 'te':
+        return 'ఇప్పుడు ప్రస్తుతం';
       case 'hi':
         return 'सरकारी योजनाएं';
       case 'pa':
@@ -565,6 +663,10 @@ class AppLocalizations {
         return 'കിസാൻ സേതു - സർക്കാർ പദ്ധതികൾ';
       case 'kn': // Kannada
         return 'ಕಿಸಾನ್ ಸೇತು - ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು';
+      case 'ta':
+        return 'இன்று வானம்';
+      case 'te':
+        return 'ఇప్పుడు ప్రస్తుతం';
       case 'hi':
         return 'किसान सेतु - सरकारी योजनाएं';
       case 'pa':
@@ -590,6 +692,10 @@ class AppLocalizations {
         return 'പദ്ധതികൾ തിരയുക...';
       case 'kn': // Kannada
         return 'ಯೋಜನೆಗಳನ್ನು ಹುಡುಕಿ...';
+      case 'ta':
+        return 'இன்று வானம்';
+      case 'te':
+        return 'ఇప్పుడు ప్రస్తుతం';
       case 'hi':
         return 'योजनाएं खोजें...';
       case 'pa':

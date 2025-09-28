@@ -47,13 +47,13 @@ class _HomeScreenState extends State<HomeScreen> {
     'Tamil': Locale('ta'),
     'Telugu': Locale('te'),
     'Kannada': Locale('kn'),
-    'Hindi': Locale('hi'),  
+    'Hindi': Locale('hi'),
     'Punjabi': Locale('pa'),
     'Gujarati': Locale('gu'),
     'Bengali': Locale('bn'),
     'Marathi': Locale('mr'),
   };
-  
+
   // Weather data variables
   bool isLoading = true;
   String temperature = '--';
@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadWeatherData() async {
     // Check if widget is still mounted before updating state
     if (!mounted) return;
-    
+
     setState(() {
       isLoading = true;
     });
@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Check if widget is still mounted before updating state
       if (!mounted) return;
-      
+
       // Update UI with weather data
       setState(() {
         isLoading = false;
@@ -219,9 +219,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'KisaanSetu',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          localizations.appName,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.green,
         elevation: 0,
@@ -241,17 +241,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 await _saveLanguage(newValue);
 
                 // Change app locale
-                final locale = languageToLocaleMap[newValue] ?? const Locale('en');
+                final locale =
+                    languageToLocaleMap[newValue] ?? const Locale('en');
                 KisaanSetuApp.of(context).setLocale(locale);
               }
             },
-            items: languageOptions.map<DropdownMenuItem<String>>((String value) {
+            items: languageOptions.map<DropdownMenuItem<String>>((
+              String value,
+            ) {
               return DropdownMenuItem<String>(
                 value: value,
-                child: Text(
-                  value,
-                  style: const TextStyle(color: Colors.white),
-                ),
+                child: Text(value, style: const TextStyle(color: Colors.white)),
               );
             }).toList(),
           ),
@@ -263,10 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
           image: DecorationImage(
             image: AssetImage('assets/farm_background.jpg'),
             fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.white,
-              BlendMode.lighten,
-            ),
+            colorFilter: ColorFilter.mode(Colors.white, BlendMode.lighten),
           ),
         ),
         child: Padding(
@@ -305,32 +302,38 @@ class _HomeScreenState extends State<HomeScreen> {
                       isLoading
                           ? const Center(child: CircularProgressIndicator())
                           : Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Column(
-                                children: [
-                                  Icon(
-                                    weatherIcon,
-                                    size: 40,
-                                    color: weatherIconColor,
-                                  ),
-                                  Text(
-                                    temperature,
-                                    style: const TextStyle(fontSize: 24),
-                                  ),
-                                  Text(weatherCondition),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Humidity: $humidity'),
-                                  Text('Wind: $windSpeed'),
-                                  Text('Rain chance: $rainChance'),
-                                ],
-                              ),
-                            ],
-                          ),
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Column(
+                                  children: [
+                                    Icon(
+                                      weatherIcon,
+                                      size: 40,
+                                      color: weatherIconColor,
+                                    ),
+                                    Text(
+                                      temperature,
+                                      style: const TextStyle(fontSize: 24),
+                                    ),
+                                    Text(weatherCondition),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${localizations.humidityLabel}: $humidity',
+                                    ),
+                                    Text(
+                                      '${localizations.windSpeedLabel}: $windSpeed',
+                                    ),
+                                    Text(
+                                      '${localizations.rainChanceLabel}: $rainChance',
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                       const SizedBox(height: 10),
                       CustomButton(
                         text: localizations.detailedWeather,
@@ -351,12 +354,140 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
+              // // Main Features Grid
+              // Expanded(
+              //   child: GridView.count(
+              //     crossAxisCount: 2,
+              //     crossAxisSpacing: 16,
+              //     mainAxisSpacing: 16,
+              //     children: [
+              //       _buildFeatureCard(
+              //         context,
+              //         localizations.aiAssistant,
+              //         Icons.smart_toy,
+              //         Colors.green.shade700,
+              //         () {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => ChatbotScreen(),
+              //             ),
+              //           );
+              //         },
+              //       ),
+              //       _buildFeatureCard(
+              //         context,
+              //         //i want to wrap this text as it is overflowing when i change to otherlanguage
+              //         //so that it fits in the card
+              //         localizations.cropRecommendations,
+              //         Icons.grass,
+              //         Colors.teal.shade700,
+              //         () {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => CropRecommendationScreen(),
+              //             ),
+              //           );
+              //         },
+              //       ),
+              //       _buildFeatureCard(
+              //         context,
+              //         localizations.governmentSchemes,
+              //         Icons.account_balance,
+              //         Colors.indigo.shade700,
+              //         () {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => const GovernmentSchemesScreen(),
+              //             ),
+              //           );
+              //         },
+              //       ),
+              //       _buildFeatureCard(
+              //         context,
+              //         localizations.nearbyStores,
+              //         //i want to wrap this text as it is overflowing when i change to otherlanguage
+              //         //so that it fits in the card
+              //         Icons.store_mall_directory,
+              //         Colors.blue.shade700,
+              //         () {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => NearbyStorageScreen(),
+              //             ),
+              //           );
+              //         },
+              //       ),
+              //       _buildFeatureCard(
+              //         context,
+              //         localizations.nearbyTraders,
+              //         //i want to wrap this text as it is overflowing when i change to otherlanguage
+              //         //so that it fits in the card
+              //         Icons.people_alt,
+              //         Colors.brown.shade700,
+              //         () {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => NearbyTradersScreen(),
+              //             ),
+              //           );
+              //         },
+              //       ),
+              //       _buildFeatureCard(
+              //         context,
+              //         localizations.fertilizerRecommendation,
+              //         Icons.eco,
+              //         Colors.lightGreen.shade700,
+              //         () {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => const FertilizerRecommendationScreen(),
+              //             ),
+              //           );
+              //         },
+              //       ),
+              //       _buildFeatureCard(
+              //         context,
+              //         localizations.marketPrices,
+              //         Icons.attach_money,
+              //         Colors.purple.shade700,
+              //         () {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => KeralaMarketScreen(),
+              //             ),
+              //           );
+              //         },
+              //       ),
+              //       _buildFeatureCard(
+              //         context,
+              //         localizations.newsScreen,
+              //         Icons.newspaper,
+              //         Colors.blueGrey.shade700,
+              //         () {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(builder: (context) => CallScreen()),
+              //           );
+              //         },
+              //       ),
+              //     ],
+              //   ),
+              // ),
               // Main Features Grid
               Expanded(
                 child: GridView.count(
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
+                  childAspectRatio:
+                      0.9, // Adjust this ratio to make cards more square
                   children: [
                     _buildFeatureCard(
                       context,
@@ -375,7 +506,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildFeatureCard(
                       context,
                       localizations.cropRecommendations,
-                      Icons.spa,
+                      Icons.grass,
                       Colors.teal.shade700,
                       () {
                         Navigator.push(
@@ -395,7 +526,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const GovernmentSchemesScreen(),
+                            builder: (context) =>
+                                const GovernmentSchemesScreen(),
                           ),
                         );
                       },
@@ -437,7 +569,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const FertilizerRecommendationScreen(),
+                            builder: (context) =>
+                                const FertilizerRecommendationScreen(),
                           ),
                         );
                       },
