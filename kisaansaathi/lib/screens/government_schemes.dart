@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kisaansaathi/l10n/app_localizations.dart';
 import 'dart:core';
+import 'package:url_launcher/url_launcher.dart';
 
 class GovernmentScheme {
   final String id;
@@ -19,6 +20,7 @@ class GovernmentScheme {
   final Map<String, String> benefits;
   final Map<String, String> contactInfo;
   final String youtubeVideoId; // YouTube video ID for tutorial
+  final String applicationUrl; // URL for applying to the scheme
   final Map<String, String> documentsRequired; // Required documents
   final Map<String, String> importantNotes; // Additional important information
 
@@ -39,6 +41,7 @@ class GovernmentScheme {
     required this.benefits,
     required this.contactInfo,
     required this.youtubeVideoId,
+    required this.applicationUrl,
     required this.documentsRequired,
     required this.importantNotes,
   });
@@ -283,8 +286,8 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
         'gu':
             'PM-KISAN હેલ્પલાઇન: 155261 અથવા 1800-115-526\nવેબસાઇટ: pmkisan.gov.in\nઈમેલ: pmkisan@gov.in',
       },
-      youtubeVideoId:
-          'https://www.youtube.com/watch?v=oC3MMuaZjpU', // Example video ID
+      youtubeVideoId: 'oC3MMuaZjpU', // PM Kisan video
+      applicationUrl: 'https://pmkisan.gov.in/',
       documentsRequired: {
         'en':
             'Aadhaar Card, Land ownership documents, Bank account details, Mobile number linked with Aadhaar, Passport size photograph',
@@ -497,7 +500,9 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
         'gu':
             'PMFBY હેલ્પલાઇન: 1800-180-1551\nવેબસાઇટ: pmfby.gov.in\nઈમેલ: help@pmfby.gov.in',
       },
-      youtubeVideoId: 'abc123def456', // Example video ID
+      youtubeVideoId: 'LHy6gfFwHiE', 
+      applicationUrl:
+          'https://pmfby.gov.in/',
       documentsRequired: {
         'en':
             'Aadhaar Card, Land records, Bank passbook, Crop details, Sowing certificate',
@@ -677,7 +682,8 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
         'mr': 'कृषी आणि शेतकरी कल्याण मंत्रालय: 1800-180-1551',
         'gu': 'કૃષિ અને ખેડૂત કલ્યાણ મંત્રાલય: 1800-180-1551',
       },
-      youtubeVideoId: 'PMKSY_video_id', // Placeholder
+      youtubeVideoId: 'QsHBGIrM_4c', // PMKSY video
+      applicationUrl: 'https://pmksy.gov.in/',
       documentsRequired: {
         'en':
             'Land ownership papers, Aadhaar card, Bank passbook, Soil health card, Application form',
@@ -858,7 +864,9 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
         'mr': 'स्थानिक नाबार्ड कार्यालय किंवा बँक शाखा',
         'gu': 'સ્થાનિક નાબાર્ડ ઓફિસ અથવા બેંક શાખા',
       },
-      youtubeVideoId: 'KCC_video_id', // Placeholder
+      youtubeVideoId: '79uGBtYLvAE', // KCC scheme video
+      applicationUrl:
+          'https://www.myscheme.gov.in/schemes/kcc',
       documentsRequired: {
         'en':
             'Aadhaar Card, Land records, Bank passbook, ID Proof, Application form, Details of crops/farming activities',
@@ -896,7 +904,6 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
             'વ્યાજ સબવેન્શન મુખ્ય લાભ છે. કાર્ડ પાક ઉત્પાદન અને અન્ય જરૂરિયાતો માટે ફરતો ક્રેડિટ પ્રદાન કરે છે.',
       },
     ),
-
     GovernmentScheme(
       id: '5',
       title: {
@@ -1040,7 +1047,8 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
         'mr': 'राज्य कृषी विभाग किंवा टोल फ्री: 1800-180-1551',
         'gu': 'રાજ્ય કૃષિ વિભાગ અથવા ટોલ ફ્રી: 1800-180-1551',
       },
-      youtubeVideoId: 'PKVY_video_id', // Placeholder
+      youtubeVideoId: 'WsC8Vvj7ba0', // PKVY video
+      applicationUrl: 'https://www.myscheme.gov.in/schemes/pkvy',
       documentsRequired: {
         'en':
             'Aadhaar Card, Land records, Bank passbook, Soil health card (if available), Application form, Willingness certificate for organic farming',
@@ -1213,7 +1221,8 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
         'mr': 'जिल्हा कृषी कार्यालय किंवा टोल फ्री: 1800-180-1551',
         'gu': 'જિલ્લા કૃષિ કાર્યાલય અથવા ટોલ ફ્રી: 1800-180-1551',
       },
-      youtubeVideoId: 'NMSA_video_id', // Placeholder
+      youtubeVideoId: '0apVKHWnW3A', // Placeholder
+      applicationUrl: 'https://nmsa.dac.gov.in/',
       documentsRequired: {
         'en':
             'Aadhaar Card, Land records, Bank Passbook, Soil Health Card (if available), Application Form',
@@ -1251,7 +1260,7 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
             'આ મિશન વરસાદ આધારિત વિસ્તાર વિકાસ (RAD), માટી આરોગ્ય વ્યવસ્થાપન (SHM), અને જલવાયુ પરિવર્તન અને ટકાઉ ખેતી (CCSAM) જેવા વિવિધ ઘટકો દ્વારા અમલમાં મૂકવામાં આવે છે।',
       },
     ),
-GovernmentScheme(
+    GovernmentScheme(
       id: '7',
       title: {
         'en': 'National Livestock Mission (NLM)',
@@ -1395,7 +1404,8 @@ GovernmentScheme(
         'mr': 'जिल्हा पशुपालन विभाग किंवा टोल फ्री: 1800-180-8791',
         'gu': 'જિલ્લા પશુપાલન વિભાગ અથવા ટોલ ફ્રી: 1800-180-8791',
       },
-      youtubeVideoId: 'NLM_video_id', // Placeholder
+      youtubeVideoId: 'xG4nqYtDhu0', // Placeholder
+      applicationUrl: 'https://nlm.udyamimitra.in/',
       documentsRequired: {
         'en':
             'Aadhaar Card, ID proof, Land/shed ownership documents, Bank Passbook, Detailed Project Report (DPR), Caste Certificate (for special provisions).',
@@ -1433,7 +1443,7 @@ GovernmentScheme(
             'આ યોજનામાં ચાર ઉપ-મિશન છે: ફીડ અને ઘાસચારાનો વિકાસ, પશુધન ઉત્પાદન, ડુક્કર વિકાસ (ઉત્તર-પૂર્વીય પ્રદેશમાં), અને કૌશલ્ય વિકાસ, ટેકનોલોજી ટ્રાન્સફર અને વિસ્તરણ।',
       },
     ),
-GovernmentScheme(
+    GovernmentScheme(
       id: '8',
       title: {
         'en': 'Pradhan Mantri Kisan Maan Dhan Yojana (PM-KMY)',
@@ -1584,7 +1594,8 @@ GovernmentScheme(
         'mr': 'पीएम-केएमवाय हेल्पलाइन: 1800-180-1551',
         'gu': 'PM-KMY હેલ્પલાઇન: 1800-180-1551',
       },
-      youtubeVideoId: 'PMKMY_video_id', // Placeholder
+      youtubeVideoId: 'tgYrHws1SM0', // Placeholder
+      applicationUrl: 'https://maandhan.in/',
       documentsRequired: {
         'en':
             'Aadhaar Card, Land records (Khasra/Khatauni), Bank Passbook, Mobile Number, Application Form.',
@@ -1622,7 +1633,7 @@ GovernmentScheme(
             'માસિક યોગદાનની રકમ પ્રવેશની ઉંમરના આધારે ₹55 થી ₹200 સુધીની હોય છે. કેન્દ્ર સરકાર પેન્શન ફંડમાં સમાન યોગદાન ચૂકવે છે।',
       },
     ),
-GovernmentScheme(
+    GovernmentScheme(
       id: '9',
       title: {
         'en': 'Micro Irrigation Fund (MIF)',
@@ -1765,7 +1776,8 @@ GovernmentScheme(
         'mr': 'राज्य कृषी विभाग किंवा नाबार्ड प्रादेशिक कार्यालय',
         'gu': 'રાજ્ય કૃષિ વિભાગ અથવા નાબાર્ડ પ્રાદેશિક કાર્યાલય',
       },
-      youtubeVideoId: 'MIF_video_id', // Placeholder
+      youtubeVideoId: 'v6siFgCLjmQ', // Placeholder
+      applicationUrl: 'https://www.nabard.org/content1.aspx?id=1720&catid=8&mid=8',
       documentsRequired: {
         'en':
             'Aadhaar Card, Land records (Proof of ownership), Bank passbook, Proposed irrigation plan, Quotation from Micro-Irrigation supplier.',
@@ -1803,7 +1815,7 @@ GovernmentScheme(
             'MIF એ PMKSY યોજના હેઠળ ઉપલબ્ધ સબસિડી ઉપરાંત એક ટોપ-અપ ફંડ છે. લોન કરારના આધારે MIF માંથી લોનનો ઘટક રાજ્ય સરકાર અથવા ખેડૂત દ્વારા પરત ચૂકવવાનો હોય છે।',
       },
     ),
-GovernmentScheme(
+    GovernmentScheme(
       id: '10',
       title: {
         'en': 'Mission for Integrated Development of Horticulture (MIDH)',
@@ -1846,7 +1858,13 @@ GovernmentScheme(
         'gu': 'બાગાયતી વિભાગ',
       },
       farmingTypes: ['Horticulture'],
-      cropTypes: ['Fruits', 'Vegetables', 'Flowers', 'Spices', 'Medicinal & Aromatic Plants'],
+      cropTypes: [
+        'Fruits',
+        'Vegetables',
+        'Flowers',
+        'Spices',
+        'Medicinal & Aromatic Plants',
+      ],
       minLandSize: 0.0,
       maxLandSize: double.infinity,
       requiresAadhar: true,
@@ -1946,7 +1964,8 @@ GovernmentScheme(
         'mr': 'राज्य बागायत विभाग किंवा टोल फ्री: 1800-180-1551',
         'gu': 'રાજ્ય બાગાયતી વિભાગ અથવા ટોલ ફ્રી: 1800-180-1551',
       },
-      youtubeVideoId: 'MIDH_video_id', // Placeholder
+      youtubeVideoId: 'A4rNvvc6bLw', // Placeholder
+      applicationUrl: 'https://www.midh.gov.in/',
       documentsRequired: {
         'en':
             'Aadhaar Card, Land records (Proof of ownership), Bank passbook, Detailed Project Report (DPR) for high-value components, Application Form, Caste Certificate (if applicable).',
@@ -2165,24 +2184,42 @@ GovernmentScheme(
                         ),
                       ),
                       SizedBox(height: 8),
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.play_circle_fill,
-                                size: 64,
-                                color: Colors.red,
+                      GestureDetector(
+                        onTap: () async {
+                          final youtubeUrl =
+                              'https://www.youtube.com/watch?v=${scheme.youtubeVideoId}';
+                          if (await canLaunchUrl(Uri.parse(youtubeUrl))) {
+                            await launchUrl(
+                              Uri.parse(youtubeUrl),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Could not open video tutorial'),
                               ),
-                              SizedBox(height: 8),
-                              Text('Watch Application Tutorial'),
-                            ],
+                            );
+                          }
+                        },
+                        child: Container(
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.play_circle_fill,
+                                  size: 64,
+                                  color: Colors.red,
+                                ),
+                                SizedBox(height: 8),
+                                Text('Watch Application Tutorial'),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -2228,6 +2265,45 @@ GovernmentScheme(
                     SizedBox(height: 8),
                     Text(scheme.getLocalizedDocumentsRequired(context)),
 
+                    // Apply Now Button
+                    SizedBox(height: 24),
+                    if (scheme.applicationUrl.isNotEmpty) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final url = scheme.applicationUrl;
+                            if (await canLaunchUrl(Uri.parse(url))) {
+                              await launchUrl(
+                                Uri.parse(url),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Could not open application website',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: Text(
+                            'Apply Now',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+
                     // Contact Information
                     SizedBox(height: 16),
                     Text(
@@ -2252,17 +2328,17 @@ GovernmentScheme(
                     SizedBox(height: 8),
                     Text(scheme.getLocalizedImportantNotes(context)),
 
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Implement apply functionality
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        minimumSize: Size(double.infinity, 50),
-                      ),
-                      child: Text('Apply Now', style: TextStyle(fontSize: 16)),
-                    ),
+                    // SizedBox(height: 20),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     // Implement apply functionality
+                    //   },
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: Colors.green,
+                    //     minimumSize: Size(double.infinity, 50),
+                    //   ),
+                    //   child: Text('Apply Now', style: TextStyle(fontSize: 16)),
+                    // ),
                   ],
                 ),
               ),
