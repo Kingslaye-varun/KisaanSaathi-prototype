@@ -37,10 +37,23 @@ class CustomButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null) ...[Icon(icon), const SizedBox(width: 8)],
-            Text(
-              text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            if (icon != null) ...[
+              Icon(icon, size: 20, color: Colors.white),
+              SizedBox(width: 8),
+            ],
+            Expanded(
+              // Add this Expanded widget
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis, // Handle long text
+                maxLines: 1, // Ensure single line
+              ),
             ),
           ],
         ),

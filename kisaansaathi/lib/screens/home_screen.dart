@@ -451,7 +451,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MarketScreen(),
+                            builder: (context) => KeralaMarketScreen(),
                           ),
                         );
                       },

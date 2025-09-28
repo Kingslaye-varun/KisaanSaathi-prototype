@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:kisaansaathi/screens/chat_screen.dart';
+import 'package:kisaansaathi/screens/notification_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../services/post_service.dart';
@@ -75,7 +77,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final farmerData = prefs.getString('farmerData');
-      
+
       if (farmerData != null) {
         final farmer = json.decode(farmerData);
         setState(() {
@@ -87,14 +89,16 @@ class _CommunityScreenState extends State<CommunityScreen> {
       } else {
         print('No farmer data found in SharedPreferences');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No farmer data found. Please log in again.')),
+          const SnackBar(
+            content: Text('No farmer data found. Please log in again.'),
+          ),
         );
       }
     } catch (e) {
       print('Error loading current farmer: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading farmer data: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading farmer data: $e')));
     }
   }
 
@@ -120,14 +124,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
         tag: _selectedTag == 'All' ? null : _selectedTag,
       );
 
-      // Safely handle the posts data
-      List<Post> posts = [];
-      if (result['posts'] != null) {
-        posts = List<Post>.from(result['posts']);
-      }
-
       setState(() {
-        _posts = posts;
+        _posts = result['posts'] ?? [];
         _totalPages = result['totalPages'] ?? 1;
         _hasMore = _currentPage < _totalPages;
         _isLoading = false;
@@ -136,9 +134,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading posts: $e'))
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading posts: $e')));
     }
   }
 
@@ -156,11 +154,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         tag: _selectedTag == 'All' ? null : _selectedTag,
       );
 
-      // Safely handle the posts data
-      List<Post> newPosts = [];
-      if (result['posts'] != null) {
-        newPosts = List<Post>.from(result['posts']);
-      }
+      final newPosts = result['posts'] ?? [];
 
       setState(() {
         _posts.addAll(newPosts);
@@ -172,9 +166,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
       setState(() {
         _isLoadingMore = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading more posts: $e'))
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading more posts: $e')));
     }
   }
 
@@ -198,9 +192,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e'))
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
     }
   }
 
@@ -293,7 +287,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         SnackBar(
           content: Text('Error creating post: $e'),
           backgroundColor: Colors.red,
-        )
+        ),
       );
     }
   }
@@ -312,9 +306,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
       // Refresh posts to update like status
       _refreshIndicatorKey.currentState?.show();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error liking post: $e'))
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error liking post: $e')));
     }
   }
 
@@ -336,17 +330,18 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  void _navigateToProfile(String farmerId) {
-    // This will be implemented later
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile screen will be implemented soon')),
+  void _navigateToNotification(String farmerId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => NotificationScreen()),
     );
   }
 
   void _navigateToChat(String farmerId) {
-    // This will be implemented later
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Chat screen will be implemented soon')),
+    // Navigate to chat screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ChatScreen()),
     );
   }
 
@@ -397,7 +392,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
                         ? NetworkImage(_currentFarmerImage!)
                         : null,
                     child: _currentFarmerImage == null
-                        ? const Icon(Icons.person, size: 30, color: Colors.green)
+                        ? const Icon(
+                            Icons.person,
+                            size: 30,
+                            color: Colors.green,
+                          )
                         : null,
                   ),
                   const SizedBox(width: 12),
@@ -423,10 +422,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Post topic selection
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.green.shade300),
                   borderRadius: BorderRadius.circular(20),
@@ -445,14 +447,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   items: _tags
                       .where((tag) => tag != 'All')
                       .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(_getReadableTagName(value)),
-                    );
-                  }).toList(),
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(_getReadableTagName(value)),
+                        );
+                      })
+                      .toList(),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
               TextField(
                 controller: _postController,
@@ -516,12 +519,17 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton.icon(
-                    icon: const Icon(Icons.add_photo_alternate, color: Colors.green, size: 28),
-                    label: const Text('Add Photo', 
+                    icon: const Icon(
+                      Icons.add_photo_alternate,
+                      color: Colors.green,
+                      size: 28,
+                    ),
+                    label: const Text(
+                      'Add Photo',
                       style: TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.bold,
-                      )
+                      ),
                     ),
                     onPressed: () async {
                       await _pickImage();
@@ -539,7 +547,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -583,11 +594,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
-              Navigator.pushNamed(context, '/profile');
+              _navigateToNotification(_currentFarmerId!);
             },
-            tooltip: 'Profile',
+            tooltip: 'Notifications',
           ),
         ],
       ),
@@ -620,7 +631,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey.shade300),
                                 borderRadius: BorderRadius.circular(30),
@@ -645,16 +658,21 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       itemCount: _tags.length,
                       itemBuilder: (context, index) {
                         final tag = _tags[index];
-                        final isSelected = _selectedTag == tag || 
-                                          (tag == 'All' && _selectedTag == null);
+                        final isSelected =
+                            _selectedTag == tag ||
+                            (tag == 'All' && _selectedTag == null);
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: FilterChip(
-                            label: Text(tag.replaceAll('_', ' ').toCapitalized()),
+                            label: Text(
+                              tag.replaceAll('_', ' ').toCapitalized(),
+                            ),
                             selected: isSelected,
                             onSelected: (selected) {
                               setState(() {
-                                _selectedTag = selected ? (tag == 'All' ? null : tag) : null;
+                                _selectedTag = selected
+                                    ? (tag == 'All' ? null : tag)
+                                    : null;
                                 _currentPage = 1;
                                 _posts = [];
                                 _isLoading = true;
@@ -665,8 +683,12 @@ class _CommunityScreenState extends State<CommunityScreen> {
                             selectedColor: Colors.green.shade100,
                             checkmarkColor: Colors.green,
                             labelStyle: TextStyle(
-                              color: isSelected ? Colors.green.shade800 : Colors.black87,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected
+                                  ? Colors.green.shade800
+                                  : Colors.black87,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                           ),
                         );
@@ -678,9 +700,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   Expanded(
                     child: _posts.isEmpty
                         ? const Center(
-                            child: Text(
-                              'No posts yet. Be the first to post!',
-                            ),
+                            child: Text('No posts yet. Be the first to post!'),
                           )
                         : ListView.builder(
                             controller: _scrollController,
@@ -696,14 +716,17 @@ class _CommunityScreenState extends State<CommunityScreen> {
                               }
 
                               final post = _posts[index];
-                              final isLiked = post.likes.contains(_currentFarmerId);
+                              final isLiked = post.likes.contains(
+                                _currentFarmerId,
+                              );
 
                               return PostCard(
                                 post: post,
                                 isLiked: isLiked,
                                 onLike: () => _toggleLike(post),
                                 onComment: () => _showComments(post),
-                                onProfileTap: () => _navigateToProfile(post.authorId),
+                                onProfileTap: () =>
+                                    _navigateToNotification(post.authorId),
                                 onChatTap: () => _navigateToChat(post.authorId),
                                 currentFarmerId: _currentFarmerId,
                               );
@@ -783,7 +806,11 @@ class PostCard extends StatelessWidget {
                             ? NetworkImage(post.authorProfileImage!)
                             : null,
                         child: post.authorProfileImage == null
-                            ? const Icon(Icons.person, size: 28, color: Colors.green)
+                            ? const Icon(
+                                Icons.person,
+                                size: 28,
+                                color: Colors.green,
+                              )
                             : null,
                       ),
                     ),
@@ -812,7 +839,10 @@ class PostCard extends StatelessWidget {
                               const SizedBox(width: 4),
                               Text(
                                 _formatTimestamp(post.createdAt),
-                                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -845,7 +875,10 @@ class PostCard extends StatelessWidget {
                     children: post.tags
                         .map(
                           (tag) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.green[50],
                               borderRadius: BorderRadius.circular(12),
@@ -882,7 +915,11 @@ class PostCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Center(
-                            child: Icon(Icons.error, color: Colors.red, size: 32),
+                            child: Icon(
+                              Icons.error,
+                              color: Colors.red,
+                              size: 32,
+                            ),
                           ),
                         );
                       },
@@ -899,7 +936,7 @@ class PostCard extends StatelessWidget {
                             child: CircularProgressIndicator(
                               value: loadingProgress.expectedTotalBytes != null
                                   ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
+                                        loadingProgress.expectedTotalBytes!
                                   : null,
                               color: Colors.green,
                             ),
@@ -915,22 +952,14 @@ class PostCard extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.thumb_up,
-                        size: 16,
-                        color: Colors.green[400],
-                      ),
+                      Icon(Icons.thumb_up, size: 16, color: Colors.green[400]),
                       const SizedBox(width: 4),
                       Text(
                         '${post.likes.length}',
                         style: TextStyle(color: Colors.grey[600], fontSize: 13),
                       ),
                       const SizedBox(width: 16),
-                      Icon(
-                        Icons.comment,
-                        size: 16,
-                        color: Colors.blue[400],
-                      ),
+                      Icon(Icons.comment, size: 16, color: Colors.blue[400]),
                       const SizedBox(width: 4),
                       Text(
                         '${post.comments.length}',
@@ -1043,9 +1072,9 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
     }
 
     if (widget.currentFarmerId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please log in to comment'))
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please log in to comment')));
       return;
     }
 
@@ -1070,9 +1099,9 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       setState(() {
         _isSubmitting = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding comment: $e'))
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error adding comment: $e')));
     }
   }
 
