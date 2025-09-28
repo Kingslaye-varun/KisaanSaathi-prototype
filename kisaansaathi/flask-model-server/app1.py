@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, make_response
+from flask_cors import CORS
 import numpy as np
 import tensorflow as tf
 import google.generativeai as genai
@@ -20,7 +21,7 @@ if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
 
 genai.configure(api_key=GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel('gemini-pro')
+gemini_model = genai.GenerativeModel('gemini-2.0-flash')
 
 # -------------------------
 # Load Plant Disease CNN
@@ -42,51 +43,58 @@ model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Class labels (in the same order used during training!)
-CLASS_NAMES = ['Apple___Apple_scab',
- 'Apple___Black_rot',
- 'Apple___Cedar_apple_rust',
- 'Apple___healthy',
- 'Blueberry___healthy',
- 'Cherry_(including_sour)___Powdery_mildew',
- 'Cherry_(including_sour)___healthy',
- 'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot',
- 'Corn_(maize)___Common_rust_',
- 'Corn_(maize)___Northern_Leaf_Blight',
- 'Corn_(maize)___healthy',
- 'Grape___Black_rot',
- 'Grape___Esca_(Black_Measles)',
- 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)',
- 'Grape___healthy',
- 'Orange___Haunglongbing_(Citrus_greening)',
- 'Peach___Bacterial_spot',
- 'Peach___healthy',
- 'Pepper,_bell___Bacterial_spot',
- 'Pepper,_bell___healthy',
- 'Potato___Early_blight',
- 'Potato___Late_blight',
- 'Potato___healthy',
- 'Raspberry___healthy',
- 'Soybean___healthy',
- 'Squash___Powdery_mildew',
- 'Strawberry___Leaf_scorch',
- 'Strawberry___healthy',
- 'Tomato___Bacterial_spot',
- 'Tomato___Early_blight',
- 'Tomato___Late_blight',
- 'Tomato___Leaf_Mold',
- 'Tomato___Septoria_leaf_spot',
- 'Tomato___Spider_mites Two-spotted_spider_mite',
- 'Tomato___Target_Spot',
- 'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
- 'Tomato___Tomato_mosaic_virus',
- 'Tomato___healthy',
- 'Non_Plant___Not_a_leaf']
-
+CLASS_NAMES = [
+    'Apple___Apple_scab',
+    'Apple___Black_rot',
+    'Apple___Cedar_apple_rust',
+    'Apple___healthy',
+    'Blueberry___healthy',
+    'Cherry_(including_sour)___Powdery_mildew',
+    'Cherry_(including_sour)___healthy',
+    'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot',
+    'Corn_(maize)___Common_rust_',
+    'Corn_(maize)___Northern_Leaf_Blight',
+    'Corn_(maize)___healthy',
+    'Grape___Black_rot',
+    'Grape___Esca_(Black_Measles)',
+    'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)',
+    'Grape___healthy',
+    'Orange___Haunglongbing_(Citrus_greening)',
+    'Peach___Bacterial_spot',
+    'Peach___healthy',
+    'Pepper,_bell___Bacterial_spot',
+    'Pepper,_bell___healthy',
+    'Potato___Early_blight',
+    'Potato___Late_blight',
+    'Potato___healthy',
+    'Raspberry___healthy',
+    'Soybean___healthy',
+    'Squash___Powdery_mildew',
+    'Strawberry___Leaf_scorch',
+    'Strawberry___healthy',
+    'Tomato___Bacterial_spot',
+    'Tomato___Early_blight',
+    'Tomato___Late_blight',
+    'Tomato___Leaf_Mold',
+    'Tomato___Septoria_leaf_spot',
+    'Tomato___Spider_mites Two-spotted_spider_mite',
+    'Tomato___Target_Spot',
+    'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
+    'Tomato___Tomato_mosaic_virus',
+    'Tomato___healthy'
+]
 
 # -------------------------
 # Flask app
 # -------------------------
-app = Flask(__name__)
+app = Flask(__name__, template_folder='model/templates')
+CORS(app, resources={
+    r"/predict": {"origins": "*"}
+})
+
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 # Define image dimensions
 IMG_HEIGHT = 224
@@ -116,31 +124,62 @@ def preprocess_image(image_file):
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    file = request.files.get("file")
-    lang = request.form.get("lang", "English")
+    try:
+        # Check if the post request has the file part
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part in the request"}), 400
+            
+        file = request.files['file']
+        
+        # If user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+            
+        if file:
+            try:
+                # Preprocess image
+                img_array = preprocess_image(file)
 
-    # Preprocess image
-    img_array = preprocess_image(file)
+                # Model prediction
+                preds = model.predict(img_array)
+                idx = np.argmax(preds)
+                confidence = float(np.max(preds))
+                disease_name = CLASS_NAMES[idx]
 
-    # Model prediction
-    preds = model.predict(img_array)
-    idx = np.argmax(preds)
-    confidence = float(np.max(preds))
-    disease_name = CLASS_NAMES[idx]
+                # Build Gemini prompt
+                lang = request.form.get("lang", "English")
+                prompt = generate_prompt(disease_name, confidence, lang)
 
-    # Build Gemini prompt
-    prompt = generate_prompt(disease_name, confidence, lang)
+                # Get Gemini explanation
+                try:
+                    response = gemini_model.generate_content(prompt)
+                    answer = response.text if response else "Error: No response from Gemini."
+                except Exception as e:
+                    print(f"Error generating Gemini response: {str(e)}")
+                    answer = f"Could not generate detailed advice. {str(e)}"
 
-    # Get Gemini explanation
-    response = gemini_model.generate_content(prompt)
-    answer = response.text if response else "Error: No response from Gemini."
-
-    return jsonify({
-        "disease": disease_name,
-        "confidence": confidence,
-        "language": lang,
-        "advice": answer
-    })
+                return jsonify({
+                    "disease": disease_name,
+                    "confidence": confidence,
+                    "language": lang,
+                    "advice": answer,
+                    "status": "success"
+                })
+                
+            except Exception as e:
+                print(f"Error processing image: {str(e)}")
+                return jsonify({
+                    "error": f"Error processing image: {str(e)}",
+                    "status": "error"
+                }), 500
+                
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        return jsonify({
+            "error": f"An unexpected error occurred: {str(e)}",
+            "status": "error"
+        }), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

@@ -6,54 +6,85 @@
     <title>Plant Disease Detector</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-green-50 min-h-screen flex flex-col items-center justify-center">
+<body class="bg-green-50 min-h-screen flex flex-col items-center justify-center p-4">
     <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
         <h1 class="text-3xl font-bold text-center text-green-700 mb-6">Plant Disease Detector</h1>
         
-        <form id="upload-form" class="space-y-4">
-            <div class="flex flex-col items-center">
-                <input 
-                    type="file" 
-                    id="image-upload" 
-                    accept="image/*" 
-                    class="hidden"
-                >
-                <label 
-                    for="image-upload" 
-                    class="cursor-pointer bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-                >
-                    Select Image
-                </label>
-                <p id="file-name" class="text-sm text-gray-500 mt-2">No file chosen</p>
+        <form id="upload-form" class="space-y-6" enctype="multipart/form-data" action="http://127.0.0.1:5000/predict" method="POST">
+            <!-- Language Selection -->
+            <div class="space-y-2">
+                <label for="language" class="block text-sm font-medium text-gray-700">Language</label>
+                <select id="language" class="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="French">French</option>
+                </select>
             </div>
-
-            <div id="preview-container" class="hidden text-center">
-                <img id="image-preview" src="#" alt="Image Preview" class="max-w-full rounded-lg mx-auto mb-4">
-            </div>
-
-            <button 
-                type="submit" 
-                id="predict-btn" 
-                class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition disabled:opacity-50"
-                disabled
-            >
-                Detect Disease
-            </button>
-        </form>
-
-        <div id="result-container" class="mt-6 hidden">
-            <div class="bg-gray-100 p-4 rounded-lg">
-                <h2 class="text-xl font-semibold text-green-800 mb-2" id="prediction-title"></h2>
-                <p class="mb-2"><strong>Confidence:</strong> <span id="confidence-score"></span></p>
-                <div class="mt-4">
-                    <h3 class="font-bold text-green-700">Cause:</h3>
-                    <p id="cause-text" class="text-gray-700"></p>
-                    <h3 class="font-bold text-green-700 mt-2">Remedy:</h3>
-                    <p id="remedy-text" class="text-gray-700"></p>
+            
+            <!-- Image Upload -->
+            <div class="space-y-2">
+                <div class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    <input 
+                        type="file" 
+                        id="image-upload" 
+                        name="file"
+                        accept="image/*" 
+                        class="hidden"
+                    >
+                    <label 
+                        for="image-upload" 
+                        class="cursor-pointer bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center space-x-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span>Select Image</span>
+                    </label>
+                    <p id="file-name" class="text-sm text-gray-500 mt-2">No file chosen</p>
+                </div>
+                
+                <!-- Preview Container -->
+                <div id="preview-container" class="hidden mt-4">
+                    <p class="text-sm text-gray-700 mb-2">Preview:</p>
+                    <div class="border rounded-lg overflow-hidden">
+                        <img id="image-preview" src="#" alt="Image Preview" class="w-full h-48 object-contain bg-gray-100">
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+            
+            <!-- Predict Button -->
+            <div>
+                <button 
+                    type="submit" 
+                    id="predict-btn" 
+                    class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled
+                >
+                    Detect Disease
+                </button>
+            </div>
+            
+            <!-- Results Container -->
+            <div id="result-container" class="hidden mt-6 space-y-4">
+                <h2 class="text-xl font-semibold text-green-800 border-b pb-2">Results</h2>
+                
+                <div class="space-y-2">
+                    <h3 class="text-lg font-medium text-gray-900" id="prediction-title"></h3>
+                    <p class="text-sm text-gray-600">
+                        <span class="font-medium">Confidence:</span> 
+                        <span id="confidence-score" class="font-bold text-green-600"></span>
+                    </p>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-medium text-gray-900 mb-1">Cause</h4>
+                    <p id="cause-text" class="text-gray-700 text-sm"></p>
+                    
+                    <h4 class="font-medium text-gray-900 mt-4 mb-1">Remedy</h4>
+                    <p id="remedy-text" class="text-gray-700 text-sm"></p>
+                </div>
+            </div>
 
     <script>
         const imageUpload = document.getElementById('image-upload');
@@ -67,6 +98,7 @@
         const confidenceScore = document.getElementById('confidence-score');
         const causeText = document.getElementById('cause-text');
         const remedyText = document.getElementById('remedy-text');
+        const languageSelect = document.getElementById('language');
 
         imageUpload.addEventListener('change', function(event) {
             if (this.files && this.files[0]) {
@@ -86,31 +118,58 @@
         uploadForm.addEventListener('submit', async function(event) {
             event.preventDefault();
             
-            const formData = new FormData();
-            formData.append('image', imageUpload.files[0]);
-
+            if (!imageUpload.files || !imageUpload.files[0]) {
+                alert('Please select an image first');
+                return;
+            }
+            
+            const formData = new FormData(uploadForm);
+            
             try {
-                const response = await fetch('/predict', {
+                // Show loading state
+                predictBtn.disabled = true;
+                predictBtn.textContent = 'Processing...';
+                resultContainer.classList.add('hidden');
+                
+                const response = await fetch('http://127.0.0.1:5000/predict', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 });
 
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    resultContainer.classList.remove('hidden');
-                    predictionTitle.textContent = data.prediction.replace(/_/g, ' ');
-                    confidenceScore.textContent = `${(data.confidence * 100).toFixed(2)}%`;
-                    causeText.textContent = data.cause;
-                    remedyText.textContent = data.remedy;
-                } else {
-                    alert('Error: ' + data.error);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                 }
+
+                const data = await response.json();
+                
+                // Show results
+                resultContainer.classList.remove('hidden');
+                const diseaseName = data.disease ? data.disease.replace(/_/g, ' ').replace(/\s+/g, ' ') : 'Unknown';
+                predictionTitle.textContent = diseaseName;
+                confidenceScore.textContent = data.confidence ? `${(data.confidence * 100).toFixed(2)}%` : 'N/A';
+                
+                // Parse advice if available
+                const advice = data.advice || 'No advice available';
+                const causeMatch = advice.match(/[cC]ause[\s:]*(.*?)(?=[rR]emedy|$)/s);
+                const remedyMatch = advice.match(/[rR]emedy[\s:]*(.*)/s);
+                
+                causeText.textContent = causeMatch ? causeMatch[1].trim() : advice;
+                remedyText.textContent = remedyMatch ? remedyMatch[1].trim() : '';
+                
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while processing the image');
+                alert('Error: ' + (error.message || 'Failed to process image. Please try again.'));
+            } finally {
+                predictBtn.disabled = false;
+                predictBtn.textContent = 'Detect Disease';
             }
         });
     </script>
+        </form>
+    </div>
 </body>
 </html>
