@@ -50,7 +50,7 @@
 //     await prefs.remove('profileImageUrl');
 //   }
 
-//   runApp(KisaanSetuApp(initialLocale: locale, initialRoute: initialRoute));
+//   runApp(KisaanSaathiApp(initialLocale: locale, initialRoute: initialRoute));
 // }
 
 // // Helper function to convert language name to locale
@@ -109,25 +109,25 @@
 
 
 
-// class KisaanSetuApp extends StatefulWidget {
+// class KisaanSaathiApp extends StatefulWidget {
 //   final Locale initialLocale;
 //   final String initialRoute;
 
-//   const KisaanSetuApp({
+//   const KisaanSaathiApp({
 //     super.key,
 //     this.initialLocale = const Locale('en'),
 //     this.initialRoute = '/login',
 //   });
 
 //   @override
-//   _KisaanSetuAppState createState() => _KisaanSetuAppState();
+//   _KisaanSaathiAppState createState() => _KisaanSaathiAppState();
 
 //   // Static method to access state from anywhere
-//   static _KisaanSetuAppState of(BuildContext context) =>
-//       context.findAncestorStateOfType<_KisaanSetuAppState>()!;
+//   static _KisaanSaathiAppState of(BuildContext context) =>
+//       context.findAncestorStateOfType<_KisaanSaathiAppState>()!;
 // }
 
-// class _KisaanSetuAppState extends State<KisaanSetuApp> {
+// class _KisaanSaathiAppState extends State<KisaanSaathiApp> {
 //   late Locale _locale;
 
 //   @override
@@ -147,7 +147,7 @@
 //   Widget build(BuildContext context) {
 //     return MaterialApp(
 //       debugShowCheckedModeBanner: false,
-//       title: 'KisaanSetu',
+//       title: 'KisaanSaathi',
 //       theme: ThemeData(
 //         primarySwatch: Colors.green,
 //         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -327,7 +327,7 @@ void main() async {
     await prefs.remove('profileImageUrl');
   }
 
-  runApp(KisaanSetuApp(initialLocale: locale, initialRoute: initialRoute));
+  runApp(KisaanSaathiApp(initialLocale: locale, initialRoute: initialRoute));
 }
 
 // Helper function to convert language name to locale
@@ -384,25 +384,25 @@ Future<void> requestPermissions() async {
   }
 }
 
-class KisaanSetuApp extends StatefulWidget {
+class KisaanSaathiApp extends StatefulWidget {
   final Locale initialLocale;
   final String initialRoute;
 
-  const KisaanSetuApp({
+  const KisaanSaathiApp({
     super.key,
     this.initialLocale = const Locale('en'),
     this.initialRoute = '/login',
   });
 
   @override
-  _KisaanSetuAppState createState() => _KisaanSetuAppState();
+  _KisaanSaathiAppState createState() => _KisaanSaathiAppState();
 
   // Static method to access state from anywhere
-  static _KisaanSetuAppState of(BuildContext context) =>
-      context.findAncestorStateOfType<_KisaanSetuAppState>()!;
+  static _KisaanSaathiAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<_KisaanSaathiAppState>()!;
 }
 
-class _KisaanSetuAppState extends State<KisaanSetuApp> {
+class _KisaanSaathiAppState extends State<KisaanSaathiApp> {
   late Locale _locale;
 
   @override
@@ -429,7 +429,7 @@ class _KisaanSetuAppState extends State<KisaanSetuApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'KisaanSetu v1.0.1',
+      title: 'KisaanSaathi v1.0.1',
       theme: ThemeData(
         primarySwatch: Colors.green,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -534,7 +534,7 @@ class _KisaanSetuAppState extends State<KisaanSetuApp> {
             const Icon(Icons.agriculture, size: 64, color: Colors.green),
             const SizedBox(height: 20),
             const Text(
-              'KisaanSetu App',
+              'KisaanSaathi App',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),

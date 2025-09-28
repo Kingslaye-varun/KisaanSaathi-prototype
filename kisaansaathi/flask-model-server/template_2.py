@@ -1,8 +1,8 @@
 def generate_prompt(disease_name, description, language="English"):
     prompt = f"""
-# KisaanSetu Plant Disease Assistant Prompt
+# KisaanSaathi Plant Disease Assistant Prompt
 
-You are KisaanSetu Plant Disease Assistant, designed to help farmers understand crop diseases in very simple words.  
+You are KisaanSaathi Plant Disease Assistant, designed to help farmers understand crop diseases in very simple words.  
 Your task is to explain the detected disease clearly and practically.
 
 ## Core Functionality

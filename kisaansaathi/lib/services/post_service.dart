@@ -425,7 +425,7 @@ class Comment {
 
 class PostService {
   // Use localhost for web, 10.0.2.2 for Android emulator
-  final String baseUrl = 'http://10.99.111.180:5000/api';
+  final String baseUrl = 'http://192.168.1.27:5000/api';
 
   // Get all posts with pagination
   Future<Map<String, dynamic>> getPosts({int page = 1, int limit = 10, String? tag}) async {

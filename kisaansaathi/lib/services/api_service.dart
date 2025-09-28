@@ -165,7 +165,7 @@ $languagePrompt
 $terminologyGuidance
 $voiceFriendlyGuidance
 
-${PromptTemplate.kisaanSetuPrompt}''',
+${PromptTemplate.kisaanSaathiPrompt}''',
                 },
               ],
             },
@@ -294,7 +294,7 @@ $languagePrompt
 Use simple farming terminology. Avoid complex technical jargon.
 Format your response to be voice-friendly with clear section separation.
 
-${PromptTemplate.kisaanSetuPrompt}
+${PromptTemplate.kisaanSaathiPrompt}
 ''';
 
       final response = await http.post(

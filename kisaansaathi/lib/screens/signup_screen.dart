@@ -150,7 +150,7 @@ class _SignupScreenState extends State<SignupScreen> {
         
         // Update app locale immediately
         Locale newLocale = _languageMap[_selectedLanguage] ?? Locale('en');
-        KisaanSetuApp.of(context).setLocale(newLocale);
+        KisaanSaathiApp.of(context).setLocale(newLocale);
 
         // Navigate to home screen
         Navigator.pushReplacementNamed(context, '/home');
@@ -183,7 +183,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     // Update app locale immediately
     Locale newLocale = _languageMap[_selectedLanguage] ?? Locale('en');
-    KisaanSetuApp.of(context).setLocale(newLocale);
+    KisaanSaathiApp.of(context).setLocale(newLocale);
 
     // Navigate to home screen without authentication
     Navigator.pushReplacementNamed(context, '/home');
@@ -295,7 +295,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               });
                               Locale newLocale =
                                   _languageMap[newValue] ?? Locale('en');
-                              KisaanSetuApp.of(context).setLocale(newLocale);
+                              KisaanSaathiApp.of(context).setLocale(newLocale);
                             }
                           },
                           items: languages.map<DropdownMenuItem<String>>((
@@ -604,7 +604,7 @@ class _SignupScreenState extends State<SignupScreen> {
 //       await prefs.setString('phoneNumber', _phoneController.text.trim());
 //       await prefs.setString('selectedLanguage', _selectedLanguage);
 //       Locale newLocale = _languageMap[_selectedLanguage] ?? Locale('en');
-//       KisaanSetuApp.of(context).setLocale(newLocale);
+//       KisaanSaathiApp.of(context).setLocale(newLocale);
 //       Navigator.pushReplacementNamed(context, '/home');
 //     } catch (e) {
 //       ScaffoldMessenger.of(context).showSnackBar(
@@ -619,7 +619,7 @@ class _SignupScreenState extends State<SignupScreen> {
 //     final prefs = await SharedPreferences.getInstance();
 //     await prefs.setString('selectedLanguage', _selectedLanguage);
 //     Locale newLocale = _languageMap[_selectedLanguage] ?? Locale('en');
-//     KisaanSetuApp.of(context).setLocale(newLocale);
+//     KisaanSaathiApp.of(context).setLocale(newLocale);
 //     Navigator.pushReplacementNamed(context, '/home');
 //   }
 
@@ -770,7 +770,7 @@ class _SignupScreenState extends State<SignupScreen> {
 //                                     _selectedLanguage = newValue;
 //                                   });
 //                                   Locale newLocale = _languageMap[newValue] ?? Locale('en');
-//                                   KisaanSetuApp.of(context).setLocale(newLocale);
+//                                   KisaanSaathiApp.of(context).setLocale(newLocale);
 //                                 }
 //                               },
 //                               items: languages.map<DropdownMenuItem<String>>((String value) {

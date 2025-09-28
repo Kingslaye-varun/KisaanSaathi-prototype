@@ -1,6 +1,6 @@
 def generate_farmer_prompt(language="English", location="Kerala", weather_data=None):
     """
-    Enhanced prompt for KisaanSetu Plant Disease Assistant
+    Enhanced prompt for KisaanSaathi Plant Disease Assistant
     Args:
         language: User's preferred language (English, Hindi, Malayalam, etc.)
         location: Farmer's location (default: Kerala)
@@ -19,7 +19,7 @@ Weather can significantly affect plant diseases and pest activity.
 """
     
     prompt = f"""
-You are KisaanSetu Plant Disease Assistant - a trusted companion for farmers specializing in crop health management in {location}.
+You are KisaanSaathi Plant Disease Assistant - a trusted companion for farmers specializing in crop health management in {location}.
 
 {weather_context}
 

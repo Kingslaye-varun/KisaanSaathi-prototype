@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
         
         // Update app locale
         Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');
-        KisaanSetuApp.of(context).setLocale(newLocale);
+        KisaanSaathiApp.of(context).setLocale(newLocale);
         
         // Navigate to home screen
         Navigator.pushReplacementNamed(context, '/home');
@@ -314,7 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       _selectedLanguage = newValue;
                                     });
                                     Locale newLocale = _languageMap[newValue] ?? const Locale('en');
-                                    KisaanSetuApp.of(context).setLocale(newLocale);
+                                    KisaanSaathiApp.of(context).setLocale(newLocale);
                                   }
                                 },
                                 items: languages.map<DropdownMenuItem<String>>((String value) {

@@ -35,32 +35,33 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  String get appName {
-    switch (locale.languageCode) {
-      case 'ml': // Malayalam
-        return 'കിസാൻ സേതു';
-      case 'kn': // Kannada
-        return 'ಕಿಸಾನ್ ಸೇತು';
-      case 'hi':
-        return 'किसान सेतु';
-      case 'pa':
-        return 'ਕਿਸਾਨ ਸੇਤੂ';
-      case 'bn':
-        return 'কৃষক সেতু';
-      case 'gu':
-        return 'કિસાન સેટુ';
-      case 'mr':
-        return 'किसान सेतू';
-      case 'te':
-        return 'కిసాన్ సేతు';
-      case 'ta':
-        return 'கிசான் செடு';
-      case 'en':
-        return 'Kisan Setu';
-      default:
-        return 'Kisan Setu'; // Default fallback value
-    }
+ String get appName {
+  switch (locale.languageCode) {
+    case 'ml': // Malayalam
+      return 'കിസാൻസാഥി';
+    case 'kn': // Kannada
+      return 'ಕಿಸಾನ್ಸಾಥಿ';
+    case 'hi': // Hindi
+      return 'किसानसाथी';
+    case 'pa': // Punjabi
+      return 'ਕਿਸਾਨਸਾਥੀ';
+    case 'bn': // Bengali
+      return 'কিসানসাথি';
+    case 'gu': // Gujarati
+      return 'કિસાનસાથી';
+    case 'mr': // Marathi
+      return 'किसानसाथी';
+    case 'te': // Telugu
+      return 'కిసాన్సాథి';
+    case 'ta': // Tamil
+      return 'கிசான்சாதி';
+    case 'en': // English
+      return 'KisaanSaathi';
+    default:
+      return 'KisaanSaathi'; // Default fallback value
   }
+}
+
 
   String get agriStore {
     switch (locale.languageCode) {
@@ -657,34 +658,31 @@ String get rainChanceLabel {
     }
   }
 
-  String get governmentSchemesTitle {
-    switch (locale.languageCode) {
-      case 'ml': // Malayalam
-        return 'കിസാൻ സേതു - സർക്കാർ പദ്ധതികൾ';
-      case 'kn': // Kannada
-        return 'ಕಿಸಾನ್ ಸೇತು - ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು';
-      case 'ta':
-        return 'இன்று வானம்';
-      case 'te':
-        return 'ఇప్పుడు ప్రస్తుతం';
-      case 'hi':
-        return 'किसान सेतु - सरकारी योजनाएं';
-      case 'pa':
-        return 'ਕਿਸਾਨ ਸੇਤੂ - ਸरਕਾਰੀ ਯੋਜਨਾਵਾਂ';
-      case 'bn':
-        return 'কিসান সেতু - সরকারি প্রকল্প';
-      case 'ta':
-        return 'கிசான் செடு - அரசு திட்டங்கள்';
-      case 'te':
-        return 'కిసాన్ సేతు - ప్రభుత్వ పథకాలు';
-      case 'mr':
-        return 'किसान सेतू - शासकीय योजना';
-      case 'gu':
-        return 'કિસાન સેતુ - સરકારી યોજનાઓ';
-      default:
-        return 'Kisan Setu - Government Schemes';
-    }
+String get governmentSchemesTitle {
+  switch (locale.languageCode) {
+    case 'ml': // Malayalam
+      return 'കിസാൻസാഥി - സർക്കാർ പദ്ധതികൾ';
+    case 'kn': // Kannada
+      return 'ಕಿಸಾನ್ಸಾಥಿ - ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು';
+    case 'ta': // Tamil
+      return 'கிசான்சாதி - அரசு திட்டங்கள்';
+    case 'te': // Telugu
+      return 'కిసాన్సాథి - ప్రభుత్వ పథకాలు';
+    case 'hi': // Hindi
+      return 'किसानसाथी - सरकारी योजनाएं';
+    case 'pa': // Punjabi
+      return 'ਕਿਸਾਨਸਾਥੀ - ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ';
+    case 'bn': // Bengali
+      return 'কিসানসাথি - সরকারি প্রকল্প';
+    case 'mr': // Marathi
+      return 'किसानसाथी - शासकीय योजना';
+    case 'gu': // Gujarati
+      return 'કિસાનસાથી - સરકારી યોજનાઓ';
+    default:
+      return 'KisaanSaathi - Government Schemes';
   }
+}
+
 
   String get searchSchemesHint {
     switch (locale.languageCode) {

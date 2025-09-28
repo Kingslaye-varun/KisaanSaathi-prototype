@@ -243,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Change app locale
                 final locale =
                     languageToLocaleMap[newValue] ?? const Locale('en');
-                KisaanSetuApp.of(context).setLocale(locale);
+                KisaanSaathiApp.of(context).setLocale(locale);
               }
             },
             items: languageOptions.map<DropdownMenuItem<String>>((

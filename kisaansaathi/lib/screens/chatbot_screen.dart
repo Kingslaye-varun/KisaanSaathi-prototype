@@ -156,9 +156,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void _addWelcomeMessage() {
     final Map<String, String> welcomeMessages = {
       'English':
-          'Hello! I am KisaanSetu AI Assistant. How can I help you today? I can assist with: Crop recommendations, Weather information, Pest control advice, Government schemes, Market prices, Plant disease detection from images, and General farming queries',
+          'Namaskaram! I am KisaanSaathi AI Assistant. How can I help you today? I can assist with: Crop recommendations, Weather information, Pest control advice, Government schemes, Market prices, Plant disease detection from images, and General farming queries',
       'Hindi':
-          'नमस्ते! मैं किसानसेतु AI सहायक हूँ। आज मैं आपकी कैसे मदद कर सकता हूँ? मैं इन विषयों पर सहायता कर सकता हूँ: फसल सिफारिशें, मौसम की जानकारी, कीट नियंत्रण सलाह, सरकारी योजनाएँ, बाजार मूल्य, छवियों से पौधों की बीमारियों का पता लगाना, और सामान्य कृषि प्रश्न',
+          'नमस्कारम्! मैं किसानसेतु AI सहायक हूँ। आज मैं आपकी कैसे मदद कर सकता हूँ? मैं इन विषयों पर सहायता कर सकता हूँ: फसल सिफारिशें, मौसम की जानकारी, कीट नियंत्रण सलाह, सरकारी योजनाएँ, बाजार मूल्य, छवियों से पौधों की बीमारियों का पता लगाना, और सामान्य कृषि प्रश्न',
       'Punjabi':
           'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਕਿਸਾਨ ਸੇਤੁ AI ਸਹਾਇਕ ਹਾਂ। ਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ? ਮੈਂ ਇਹਨਾਂ ਵਿਸ਼ਿਆਂ ਵਿੱਚ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ: ਫਸਲ ਸਿਫਾਰਸ਼ਾਂ, ਮੌਸਮ ਦੀ ਜਾਣਕਾਰੀ, ਕੀੜੇ ਨਿਯੰਤਰਣ ਸਲਾਹ, ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ, ਮੰਡੀ ਮੁੱਲ, ਤਸਵੀਰਾਂ ਤੋਂ ਪੌਦਿਆਂ ਦੀਆਂ ਬੀਮਾਰੀਆਂ ਦਾ ਪਤਾ ਲਗਾਉਣਾ, ਅਤੇ ਆਮ ਖੇਤੀਬਾੜੀ ਸਵਾਲ',
       'Bengali':
@@ -170,7 +170,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       'Marathi':
           'नमस्कार! मी किसानसेतू AI सहाय्यक आहे. आज मी तुम्हाला कशी मदत करू शकतो? मी या विषयांवर मदत करू शकतो: पीक शिफारशी, हवामान माहिती, कीटक नियंत्रण सल्ला, सरकारी योजना, बाजार किंमती, प्रतिमांवरून वनस्पती रोग ओळखणे, आणि सामान्य शेती प्रश्न',
       'Gujarati':
-          'નમસ્તે! હું કિસાનસેતુ AI સહાયક છું. આજે હું તમને કેવી રીતે મદદ કરી શકું? હું આ વિષયોમાં મદદ કરી શકું છું: પાક ભલામણો, હવામાન માહિતી, જંતુ નિયંત્રણ સલાહ, સરકારી યોજનાઓ, બજાર ભાવો, ચિત્રોમાંથી છોડ રોગ શોધ, અને સામાન્ય ખેતી પ્રશ્નો',
+          'નમસ્કારમ્! હું કિસાનસેતુ AI સહાયક છું. આજે હું તમને કેવી રીતે મદદ કરી શકું? હું આ વિષયોમાં મદદ કરી શકું છું: પાક ભલામણો, હવામાન માહિતી, જંતુ નિયંત્રણ સલાહ, સરકારી યોજનાઓ, બજાર ભાવો, ચિત્રોમાંથી છોડ રોગ શોધ, અને સામાન્ય ખેતી પ્રશ્નો',
       'Malayalam':
           'നമസ്കാരം! ഞാൻ കിസാൻസേതു AI സഹായി. ഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കാം? ഞാൻ ഈ വിഷയങ്ങളിൽ സഹായം നൽകാം: വിള ശുപാർശകൾ, കാലാവസ്ഥാ വിവരം, കീട നിയന്ത്രണ ഉപദേശം, സർക്കാർ പദ്ധതികൾ, മാർക്കറ്റ് വിലകൾ, ചിത്രങ്ങളിൽ നിന്ന് സസ്യരോഗങ്ങൾ കണ്ടെത്തൽ, പൊതുവായ കൃഷി ചോദ്യങ്ങൾ',
       'Kannada':
@@ -1039,7 +1039,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
             SizedBox(width: 10),
             Expanded(
               child: Text(
-                'KisaanSetu Assistant',
+                'KisaanSaathi Assistant',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
