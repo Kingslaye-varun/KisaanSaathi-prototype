@@ -246,14 +246,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         ),
       );
 
-      final tags = _selectedTag != 'All' ? [_selectedTag!] : ['general'];
 
-      final result = await _postService.createPost(
-        content: _postController.text.trim(),
-        authorId: _currentFarmerId!,
-        tags: tags,
-        image: _imageFile,
-      );
 
       setState(() {
         _postController.clear();

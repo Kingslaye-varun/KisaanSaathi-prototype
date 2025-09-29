@@ -15,7 +15,6 @@ class FarmerProfileView extends StatefulWidget {
 class _FarmerProfileViewState extends State<FarmerProfileView> {
   bool _isLoading = true;
   Map<String, dynamic>? _farmerData;
-  final FarmerService _farmerService = FarmerService();
   bool _isCurrentUser = false;
   String? _currentUserId;
 

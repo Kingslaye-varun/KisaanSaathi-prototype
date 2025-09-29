@@ -1,20 +1,20 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:kisaansaathi/services/prompt_template.dart';
 
 class ApiService {
   // Weather API - OpenWeatherMap (using your existing key)
-  static final String _weatherApiKey = "7e3cac2d274dba29e7551e1f3b582971";
+  static final String _weatherApiKey = dotenv.env['WEATHER_API_KEY'] ?? '';
   static const String _weatherBaseUrl =
       'https://api.openweathermap.org/data/2.5';
 
   static String get weatherApiKey => _weatherApiKey;
 
   // Gemini API - Using your existing Gemini key
-  static final String _geminiApiKey = 'AIzaSyCdoMX-rv2O4N0NzaSLsU2bQ_FbbpM4aCs';
-  static final String _geminiApiKey2 =
-      'AIzaSyAM_B2UajrTC3nhcwe-K4VbqUAa6CSyLs0';
+  static final String _geminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+  static final String _geminiApiKey2 = dotenv.env['GEMINI_API_KEY_2'] ?? '';
   static const String _geminiBaseUrl =
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 

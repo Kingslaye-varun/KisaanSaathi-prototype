@@ -280,10 +280,10 @@
 // }
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http_parser/http_parser.dart';
-import '../config/env_config.dart';
 
 class Post {
   final String id;
@@ -425,7 +425,7 @@ class Comment {
 
 class PostService {
   // Use localhost for web, 10.0.2.2 for Android emulator
-  final String baseUrl = 'http://192.168.1.27:5000/api';
+  final String baseUrl = '${dotenv.env['NODE_API_URL']}/api';
 
   // Get all posts with pagination
   Future<Map<String, dynamic>> getPosts({int page = 1, int limit = 10, String? tag}) async {

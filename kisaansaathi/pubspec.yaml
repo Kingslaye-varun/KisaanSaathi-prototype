@@ -53,6 +53,8 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_staggered_grid_view: ^0.7.0
   flutter_webrtc: ^1.2.0
+  flutter_dotenv: ^6.0.0
+  http_parser: ^4.1.2
 
 dev_dependencies:
   flutter_test:
@@ -106,6 +108,7 @@ flutter:
     - assets/gov_schemes/soilhealth.png
     - assets/gov_schemes/movcdner.jpeg
     - assets/gov_schemes/deds.jpeg
+    - .env
 
 
 

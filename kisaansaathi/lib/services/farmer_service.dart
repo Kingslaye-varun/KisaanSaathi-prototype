@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/env_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FarmerService {
   // Configuration constants
-  static const String baseUrl = '${EnvConfig.nodeApiUrl}/api/farmers';
-  static const Duration timeoutDuration = Duration(seconds: 30);
+  static final String baseUrl = '${dotenv.env['NODE_API_URL']}/api/farmers';
+  static const Duration timeoutDuration = Duration(seconds: 60);
   static const Map<String, String> defaultHeaders = {
     'Content-Type': 'application/json',
   };
