@@ -389,7 +389,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
       // Use the environment config for Flask API URL
       final serverUrls = [
-        '${dotenv.env['FLASK_API_URL']}/predict',
+        'http://10.99.111.180:5000/predict',
         'http://127.0.0.1:5000/predict',
         'http://localhost:5000/predict',
       ];
