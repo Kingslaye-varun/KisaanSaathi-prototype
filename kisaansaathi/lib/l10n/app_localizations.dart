@@ -124,25 +124,25 @@ class AppLocalizations {
   String get nearbyStores {
     switch (locale.languageCode) {
       case 'ml': // Malayalam
-        return 'അയൽപക്കത്തെ കടകൾ';
+        return 'അടുത്തുള്ള തണുപ്പുമുറികൾ';
       case 'kn': // Kannada
-        return 'ಹತ್ತಿರದ ಅಂಗಡಿಗಳು';
-      case 'hi':
-        return 'आसपास के स्टोर्स';
-      case 'pa':
-        return 'ਨੇੜੇ ਦੁਕਾਨਾਂ';
-      case 'bn':
-        return 'পার্শ্ববর্তী দোকানগুলি';
-      case 'ta':
-        return 'அருகிலுள்ள அங்காடிகள்';
-      case 'te':
-        return 'సమీప దుకాణాలు';
-      case 'mr':
-        return 'जवळच्या स्टोअर्स';
-      case 'gu':
-        return 'નજીકના દુકાનો';
+        return 'ಹತ್ತಿರದ ಶೀತಲಗೃಹಗಳು';
+      case 'hi': // Hindi
+        return 'आसपास के कोल्ड स्टोरेज';
+      case 'pa': // Punjabi
+        return 'ਨੇੜਲੇ ਕੋਲਡ ਸਟੋਰੇਜ';
+      case 'bn': // Bengali
+        return 'পার্শ্ববর্তী কোল্ড স্টোরেজ';
+      case 'ta': // Tamil
+        return 'அருகிலுள்ள குளிர்சாதனங்கள்';
+      case 'te': // Telugu
+        return 'సమీపంలోని కోల్డ్ స్టోరేజ్‌లు';
+      case 'mr': // Marathi
+        return 'जवळच्या कोल्ड स्टोरेज';
+      case 'gu': // Gujarati
+        return 'નજીકના ઠંડા સ્ટોરેજ';
       default:
-        return 'Nearby Stores';
+        return 'Nearby Cold Storages';
     }
   }
 
@@ -700,10 +700,6 @@ String get governmentSchemesTitle {
         return 'ਯੋਜਨਾਵਾਂ ਖੋਜੋ...';
       case 'bn':
         return 'স্কিম অনুসন্ধান করুন...';
-      case 'ta':
-        return 'திட்டங்களைத் தேடு...';
-      case 'te':
-        return 'పథకాలను శోధించండి...';
       case 'mr':
         return 'योजना शोधा...';
       case 'gu':
@@ -712,6 +708,31 @@ String get governmentSchemesTitle {
         return 'Search schemes...';
     }
   }
+
+  String get helpline {
+  switch (locale.languageCode) {
+    case 'ml': // Malayalam
+      return 'ഹെൽപ്പ് ലൈൻ';
+    case 'kn': // Kannada
+      return 'ಸಹಾಯ ಹೊತ್ತಿಗೆ';
+    case 'hi': // Hindi
+      return 'हेल्पलाइन';
+    case 'pa': // Punjabi
+      return 'ਹੈਲਪਲਾਈਨ';
+    case 'bn': // Bengali
+      return 'হেল্পলাইন';
+    case 'ta': // Tamil
+      return 'உதவி மையம்';
+    case 'te': // Telugu
+      return 'హెల్ప్ లైన్';
+    case 'mr': // Marathi
+      return 'मदत केंद्र';
+    case 'gu': // Gujarati
+      return 'હેલ્પલાઈન';
+    default:
+      return 'Helpline';
+  }
+}
 
   String get filterButton {
     switch (locale.languageCode) {

@@ -463,8 +463,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     _buildFeatureCard(
                       context,
-                      localizations.newsScreen,
-                      Icons.newspaper,
+                      localizations.helpline,
+                      Icons.call,
                       Colors.blueGrey.shade700,
                       () {
                         Navigator.push(
