@@ -373,6 +373,7 @@ import 'screens/chat_screen.dart';
 import 'screens/community_screen.dart';
 import 'screens/agristore_screen.dart';
 import 'screens/farmer_profile_view.dart';
+import 'screens/nearby_store_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
