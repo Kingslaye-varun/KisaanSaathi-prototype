@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:kisaansaathi/screens/krishibhavan.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({Key? key}) : super(key: key);
@@ -389,7 +390,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
       // Use the environment config for Flask API URL
       final serverUrls = [
-        'http://192.168.29.121:5000/predict',
+        'http://172.16.120.213:5000/predict',
         'http://127.0.0.1:5000/predict',
         'http://localhost:5000/predict',
       ];
@@ -407,6 +408,25 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
           // Add language parameter
           request.fields['lang'] = _selectedLanguage;
+
+          // Add location data if available
+          try {
+            Position? position = await _getCurrentLocation();
+            if (position != null) {
+              request.fields['latitude'] = position.latitude.toString();
+              request.fields['longitude'] = position.longitude.toString();
+
+              // Try to get location name
+              String locationName = await _getLocationName(
+                position.latitude,
+                position.longitude,
+              );
+              request.fields['location'] = locationName;
+            }
+          } catch (e) {
+            debugPrint('Error getting location for disease detection: $e');
+            // Continue without location data
+          }
 
           // Send the request with timeout
           var response = await request.send().timeout(
@@ -598,6 +618,75 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
+  }
+
+  // Location helper methods for disease detection
+  Future<Position?> _getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return null;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          return null;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        return null;
+      }
+
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+      );
+    } catch (e) {
+      debugPrint('Error getting current location: $e');
+      return null;
+    }
+  }
+
+  Future<String> _getLocationName(double latitude, double longitude) async {
+    try {
+      // Using OpenStreetMap Nominatim API for reverse geocoding
+      final url =
+          'https://nominatim.openstreetmap.org/reverse?format=json&lat=$latitude&lon=$longitude&zoom=10&addressdetails=1';
+
+      final response = await http
+          .get(Uri.parse(url), headers: {'User-Agent': 'KisaanSaathi/1.0'})
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final address = data['address'];
+
+        // Try to get district, state, or city
+        String locationName = '';
+        if (address['state_district'] != null) {
+          locationName = address['state_district'];
+        } else if (address['city'] != null) {
+          locationName = address['city'];
+        } else if (address['town'] != null) {
+          locationName = address['town'];
+        } else if (address['village'] != null) {
+          locationName = address['village'];
+        }
+
+        if (address['state'] != null) {
+          locationName += locationName.isNotEmpty
+              ? ', ${address['state']}'
+              : address['state'];
+        }
+
+        return locationName.isNotEmpty ? locationName : 'Unknown Location';
+      }
+    } catch (e) {
+      debugPrint('Error getting location name: $e');
+    }
+    return 'Unknown Location';
   }
 
   Future<void> _startListening() async {
