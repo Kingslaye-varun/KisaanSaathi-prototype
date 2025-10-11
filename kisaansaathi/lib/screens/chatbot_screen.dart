@@ -12,6 +12,7 @@ import 'dart:convert';
 import 'package:kisaansaathi/screens/krishibhavan.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:kisaansaathi/l10n/app_localizations.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({Key? key}) : super(key: key);
@@ -593,7 +594,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Colors.green),
-                title: const Text('Take Photo'),
+                title: Text(AppLocalizations.of(context).takePhoto),
                 onTap: () {
                   Navigator.of(context).pop();
                   _pickImage(ImageSource.camera);
@@ -601,7 +602,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library, color: Colors.green),
-                title: const Text('Choose from Gallery'),
+                title: Text(AppLocalizations.of(context).chooseFromGallery),
                 onTap: () {
                   Navigator.of(context).pop();
                   _pickImage(ImageSource.gallery);
@@ -915,7 +916,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
               Icon(Icons.image_search, color: Colors.green.shade700),
               const SizedBox(width: 8),
               Text(
-                'Plant Disease Detection',
+                AppLocalizations.of(context).plantDiseaseDetection,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -949,7 +950,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Tap to select plant image',
+                      AppLocalizations.of(context).tapToSelectPlantImage,
                       style: TextStyle(color: Colors.green.shade700),
                     ),
                   ],
@@ -981,7 +982,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
                                 CircularProgressIndicator(color: Colors.white),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Detecting Disease...',
+                                  AppLocalizations.of(context).detectingDisease,
                                   style: TextStyle(color: Colors.white),
                                 ),
                               ],
@@ -997,7 +998,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _showImageSourceDialog,
-                        child: Text('Change Image'),
+                        child: Text(AppLocalizations.of(context).changeImage),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1670,7 +1671,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
                         child: TextField(
                           controller: _messageController,
                           decoration: InputDecoration(
-                            hintText: 'Type your farming query...',
+                            hintText: AppLocalizations.of(context).typeMessage,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 12,

@@ -780,7 +780,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
 
             // Budget Input
             Text(
-              'Your budget (in Rupees)',
+              AppLocalizations.of(context).budget,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -807,7 +807,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
 
             // Land Size Selection
             Text(
-              'Size of your land',
+              AppLocalizations.of(context).landSize,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -837,7 +837,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
 
             // Water Availability Selection
             Text(
-              'Water availability',
+              AppLocalizations.of(context).waterAvailability,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:kisaansaathi/l10n/app_localizations.dart';
 
 class NearbyStorageScreen extends StatefulWidget {
   @override
@@ -9,20 +10,51 @@ class NearbyStorageScreen extends StatefulWidget {
 
 class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
   bool _isLoading = false;
-  String _statusMessage = 'Find nearby storage facilities!';
+  String _statusMessage = '';
   double _searchRadius = 5.0;
-  String _selectedStorageType = 'Cold Storage'; // Default selection
-  final List<String> _storageTypes = [
-    'Cold Storage',
-    'Warehouse',
-    'Refrigerated Storage',
-    'Agricultural Storage'
-  ];
+  String _selectedStorageType = ''; // Will be set in initState
+  List<String> _storageTypes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with default values
+    _statusMessage = 'Find nearby storage facilities!';
+    _selectedStorageType = 'Cold Storage';
+    _storageTypes = [
+      'Cold Storage',
+      'Warehouse',
+      'Refrigerated Storage',
+      'Agricultural Storage',
+    ];
+
+    // Update with localized strings after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          try {
+            _statusMessage = AppLocalizations.of(context).findNearbyStorage;
+            _selectedStorageType = AppLocalizations.of(context).coldStorage;
+            _storageTypes = [
+              AppLocalizations.of(context).coldStorage,
+              AppLocalizations.of(context).warehouse,
+              AppLocalizations.of(context).refrigeratedStorage,
+              AppLocalizations.of(context).agriculturalStorage,
+            ];
+          } catch (e) {
+            // Fallback to English if translations fail
+            print('Error loading translations: $e');
+          }
+        });
+      }
+    });
+  }
 
   Future<void> _findStorageFacilities() async {
     setState(() {
       _isLoading = true;
-      _statusMessage = 'Locating your position...';
+      _statusMessage =
+          'Locating your position...'; // This will be shown briefly before translations load
     });
 
     try {
@@ -70,7 +102,7 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
           Uri.parse(mapsUrl),
           mode: LaunchMode.externalApplication,
         );
-        _statusMessage = 'Showing $_selectedStorageType within ${_searchRadius.round()} km';
+        _statusMessage = 'Showing $_selectedStorageType within ${_searchRadius.round()} km radius';
       }
       // Fallback to web URL
       else if (await canLaunchUrl(Uri.parse(webUrl))) {
@@ -90,9 +122,8 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
       }
     } catch (e) {
       setState(
-        () =>
-            _statusMessage =
-                'Error: ${e.toString().replaceAll('Exception:', '')}',
+        () => _statusMessage =
+            'Error: ${e.toString().replaceAll('Exception:', '')}',
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -112,9 +143,9 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text(
-          'Storage Locator',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context).findNearbyStorage,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -190,10 +221,16 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
                           ),
                           child: DropdownButton<String>(
                             value: _selectedStorageType,
-                            icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.white,
+                            ),
                             iconSize: 24,
                             elevation: 16,
-                            style: const TextStyle(color: Colors.white, fontSize: 16),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
                             underline: Container(),
                             isExpanded: true,
                             onChanged: (String? newValue) {
@@ -201,7 +238,9 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
                                 _selectedStorageType = newValue!;
                               });
                             },
-                            items: _storageTypes.map<DropdownMenuItem<String>>((String value) {
+                            items: _storageTypes.map<DropdownMenuItem<String>>((
+                              String value,
+                            ) {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(value),
@@ -225,21 +264,22 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
                             max: 50,
                             divisions: 49,
                             label: '${_searchRadius.round()} km',
-                            onChanged: (value) => setState(() => _searchRadius = value),
+                            onChanged: (value) =>
+                                setState(() => _searchRadius = value),
                           ),
                         ),
-                        const Text(
-                          'Search Radius',
-                          style: TextStyle(color: Colors.white70),
+                        Text(
+                          AppLocalizations.of(context).searchRadius,
+                          style: const TextStyle(color: Colors.white70),
                         ),
                         const SizedBox(height: 15),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             icon: const Icon(Icons.map),
-                            label: const Text(
-                              'FIND STORAGE',
-                              style: TextStyle(fontSize: 18),
+                            label: Text(
+                              AppLocalizations.of(context).findStorage,
+                              style: const TextStyle(fontSize: 18),
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.amber[700],
@@ -249,7 +289,9 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            onPressed: _isLoading ? null : _findStorageFacilities,
+                            onPressed: _isLoading
+                                ? null
+                                : _findStorageFacilities,
                           ),
                         ),
                       ],
@@ -283,12 +325,12 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  _selectedStorageType == type 
-                                    ? Colors.blue[700]!.withOpacity(0.9)
-                                    : Colors.blue[700]!.withOpacity(0.7),
                                   _selectedStorageType == type
-                                    ? Colors.lightBlue[500]!.withOpacity(0.9)
-                                    : Colors.lightBlue[500]!.withOpacity(0.7),
+                                      ? Colors.blue[700]!.withOpacity(0.9)
+                                      : Colors.blue[700]!.withOpacity(0.7),
+                                  _selectedStorageType == type
+                                      ? Colors.lightBlue[500]!.withOpacity(0.9)
+                                      : Colors.lightBlue[500]!.withOpacity(0.7),
                                 ],
                               ),
                             ),
