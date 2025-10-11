@@ -49,7 +49,11 @@ class _FertilizerRecommendationScreenState
       'image': 'assets/crops/rubber.jpg',
       'malayalam': 'റബ്ബർ',
     },
-    {'name': 'Spices', 'image': 'assets/crops/spices.jpeg', 'malayalam': 'മസാല'},
+    {
+      'name': 'Spices',
+      'image': 'assets/crops/spices.jpeg',
+      'malayalam': 'മസാല',
+    },
     {'name': 'Banana', 'image': 'assets/crops/banana.jpeg', 'malayalam': 'വാഴ'},
     {
       'name': 'Tapioca',
@@ -58,7 +62,7 @@ class _FertilizerRecommendationScreenState
     },
     {
       'name': 'Vegetables',
-      'image': 'assets/crops/vegetables.jpg',  
+      'image': 'assets/crops/vegetables.jpg',
       'malayalam': 'പച്ചക്കറി',
     },
     {
@@ -72,22 +76,22 @@ class _FertilizerRecommendationScreenState
   final List<Map<String, String>> soilTypes = [
     {
       'name': 'Laterite Soil',
-      'image': 'assets/soil/laterite.jpeg',
+      'image': 'assets/soil/laterite.jpg',
       'description': 'Red clay soil',
     },
     {
       'name': 'Alluvial Soil',
-      'image': 'assets/soil/alluvial.jpeg',
+      'image': 'assets/soil/alluvial.jpg',
       'description': 'River soil',
     },
     {
       'name': 'Coastal Sandy',
-      'image': 'assets/soil/coastal.jpeg',
+      'image': 'assets/soil/coastal.jpg',
       'description': 'Beach area soil',
     },
     {
       'name': 'Forest Soil',
-      'image': 'assets/soil/forest.jpeg',
+      'image': 'assets/soil/forest.jpg',
       'description': 'Hill area soil',
     },
   ];
@@ -366,12 +370,10 @@ class _FertilizerRecommendationScreenState
                           height: 60,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey.shade200,
-                          ),
-                          child: Icon(
-                            Icons.agriculture,
-                            size: 30,
-                            color: Colors.green.shade600,
+                            image: DecorationImage(
+                              image: AssetImage(crop['image']!),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
