@@ -2,6 +2,527 @@ import 'package:flutter/material.dart';
 
 class AppLocalizations {
   final Locale locale;
+  
+  // Crop Recommendation Screen Strings
+  String get tellUsAboutYourFarm {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'നിങ്ങളുടെ കൃഷിയെക്കുറിച്ച് ഞങ്ങളോട് പറയൂ';
+      case 'kn': // Kannada
+        return 'ನಿಮ್ಮ ಕೃಷಿಯ ಬಗ್ಗೆ ನಮಗೆ ತಿಳಿಸಿ';
+      case 'hi': // Hindi
+        return 'अपने खेत के बारे में हमें बताएं';
+      case 'pa': // Punjabi
+        return 'ਆਪਣੇ ਖੇਤ ਬਾਰੇ ਸਾਨੂੰ ਦੱਸੋ';
+      case 'bn': // Bengali
+        return 'আপনার খামার সম্পর্কে আমাদের বলুন';
+      case 'gu': // Gujarati
+        return 'તમારા ખેતર વિશે અમને જણાવો';
+      case 'mr': // Marathi
+        return 'तुमच्या शेताबद्दल आम्हाला सांगा';
+      case 'te': // Telugu
+        return 'మీ పొలం గురించి మాకు చెప్పండి';
+      case 'ta': // Tamil
+        return 'உங்கள் பண்ணை பற்றி எங்களிடம் சொல்லுங்கள்';
+      case 'en': // English
+        return 'Tell us about your farm';
+      default:
+        return 'Tell us about your farm';
+    }
+  }
+  
+  String get whatTypeOfCrops {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'എന്ത് തരം വിളകളാണ് നിങ്ങൾക്ക് വേണ്ടത്?';
+      case 'kn': // Kannada
+        return 'ನಿಮಗೆ ಯಾವ ರೀತಿಯ ಬೆಳೆಗಳು ಬೇಕು?';
+      case 'hi': // Hindi
+        return 'आपको किस प्रकार की फसलें चाहिए?';
+      case 'pa': // Punjabi
+        return 'ਤੁਹਾਨੂੰ ਕਿਸ ਕਿਸਮ ਦੀਆਂ ਫਸਲਾਂ ਚਾਹੀਦੀਆਂ ਹਨ?';
+      case 'bn': // Bengali
+        return 'আপনি কি ধরনের ফসল চান?';
+      case 'gu': // Gujarati
+        return 'તમને કયા પ્રકારના પાક જોઈએ છે?';
+      case 'mr': // Marathi
+        return 'तुम्हाला कोणत्या प्रकारची पिके हवी आहेत?';
+      case 'te': // Telugu
+        return 'మీకు ఏ రకమైన పంటలు కావాలి?';
+      case 'ta': // Tamil
+        return 'உங்களுக்கு எந்த வகையான பயிர்கள் வேண்டும்?';
+      case 'en': // English
+        return 'What type of crops do you want?';
+      default:
+        return 'What type of crops do you want?';
+    }
+  }
+  
+  String get howToGrow {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'എങ്ങനെ വളർത്താം';
+      case 'kn': // Kannada
+        return 'ಹೇಗೆ ಬೆಳೆಸುವುದು';
+      case 'hi': // Hindi
+        return 'कैसे उगाएं';
+      case 'pa': // Punjabi
+        return 'ਕਿਵੇਂ ਉਗਾਉਣਾ ਹੈ';
+      case 'bn': // Bengali
+        return 'কিভাবে চাষ করবেন';
+      case 'gu': // Gujarati
+        return 'કેવી રીતે ઉગાડવું';
+      case 'mr': // Marathi
+        return 'कसे वाढवावे';
+      case 'te': // Telugu
+        return 'ఎలా పెంచాలి';
+      case 'ta': // Tamil
+        return 'எப்படி வளர்ப்பது';
+      case 'en': // English
+        return 'How to Grow';
+      default:
+        return 'How to Grow';
+    }
+  }
+  
+  String get moneyMatters {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'സാമ്പത്തിക കാര്യങ്ങൾ';
+      case 'kn': // Kannada
+        return 'ಹಣಕಾಸು ವಿಷಯಗಳು';
+      case 'hi': // Hindi
+        return 'आर्थिक मामले';
+      case 'pa': // Punjabi
+        return 'ਵਿੱਤੀ ਮਾਮਲੇ';
+      case 'bn': // Bengali
+        return 'অর্থনৈতিক বিষয়';
+      case 'gu': // Gujarati
+        return 'નાણાકીય બાબતો';
+      case 'mr': // Marathi
+        return 'आर्थिक बाबी';
+      case 'te': // Telugu
+        return 'ఆర్థిక విషయాలు';
+      case 'ta': // Tamil
+        return 'பண விவகாரங்கள்';
+      case 'en': // English
+        return 'Money Matters';
+      default:
+        return 'Money Matters';
+    }
+  }
+  
+  String get extraBenefits {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'അധിക ആനുകൂല്യങ്ങൾ';
+      case 'kn': // Kannada
+        return 'ಹೆಚ್ಚುವರಿ ಪ್ರಯೋಜನಗಳು';
+      case 'hi': // Hindi
+        return 'अतिरिक्त लाभ';
+      case 'pa': // Punjabi
+        return 'ਵਾਧੂ ਲਾਭ';
+      case 'bn': // Bengali
+        return 'অতিরিক্ত সুবিধা';
+      case 'gu': // Gujarati
+        return 'વધારાના લાભો';
+      case 'mr': // Marathi
+        return 'अतिरिक्त फायदे';
+      case 'te': // Telugu
+        return 'అదనపు ప్రయోజనాలు';
+      case 'ta': // Tamil
+        return 'கூடுதல் நன்மைகள்';
+      case 'en': // English
+        return 'Extra Benefits';
+      default:
+        return 'Extra Benefits';
+    }
+  }
+  
+  String get locationAccessNeeded {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'മികച്ച ശുപാർശകൾക്കായി ലൊക്കേഷൻ ആക്സസ് ആവശ്യമാണ്';
+      case 'kn': // Kannada
+        return 'ಉತ್ತಮ ಶಿಫಾರಸುಗಳಿಗಾಗಿ ಸ್ಥಳ ಪ್ರವೇಶ ಅಗತ್ಯವಿದೆ';
+      case 'hi': // Hindi
+        return 'बेहतर सिफारिशों के लिए स्थान का उपयोग आवश्यक है';
+      case 'pa': // Punjabi
+        return 'ਵਧੀਆ ਸਿਫਾਰਸ਼ਾਂ ਲਈ ਸਥਾਨ ਤੱਕ ਪਹੁੰਚ ਦੀ ਲੋੜ ਹੈ';
+      case 'bn': // Bengali
+        return 'সেরা সুপারিশের জন্য অবস্থান অ্যাক্সেস প্রয়োজন';
+      case 'gu': // Gujarati
+        return 'શ્રેષ્ઠ ભલામણો માટે સ્થાન ઍક્સેસની જરૂર છે';
+      case 'mr': // Marathi
+        return 'सर्वोत्तम शिफारसींसाठी स्थान अ‍ॅक्सेस आवश्यक आहे';
+      case 'te': // Telugu
+        return 'ఉత్తమ సిఫార్సుల కోసం స్థాన యాక్సెస్ అవసరం';
+      case 'ta': // Tamil
+        return 'சிறந்த பரிந்துரைகளுக்கு இருப்பிட அணுகல் தேவை';
+      case 'en': // English
+        return 'Location access needed for best recommendations';
+      default:
+        return 'Location access needed for best recommendations';
+    }
+  }
+  
+  String get enableLocationForCrops {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'വിള നിർദ്ദേശങ്ങൾക്കായി ലൊക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക';
+      case 'kn': // Kannada
+        return 'ಬೆಳೆ ಸಲಹೆಗಳಿಗಾಗಿ ಸ್ಥಳವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ';
+      case 'hi': // Hindi
+        return 'फसल सुझावों के लिए स्थान सक्षम करें';
+      case 'pa': // Punjabi
+        return 'ਫਸਲ ਸੁਝਾਵਾਂ ਲਈ ਸਥਾਨ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ';
+      case 'bn': // Bengali
+        return 'ফসলের পরামর্শের জন্য অবস্থান সক্ষম করুন';
+      case 'gu': // Gujarati
+        return 'પાક સૂચનો માટે સ્થાન સક્ષમ કરો';
+      case 'mr': // Marathi
+        return 'पीक सूचनांसाठी स्थान सक्षम करा';
+      case 'te': // Telugu
+        return 'పంట సూచనల కోసం స్థానాన్ని ప్రారంభించండి';
+      case 'ta': // Tamil
+        return 'பயிர் பரிந்துரைகளுக்கு இருப்பிடத்தை இயக்கவும்';
+      case 'en': // English
+        return 'Please enable location for crop suggestions';
+      default:
+        return 'Please enable location for crop suggestions';
+    }
+  }
+  
+  String get weatherDataUnavailable {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'കാലാവസ്ഥാ ഡാറ്റ ലഭ്യമല്ല';
+      case 'kn': // Kannada
+        return 'ಹವಾಮಾನ ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ';
+      case 'hi': // Hindi
+        return 'मौसम डेटा अनुपलब्ध';
+      case 'pa': // Punjabi
+        return 'ਮੌਸਮ ਡਾਟਾ ਉਪਲਬਧ ਨਹੀਂ';
+      case 'bn': // Bengali
+        return 'আবহাওয়া ডেটা অনুপলব্ধ';
+      case 'gu': // Gujarati
+        return 'હવામાન ડેટા અનુપલબ્ધ';
+      case 'mr': // Marathi
+        return 'हवामान डेटा अनुपलब्ध';
+      case 'te': // Telugu
+        return 'వాతావరణ డేటా అందుబాటులో లేదు';
+      case 'ta': // Tamil
+        return 'வானிலை தரவு கிடைக்கவில்லை';
+      case 'en': // English
+        return 'Weather data unavailable';
+      default:
+        return 'Weather data unavailable';
+    }
+  }
+  
+  String get getRecommendations {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'ശുപാർശകൾ നേടുക';
+      case 'kn': // Kannada
+        return 'ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಿರಿ';
+      case 'hi': // Hindi
+        return 'सिफारिशें प्राप्त करें';
+      case 'pa': // Punjabi
+        return 'ਸਿਫਾਰਸ਼ਾਂ ਪ੍ਰਾਪਤ ਕਰੋ';
+      case 'bn': // Bengali
+        return 'সুপারিশ পান';
+      case 'gu': // Gujarati
+        return 'ભલામણો મેળવો';
+      case 'mr': // Marathi
+        return 'शिफारसी मिळवा';
+      case 'te': // Telugu
+        return 'సిఫార్సులను పొందండి';
+      case 'ta': // Tamil
+        return 'பரிந்துரைகளைப் பெறுங்கள்';
+      case 'en': // English
+        return 'Get Recommendations';
+      default:
+        return 'Get Recommendations';
+    }
+  }
+  
+  String get recommendedCrops {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'നിങ്ങൾക്കായി ശുപാർശ ചെയ്യുന്ന വിളകൾ:';
+      case 'kn': // Kannada
+        return 'ನಿಮಗಾಗಿ ಶಿಫಾರಸು ಮಾಡಲಾದ ಬೆಳೆಗಳು:';
+      case 'hi': // Hindi
+        return 'आपके लिए अनुशंसित फसलें:';
+      case 'pa': // Punjabi
+        return 'ਤੁਹਾਡੇ ਲਈ ਸਿਫਾਰਸ਼ ਕੀਤੀਆਂ ਫਸਲਾਂ:';
+      case 'bn': // Bengali
+        return 'আপনার জন্য প্রস্তাবিত ফসল:';
+      case 'gu': // Gujarati
+        return 'તમારા માટે ભલામણ કરેલ પાકો:';
+      case 'mr': // Marathi
+        return 'तुमच्यासाठी शिफारस केलेली पिके:';
+      case 'te': // Telugu
+        return 'మీకు సిఫార్సు చేయబడిన పంటలు:';
+      case 'ta': // Tamil
+        return 'உங்களுக்கான பரிந்துரைக்கப்பட்ட பயிர்கள்:';
+      case 'en': // English
+        return 'Recommended Crops for You:';
+      default:
+        return 'Recommended Crops for You:';
+    }
+  }
+
+String get lessThan1Acre {
+  switch (locale.languageCode) {
+    case 'ml': return '1 ഏക്കറിൽ താഴെ';
+    case 'kn': return '1 ಎಕರೆಗಿಂತ ಕಡಿಮೆ';
+    case 'hi': return '1 एकड़ से कम';
+    case 'pa': return '1 ਏਕੜ ਤੋਂ ਘੱਟ';
+    case 'bn': return '১ একরের কম';
+    case 'gu': return '1 એકરથી ઓછું';
+    case 'mr': return '1 एकरपेक्षा कमी';
+    case 'te': return '1 ఎకరా కంటే తక్కువ';
+    case 'ta': return '1 ஏக்கருக்கு குறைவாக';
+    case 'en': return 'Less than 1 Acre';
+    default: return 'Less than 1 Acre';
+  }
+}
+
+String get oneToFiveAcres {
+  switch (locale.languageCode) {
+    case 'ml': return '1 മുതൽ 5 ഏക്കർ വരെ';
+    case 'kn': return '1 ರಿಂದ 5 ಎಕರೆಗಳವರೆಗೆ';
+    case 'hi': return '1 से 5 एकड़ तक';
+    case 'pa': return '1 ਤੋਂ 5 ਏਕੜ ਤੱਕ';
+    case 'bn': return '১ থেকে ৫ একর পর্যন্ত';
+    case 'gu': return '1 થી 5 એકર સુધી';
+    case 'mr': return '1 ते 5 एकरांपर्यंत';
+    case 'te': return '1 నుండి 5 ఎకరాల వరకు';
+    case 'ta': return '1 முதல் 5 ஏக்கர் வரை';
+    case 'en': return '1 to 5 Acres';
+    default: return '1 to 5 Acres';
+  }
+}
+
+String get fiveToTenAcres {
+  switch (locale.languageCode) {
+    case 'ml': return '5 മുതൽ 10 ഏക്കർ വരെ';
+    case 'kn': return '5 ರಿಂದ 10 ಎಕರೆಗಳವರೆಗೆ';
+    case 'hi': return '5 से 10 एकड़ तक';
+    case 'pa': return '5 ਤੋਂ 10 ਏਕੜ ਤੱਕ';
+    case 'bn': return '৫ থেকে ১০ একর পর্যন্ত';
+    case 'gu': return '5 થી 10 એકર સુધી';
+    case 'mr': return '5 ते 10 एकरांपर्यंत';
+    case 'te': return '5 నుండి 10 ఎకరాల వరకు';
+    case 'ta': return '5 முதல் 10 ஏக்கர் வரை';
+    case 'en': return '5 to 10 Acres';
+    default: return '5 to 10 Acres';
+  }
+}
+
+String get moreThanTenAcres {
+  switch (locale.languageCode) {
+    case 'ml': return '10 ഏക്കറിൽ കൂടുതൽ';
+    case 'kn': return '10 ಎಕರೆಗಿಂತ ಹೆಚ್ಚು';
+    case 'hi': return '10 एकड़ से अधिक';
+    case 'pa': return '10 ਏਕੜ ਤੋਂ ਵੱਧ';
+    case 'bn': return '১০ একরের বেশি';
+    case 'gu': return '10 એકરથી વધુ';
+    case 'mr': return '10 एकरांपेक्षा जास्त';
+    case 'te': return '10 ఎకరాలకు మించి';
+    case 'ta': return '10 ஏக்கருக்கு மேல்';
+    case 'en': return 'More than 10 Acres';
+    default: return 'More than 10 Acres';
+  }
+}
+
+String get good {
+  switch (locale.languageCode) {
+    case 'ml': return 'നല്ലത്';
+    case 'kn': return 'ಉತ್ತಮ';
+    case 'hi': return 'अच्छा';
+    case 'pa': return 'ਵਧੀਆ';
+    case 'bn': return 'ভালো';
+    case 'gu': return 'સારું';
+    case 'mr': return 'चांगले';
+    case 'te': return 'మంచిది';
+    case 'ta': return 'நன்று';
+    case 'en': return 'Good';
+    default: return 'Good';
+  }
+}
+
+String get moderate {
+  switch (locale.languageCode) {
+    case 'ml': return 'മിതമായത്';
+    case 'kn': return 'ಮಧ್ಯಮ';
+    case 'hi': return 'मध्यम';
+    case 'pa': return 'ਦਰਮਿਆਨਾ';
+    case 'bn': return 'মধ্যম';
+    case 'gu': return 'મધ્યમ';
+    case 'mr': return 'मध्यम';
+    case 'te': return 'మోస్తరు';
+    case 'ta': return 'மிதமானது';
+    case 'en': return 'Moderate';
+    default: return 'Moderate';
+  }
+}
+
+String get limited {
+  switch (locale.languageCode) {
+    case 'ml': return 'പരിമിതമായത്';
+    case 'kn': return 'ಸೀಮಿತ';
+    case 'hi': return 'सीमित';
+    case 'pa': return 'ਸੀਮਿਤ';
+    case 'bn': return 'সীমিত';
+    case 'gu': return 'મર્યાદિત';
+    case 'mr': return 'मर्यादित';
+    case 'te': return 'పరిమితమైన';
+    case 'ta': return 'குறைக்கப்பட்ட';
+    case 'en': return 'Limited';
+    default: return 'Limited';
+  }
+}
+
+String get budgetHint {
+  switch (locale.languageCode) {
+    case 'ml': // Malayalam
+      return 'തുക നൽകുക (ഐച്ഛികം)';
+    case 'kn': // Kannada
+      return 'ಮೊತ್ತವನ್ನು ನಮೂದಿಸಿ (ಐಚ್ಛಿಕ)';
+    case 'hi': // Hindi
+      return 'राशि दर्ज करें (वैकल्पिक)';
+    case 'pa': // Punjabi
+      return 'ਰਕਮ ਦਰਜ ਕਰੋ (ਵਿਕਲਪਿਕ)';
+    case 'bn': // Bengali
+      return 'পরিমাণ লিখুন (ঐচ্ছিক)';
+    case 'gu': // Gujarati
+      return 'રકમ દાખલ કરો (વૈકલ્પિક)';
+    case 'mr': // Marathi
+      return 'रक्कम प्रविष्ट करा (पर्यायी)';
+    case 'te': // Telugu
+      return 'మొత్తాన్ని నమోదు చేయండి (ఐచ్ఛికం)';
+    case 'ta': // Tamil
+      return 'தொகையை உள்ளிடவும் (விருப்பம்)';
+    case 'en': // English
+    default:
+      return 'Enter Amount (optional)';
+  }
+}
+
+  
+  // Fertilizer Recommendation Screen Strings
+  String get fertilizerGuide {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'വളം ഗൈഡ്';
+      case 'kn': // Kannada
+        return 'ರಸಗೊಬ್ಬರ ಮಾರ್ಗದರ್ಶಿ';
+      case 'hi': // Hindi
+        return 'उर्वरक गाइड';
+      case 'pa': // Punjabi
+        return 'ਖਾਦ ਗਾਈਡ';
+      case 'bn': // Bengali
+        return 'সার গাইড';
+      case 'gu': // Gujarati
+        return 'ખાતર માર્ગદર્શિકા';
+      case 'mr': // Marathi
+        return 'खत मार्गदर्शक';
+      case 'te': // Telugu
+        return 'ఎరువుల గైడ్';
+      case 'ta': // Tamil
+        return 'உர வழிகாட்டி';
+      case 'en': // English
+        return 'Fertilizer Guide';
+      default:
+        return 'Fertilizer Guide';
+    }
+  }
+  
+  String get selectYourCrop {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'നിങ്ങളുടെ വിള തിരഞ്ഞെടുക്കുക';
+      case 'kn': // Kannada
+        return 'ನಿಮ್ಮ ಬೆಳೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ';
+      case 'hi': // Hindi
+        return 'अपनी फसल चुनें';
+      case 'pa': // Punjabi
+        return 'ਆਪਣੀ ਫਸਲ ਚੁਣੋ';
+      case 'bn': // Bengali
+        return 'আপনার ফসল নির্বাচন করুন';
+      case 'gu': // Gujarati
+        return 'તમારો પાક પસંદ કરો';
+      case 'mr': // Marathi
+        return 'तुमची पीक निवडा';
+      case 'te': // Telugu
+        return 'మీ పంటను ఎంచుకోండి';
+      case 'ta': // Tamil
+        return 'உங்கள் பயிரைத் தேர்ந்தெடுக்கவும்';
+      case 'en': // English
+        return 'Select Your Crop';
+      default:
+        return 'Select Your Crop';
+    }
+  }
+  
+  String get selectSoilType {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'മണ്ണിന്റെ തരം തിരഞ്ഞെടുക്കുക';
+      case 'kn': // Kannada
+        return 'ಮಣ್ಣಿನ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ';
+      case 'hi': // Hindi
+        return 'मिट्टी का प्रकार चुनें';
+      case 'pa': // Punjabi
+        return 'ਮਿੱਟੀ ਦੀ ਕਿਸਮ ਚੁਣੋ';
+      case 'bn': // Bengali
+        return 'মাটির ধরন নির্বাচন করুন';
+      case 'gu': // Gujarati
+        return 'જમીનનો પ્રકાર પસંદ કરો';
+      case 'mr': // Marathi
+        return 'मातीचा प्रकार निवडा';
+      case 'te': // Telugu
+        return 'నేల రకాన్ని ఎంచుకోండి';
+      case 'ta': // Tamil
+        return 'மண் வகையைத் தேர்ந்தெடுக்கவும்';
+      case 'en': // English
+        return 'Select Soil Type';
+      default:
+        return 'Select Soil Type';
+    }
+  }
+
+  
+  String get getFertilizerRecommendation {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'വള ശുപാർശ നേടുക';
+      case 'kn': // Kannada
+        return 'ರಸಗೊಬ್ಬರ ಶಿಫಾರಸನ್ನು ಪಡೆಯಿರಿ';
+      case 'hi': // Hindi
+        return 'उर्वरक अनुशंसा प्राप्त करें';
+      case 'pa': // Punjabi
+        return 'ਖਾਦ ਸਿਫਾਰਸ਼ ਪ੍ਰਾਪਤ ਕਰੋ';
+      case 'bn': // Bengali
+        return 'সার সুপারিশ পান';
+      case 'gu': // Gujarati
+        return 'ખાતર ભલામણ મેળવો';
+      case 'mr': // Marathi
+        return 'खत शिफारस मिळवा';
+      case 'te': // Telugu
+        return 'ఎరువుల సిఫార్సును పొందండి';
+      case 'ta': // Tamil
+        return 'உர பரிந்துரையைப் பெறுங்கள்';
+      case 'en': // English
+        return 'Get Fertilizer Recommendation';
+      default:
+        return 'Get Fertilizer Recommendation';
+    }
+  }
+  
   String get newsScreen {
     switch (locale.languageCode) {
       case 'ml': // Malayalam

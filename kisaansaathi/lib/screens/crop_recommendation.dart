@@ -360,9 +360,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:kisaansaathi/services/api_service.dart';
 import 'package:kisaansaathi/widgets/custom_button.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:kisaansaathi/l10n/app_localizations.dart';
 
 class CropRecommendationScreen extends StatefulWidget {
   const CropRecommendationScreen({super.key});
+  
 
   @override
   State<CropRecommendationScreen> createState() =>
@@ -378,31 +380,50 @@ class _CropRecommendationScreenState extends State<CropRecommendationScreen> {
 
   // New input fields
   final TextEditingController _budgetController = TextEditingController();
-  String _selectedCropType = 'Cash Crops';
-  String _selectedLandSize = '1-5 Acres';
-  String _selectedWaterAvailability = 'Good';
+  late String _selectedCropType;
+  late String _selectedLandSize;
+  late String _selectedWaterAvailability;
 
-  final List<String> _cropTypes = [
-    'Cash Crops',
-    'Food Crops',
-    'Vegetables',
-    'Fruits',
-    'Mixed Farming',
-  ];
-
-  final List<String> _landSizes = [
-    'Less than 1 Acre',
-    '1-5 Acres',
-    '5-10 Acres',
-    'More than 10 Acres',
-  ];
-
-  final List<String> _waterAvailability = ['Good', 'Moderate', 'Limited'];
+  late List<String> _cropTypes;
+  late List<String> _landSizes;
+  late List<String> _waterAvailability;
 
   @override
   void initState() {
     super.initState();
     _checkLocationPermission();
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Initialize lists with localized values
+    _cropTypes = [
+      AppLocalizations.of(context).cashCrops,
+      AppLocalizations.of(context).foodCrops,
+      AppLocalizations.of(context).vegetables,
+      AppLocalizations.of(context).fruits,
+      AppLocalizations.of(context).mixedFarming,
+    ];
+    
+    _landSizes = [
+      AppLocalizations.of(context).lessThan1Acre,
+      AppLocalizations.of(context).oneToFiveAcres,
+      AppLocalizations.of(context).fiveToTenAcres,
+      AppLocalizations.of(context).moreThanTenAcres,
+    ];
+    
+    _waterAvailability = [
+      AppLocalizations.of(context).good,
+      AppLocalizations.of(context).moderate,
+      AppLocalizations.of(context).limited,
+    ];
+    
+    // Set default selections
+    _selectedCropType = _cropTypes[0];
+    _selectedLandSize = _landSizes[1]; // 1-5 Acres
+    _selectedWaterAvailability = _waterAvailability[0]; // Good
   }
 
   @override
@@ -423,13 +444,13 @@ class _CropRecommendationScreenState extends State<CropRecommendationScreen> {
         await _fetchWeatherData();
       } catch (e) {
         setState(() {
-          _errorMessage = 'Location access needed for best recommendations';
-          _isLoading = false;
-        });
+        _errorMessage = AppLocalizations.of(context).locationAccessNeeded;
+        _isLoading = false;
+      });
       }
     } else {
       setState(() {
-        _errorMessage = 'Please enable location for crop suggestions';
+        _errorMessage = AppLocalizations.of(context).enableLocationForCrops;
       });
     }
   }
@@ -448,7 +469,7 @@ class _CropRecommendationScreenState extends State<CropRecommendationScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Weather data unavailable';
+        _errorMessage = AppLocalizations.of(context).weatherDataUnavailable;
         _isLoading = false;
       });
     }
@@ -646,19 +667,19 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
                 ),
                 const SizedBox(height: 20),
                 _buildDetailCard(
-                  'How to Grow',
+                  AppLocalizations.of(context).howToGrow,
                   crop['instructions'],
                   Icons.agriculture,
                   Colors.green,
                 ),
                 _buildDetailCard(
-                  'Money Matters',
+                  AppLocalizations.of(context).moneyMatters,
                   crop['financial'],
                   Icons.currency_rupee,
                   Colors.orange,
                 ),
                 _buildDetailCard(
-                  'Extra Benefits',
+                  AppLocalizations.of(context).extraBenefits,
                   crop['benefits'],
                   Icons.star,
                   Colors.amber,
@@ -718,7 +739,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Tell us about your farm',
+              AppLocalizations.of(context).tellUsAboutYourFarm,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -729,7 +750,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
 
             // Crop Type Selection
             Text(
-              'What type of crops do you want?',
+              AppLocalizations.of(context).whatTypeOfCrops,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -771,7 +792,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
               controller: _budgetController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                hintText: 'Enter amount (optional)',
+                hintText: AppLocalizations.of(context).budgetHint,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -852,7 +873,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Best Crops For You'),
+        title: Text(AppLocalizations.of(context).bestCropsForYou),
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
       ),
@@ -910,7 +931,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
                       _buildInputSection(),
                       const SizedBox(height: 16),
                       CustomButton(
-                        text: 'Get Crop Recommendations',
+                        text: AppLocalizations.of(context).getRecommendations,
                         onPressed: _isLoading
                             ? () {}
                             : _generateRecommendations,
@@ -937,7 +958,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
                       if (_recommendations != null) ...[
                         const SizedBox(height: 16),
                         Text(
-                          'Recommended Crops for You:',
+                          AppLocalizations.of(context).recommendedCrops,
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
