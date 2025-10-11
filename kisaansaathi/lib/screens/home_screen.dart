@@ -16,6 +16,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kisaansaathi/l10n/app_localizations.dart';
+import 'package:kisaansaathi/screens/news_screen.dart';
+
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -463,13 +466,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     _buildFeatureCard(
                       context,
-                      localizations.helpline,
-                      Icons.call,
+                      localizations.newsScreen,
+                      Icons.newspaper, //News Icon
                       Colors.blueGrey.shade700,
                       () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => CallScreen()),
+                          MaterialPageRoute(builder: (context) => NewsScreen()),
                         );
                       },
                     ),

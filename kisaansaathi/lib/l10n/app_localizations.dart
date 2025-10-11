@@ -1205,6 +1205,159 @@ class AppLocalizations {
     }
   }
 
+  String get cashCrops {
+  switch (locale.languageCode) {
+    case 'ml':
+      return 'വിലക്കുള്ള വിളകൾ'; // Cash crops
+    case 'kn':
+      return 'ನಗದು ಬೆಳೆಗಳು';
+    case 'hi':
+      return 'नकदी फसलें';
+    case 'pa':
+      return 'ਨਕਦੀ ਫਸਲਾਂ';
+    case 'bn':
+      return 'নগদ ফসল';
+    case 'ta':
+      return 'பணப் பயிர்கள்';
+    case 'te':
+      return 'నగదు పంటలు';
+    case 'mr':
+      return 'नगदी पिके';
+    case 'gu':
+      return 'નગદ પાકો';
+    default:
+      return 'Cash Crops';
+  }
+}
+
+String get foodCrops {
+  switch (locale.languageCode) {
+    case 'ml':
+      return 'ഭക്ഷ്യ വിളകൾ';
+    case 'kn':
+      return 'ಆಹಾರ ಬೆಳೆಗಳು';
+    case 'hi':
+      return 'खाद्य फसलें';
+    case 'pa':
+      return 'ਖਾਦ ਫਸਲਾਂ';
+    case 'bn':
+      return 'খাদ্য ফসল';
+    case 'ta':
+      return 'உணவு பயிர்கள்';
+    case 'te':
+      return 'ఆహార పంటలు';
+    case 'mr':
+      return 'अन्न पिके';
+    case 'gu':
+      return 'અન્ન પાકો';
+    default:
+      return 'Food Crops';
+  }
+}
+
+String get vegetables {
+  switch (locale.languageCode) {
+    case 'ml':
+      return 'പച്ചക്കറികൾ';
+    case 'kn':
+      return 'ತರಕಾರಿಗಳು';
+    case 'hi':
+      return 'सब्ज़ियाँ';
+    case 'pa':
+      return 'ਸਬਜ਼ੀਆਂ';
+    case 'bn':
+      return 'সবজি';
+    case 'ta':
+      return 'காய்கறிகள்';
+    case 'te':
+      return 'కూరగాయలు';
+    case 'mr':
+      return 'भाज्या';
+    case 'gu':
+      return 'શાકભાજી';
+    default:
+      return 'Vegetables';
+  }
+}
+
+String get fruits {
+  switch (locale.languageCode) {
+    case 'ml':
+      return 'ഫലങ്ങൾ';
+    case 'kn':
+      return 'ಹಣ್ಣುಗಳು';
+    case 'hi':
+      return 'फल';
+    case 'pa':
+      return 'ਫਲ';
+    case 'bn':
+      return 'ফল';
+    case 'ta':
+      return 'பழங்கள்';
+    case 'te':
+      return 'పండ్లు';
+    case 'mr':
+      return 'फळे';
+    case 'gu':
+      return 'ફળો';
+    default:
+      return 'Fruits';
+  }
+}
+
+String get mixedFarming {
+  switch (locale.languageCode) {
+    case 'ml':
+      return 'മിശ്രകൃഷി';
+    case 'kn':
+      return 'ಮಿಶ್ರ ಕೃಷಿ';
+    case 'hi':
+      return 'मिश्रित खेती';
+    case 'pa':
+      return 'ਮਿਸ਼ਰਤ ਖੇਤੀ';
+    case 'bn':
+      return 'মিশ্র কৃষি';
+    case 'ta':
+      return 'கலப்பு விவசாயம்';
+    case 'te':
+      return 'మిశ్ర వ్యవసాయం';
+    case 'mr':
+      return 'मिश्र शेती';
+    case 'gu':
+      return 'મિશ્ર ખેતી';
+    default:
+      return 'Mixed Farming';
+  }
+}
+
+String get bestCropsForYou {
+  switch (locale.languageCode) {
+    case 'ml':
+      return 'നിങ്ങൾക്കായി ഏറ്റവും അനുയോജ്യമായ വിളകൾ';
+    case 'kn':
+      return 'ನಿಮಗಾಗಿ ಉತ್ತಮ ಬೆಳೆಗಳು';
+    case 'hi':
+      return 'आपके लिए सर्वोत्तम फसलें';
+    case 'pa':
+      return 'ਤੁਹਾਡੇ ਲਈ ਸਭ ਤੋਂ ਵਧੀਆ ਫਸਲਾਂ';
+    case 'bn':
+      return 'আপনার জন্য সেরা ফসল';
+    case 'ta':
+      return 'உங்களுக்கு சிறந்த பயிர்கள்';
+    case 'te':
+      return 'మీకు అనుకూలమైన పంటలు';
+    case 'mr':
+      return 'तुमच्यासाठी सर्वोत्तम पिके';
+    case 'gu':
+      return 'તમારા માટે શ્રેષ્ઠ પાકો';
+    default:
+      return 'Best Crops For You';
+  }
+}
+
+
+
+
   String get hectares {
     switch (locale.languageCode) {
       case 'ml': // Malayalam
