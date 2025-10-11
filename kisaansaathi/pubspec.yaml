@@ -108,6 +108,20 @@ flutter:
     - assets/gov_schemes/soilhealth.png
     - assets/gov_schemes/movcdner.jpeg
     - assets/gov_schemes/deds.jpeg
+
+    - assets/crops/rice.jpeg
+    - assets/crops/coconut.jpeg
+    - assets/crops/rubber.jpg
+    - assets/crops/spices.jpeg
+    - assets/crops/banana.jpeg
+    - assets/crops/tapioca.jpeg
+    - assets/crops/vegetables.jpg
+    - assets/crops/ginger.jpeg
+    - assets/soil/laterite.jpeg
+    - assets/soil/alluvial.jpeg
+    - assets/soil/coastal.jpeg
+    - assets/soil/forest.jpeg
+
     - .env
 
 

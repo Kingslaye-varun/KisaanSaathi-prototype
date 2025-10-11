@@ -1640,9 +1640,9 @@ class _KeralaMarketScreenState extends State<KeralaMarketScreen> {
 
   void _setFallbackKeralaLocation() {
     setState(() {
-      district = "Ernakulam";
+      district = "Airoli";
       state = "Kerala";
-      location = "Ernakulam, Kerala";
+      location = "$district, Maharashtra";
       hasError = false; // Don't show error for fallback Kerala location
     });
     _setNearestMarket();
@@ -1653,7 +1653,7 @@ class _KeralaMarketScreenState extends State<KeralaMarketScreen> {
     if (keralaAPMCMarkets.containsKey(district)) {
       nearestMarket = keralaAPMCMarkets[district]!.first;
     } else {
-      nearestMarket = "Ernakulam APMC"; // Default market
+      nearestMarket = "Vashi APMC"; // Default market
     }
     debugPrint("[MARKET] Set nearest market: $nearestMarket for $district");
   }

@@ -35,33 +35,32 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
- String get appName {
-  switch (locale.languageCode) {
-    case 'ml': // Malayalam
-      return 'കിസാൻസാഥി';
-    case 'kn': // Kannada
-      return 'ಕಿಸಾನ್ಸಾಥಿ';
-    case 'hi': // Hindi
-      return 'किसानसाथी';
-    case 'pa': // Punjabi
-      return 'ਕਿਸਾਨਸਾਥੀ';
-    case 'bn': // Bengali
-      return 'কিসানসাথি';
-    case 'gu': // Gujarati
-      return 'કિસાનસાથી';
-    case 'mr': // Marathi
-      return 'किसानसाथी';
-    case 'te': // Telugu
-      return 'కిసాన్సాథి';
-    case 'ta': // Tamil
-      return 'கிசான்சாதி';
-    case 'en': // English
-      return 'KisaanSaathi';
-    default:
-      return 'KisaanSaathi'; // Default fallback value
+  String get appName {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'കിസാൻസാഥി';
+      case 'kn': // Kannada
+        return 'ಕಿಸಾನ್ಸಾಥಿ';
+      case 'hi': // Hindi
+        return 'किसानसाथी';
+      case 'pa': // Punjabi
+        return 'ਕਿਸਾਨਸਾਥੀ';
+      case 'bn': // Bengali
+        return 'কিসানসাথি';
+      case 'gu': // Gujarati
+        return 'કિસાનસાથી';
+      case 'mr': // Marathi
+        return 'किसानसाथी';
+      case 'te': // Telugu
+        return 'కిసాన్సాథి';
+      case 'ta': // Tamil
+        return 'கிசான்சாதி';
+      case 'en': // English
+        return 'KisaanSaathi';
+      default:
+        return 'KisaanSaathi'; // Default fallback value
+    }
   }
-}
-
 
   String get agriStore {
     switch (locale.languageCode) {
@@ -90,34 +89,56 @@ class AppLocalizations {
 
   String get galleryOption {
     switch (locale.languageCode) {
-      case 'ml': return 'ഗ്യാലറി'; // Malayalam
-      case 'kn': return 'ಗ್ಯಾಲರಿ'; // Kannada
-      case 'hi': return 'गैलरी'; // Hindi
-      case 'pa': return 'ਗੈਲਰੀ'; // Punjabi
-      case 'bn': return 'গ্যালারি'; // Bengali
-      case 'gu': return 'ગેલરી'; // Gujarati
-      case 'mr': return 'गॅलरी'; // Marathi
-      case 'te': return 'గ్యాలరీ'; // Telugu
-      case 'ta': return 'கேலரி'; // Tamil
-      case 'en': return 'Gallery'; // English
-      default: return 'Gallery';
+      case 'ml':
+        return 'ഗ്യാലറി'; // Malayalam
+      case 'kn':
+        return 'ಗ್ಯಾಲರಿ'; // Kannada
+      case 'hi':
+        return 'गैलरी'; // Hindi
+      case 'pa':
+        return 'ਗੈਲਰੀ'; // Punjabi
+      case 'bn':
+        return 'গ্যালারি'; // Bengali
+      case 'gu':
+        return 'ગેલરી'; // Gujarati
+      case 'mr':
+        return 'गॅलरी'; // Marathi
+      case 'te':
+        return 'గ్యాలరీ'; // Telugu
+      case 'ta':
+        return 'கேலரி'; // Tamil
+      case 'en':
+        return 'Gallery'; // English
+      default:
+        return 'Gallery';
     }
   }
 
   // New: Camera option
   String get cameraOption {
     switch (locale.languageCode) {
-      case 'ml': return 'ക്യാമറ'; // Malayalam
-      case 'kn': return 'ಕ್ಯಾಮೆರಾ'; // Kannada
-      case 'hi': return 'कैमरा'; // Hindi
-      case 'pa': return 'ਕੈਮਰਾ'; // Punjabi
-      case 'bn': return 'ক্যামেরা'; // Bengali
-      case 'gu': return 'કૅમેરા'; // Gujarati
-      case 'mr': return 'कॅमेरा'; // Marathi
-      case 'te': return 'కెమెరా'; // Telugu
-      case 'ta': return 'கேமரா'; // Tamil
-      case 'en': return 'Camera'; // English
-      default: return 'Camera';
+      case 'ml':
+        return 'ക്യാമറ'; // Malayalam
+      case 'kn':
+        return 'ಕ್ಯಾಮೆರಾ'; // Kannada
+      case 'hi':
+        return 'कैमरा'; // Hindi
+      case 'pa':
+        return 'ਕੈਮਰਾ'; // Punjabi
+      case 'bn':
+        return 'ক্যামেরা'; // Bengali
+      case 'gu':
+        return 'કૅમેરા'; // Gujarati
+      case 'mr':
+        return 'कॅमेरा'; // Marathi
+      case 'te':
+        return 'కెమెరా'; // Telugu
+      case 'ta':
+        return 'கேமரா'; // Tamil
+      case 'en':
+        return 'Camera'; // English
+      default:
+        return 'Camera';
     }
   }
 
@@ -437,80 +458,81 @@ class AppLocalizations {
         return 'Today\'s Weather';
     }
   }
- String get humidityLabel {
-  switch (locale.languageCode) {
-    case 'ml': // Malayalam
-      return 'ആർദ്രത';
-    case 'kn': // Kannada
-      return 'ಆರ್ದ್ರತೆ';
-    case 'ta': // Tamil
-      return 'ஈரப்பதம்';
-    case 'te': // Telugu
-      return 'తేమ';
-    case 'hi': // Hindi
-      return 'आर्द्रता';
-    case 'pa': // Punjabi
-      return 'ਨਮੀ';
-    case 'bn': // Bengali
-      return 'আর্দ্রতা';
-    case 'gu': // Gujarati
-      return 'આર્દ્રતા';
-    case 'mr': // Marathi
-      return 'आर्द्रता';
-    default:
-      return 'Humidity';
-  }
-}
 
-String get windSpeedLabel {
-  switch (locale.languageCode) {
-    case 'ml': // Malayalam
-      return 'കാറ്റിൻ്റെ വേഗത';
-    case 'kn': // Kannada
-      return 'ಗಾಳಿಯ ವೇಗ';
-    case 'ta': // Tamil
-      return 'காற்றின் வேகம்';
-    case 'te': // Telugu
-      return 'గాలి వేగం';
-    case 'hi': // Hindi
-      return 'हवा की गति';
-    case 'pa': // Punjabi
-      return 'ਹਵਾ ਦੀ ਗਤੀ';
-    case 'bn': // Bengali
-      return 'বাতাসের গতি';
-    case 'gu': // Gujarati
-      return 'પવનની ગતિ';
-    case 'mr': // Marathi
-      return 'वारा वेग';
-    default:
-      return 'Wind Speed';
+  String get humidityLabel {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'ആർദ്രത';
+      case 'kn': // Kannada
+        return 'ಆರ್ದ್ರತೆ';
+      case 'ta': // Tamil
+        return 'ஈரப்பதம்';
+      case 'te': // Telugu
+        return 'తేమ';
+      case 'hi': // Hindi
+        return 'आर्द्रता';
+      case 'pa': // Punjabi
+        return 'ਨਮੀ';
+      case 'bn': // Bengali
+        return 'আর্দ্রতা';
+      case 'gu': // Gujarati
+        return 'આર્દ્રતા';
+      case 'mr': // Marathi
+        return 'आर्द्रता';
+      default:
+        return 'Humidity';
+    }
   }
-}
 
-String get rainChanceLabel {
-  switch (locale.languageCode) {
-    case 'ml': // Malayalam
-      return 'മഴ സാധ്യത';
-    case 'kn': // Kannada
-      return 'ಮಳೆ ಸಾಧ್ಯತೆ';
-    case 'ta': // Tamil
-      return 'மழை வாய்ப்பு';
-    case 'te': // Telugu
-      return 'వర్షపు అవకాశం';
-    case 'hi': // Hindi
-      return 'बारिश की संभावना';
-    case 'pa': // Punjabi
-      return 'ਬਾਰਸ਼ ਦੀ ਸੰਭਾਵਨਾ';
-    case 'bn': // Bengali
-      return 'বৃষ্টির সম্ভাবনা';
-    case 'gu': // Gujarati
-      return 'વરસાદની સંભાવના';
-    case 'mr': // Marathi
-      return 'पाऊस संभावना';
-    default:
-      return 'Rain Chance';
+  String get windSpeedLabel {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'കാറ്റിൻ്റെ വേഗത';
+      case 'kn': // Kannada
+        return 'ಗಾಳಿಯ ವೇಗ';
+      case 'ta': // Tamil
+        return 'காற்றின் வேகம்';
+      case 'te': // Telugu
+        return 'గాలి వేగం';
+      case 'hi': // Hindi
+        return 'हवा की गति';
+      case 'pa': // Punjabi
+        return 'ਹਵਾ ਦੀ ਗਤੀ';
+      case 'bn': // Bengali
+        return 'বাতাসের গতি';
+      case 'gu': // Gujarati
+        return 'પવનની ગતિ';
+      case 'mr': // Marathi
+        return 'वारा वेग';
+      default:
+        return 'Wind Speed';
+    }
   }
-}
+
+  String get rainChanceLabel {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'മഴ സാധ്യത';
+      case 'kn': // Kannada
+        return 'ಮಳೆ ಸಾಧ್ಯತೆ';
+      case 'ta': // Tamil
+        return 'மழை வாய்ப்பு';
+      case 'te': // Telugu
+        return 'వర్షపు అవకాశం';
+      case 'hi': // Hindi
+        return 'बारिश की संभावना';
+      case 'pa': // Punjabi
+        return 'ਬਾਰਸ਼ ਦੀ ਸੰਭਾਵਨਾ';
+      case 'bn': // Bengali
+        return 'বৃষ্টির সম্ভাবনা';
+      case 'gu': // Gujarati
+        return 'વરસાદની સંભાવના';
+      case 'mr': // Marathi
+        return 'पाऊस संभावना';
+      default:
+        return 'Rain Chance';
+    }
+  }
 
   String get detailedWeather {
     switch (locale.languageCode) {
@@ -658,31 +680,30 @@ String get rainChanceLabel {
     }
   }
 
-String get governmentSchemesTitle {
-  switch (locale.languageCode) {
-    case 'ml': // Malayalam
-      return 'കിസാൻസാഥി - സർക്കാർ പദ്ധതികൾ';
-    case 'kn': // Kannada
-      return 'ಕಿಸಾನ್ಸಾಥಿ - ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು';
-    case 'ta': // Tamil
-      return 'கிசான்சாதி - அரசு திட்டங்கள்';
-    case 'te': // Telugu
-      return 'కిసాన్సాథి - ప్రభుత్వ పథకాలు';
-    case 'hi': // Hindi
-      return 'किसानसाथी - सरकारी योजनाएं';
-    case 'pa': // Punjabi
-      return 'ਕਿਸਾਨਸਾਥੀ - ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ';
-    case 'bn': // Bengali
-      return 'কিসানসাথি - সরকারি প্রকল্প';
-    case 'mr': // Marathi
-      return 'किसानसाथी - शासकीय योजना';
-    case 'gu': // Gujarati
-      return 'કિસાનસાથી - સરકારી યોજનાઓ';
-    default:
-      return 'KisaanSaathi - Government Schemes';
+  String get governmentSchemesTitle {
+    switch (locale.languageCode) {
+      case 'ml': // Malayalam
+        return 'കിസാൻസാഥി - സർക്കാർ പദ്ധതികൾ';
+      case 'kn': // Kannada
+        return 'ಕಿಸಾನ್ಸಾಥಿ - ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು';
+      case 'ta': // Tamil
+        return 'கிசான்சாதி - அரசு திட்டங்கள்';
+      case 'te': // Telugu
+        return 'కిసాన్సాథి - ప్రభుత్వ పథకాలు';
+      case 'hi': // Hindi
+        return 'किसानसाथी - सरकारी योजनाएं';
+      case 'pa': // Punjabi
+        return 'ਕਿਸਾਨਸਾਥੀ - ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ';
+      case 'bn': // Bengali
+        return 'কিসানসাথি - সরকারি প্রকল্প';
+      case 'mr': // Marathi
+        return 'किसानसाथी - शासकीय योजना';
+      case 'gu': // Gujarati
+        return 'કિસાનસાથી - સરકારી યોજનાઓ';
+      default:
+        return 'KisaanSaathi - Government Schemes';
+    }
   }
-}
-
 
   String get searchSchemesHint {
     switch (locale.languageCode) {
