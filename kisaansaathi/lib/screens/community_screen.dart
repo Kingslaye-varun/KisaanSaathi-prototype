@@ -246,7 +246,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
         ),
       );
 
-
+      // Actually create the post
+      await _postService.createPost(
+        content: _postController.text.trim(),
+        authorId: _currentFarmerId!,
+        tags: _selectedTag != null ? [_selectedTag!] : ['general'],
+        image: _imageFile,
+      );
 
       setState(() {
         _postController.clear();

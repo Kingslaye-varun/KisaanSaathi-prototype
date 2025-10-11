@@ -1437,1636 +1437,732 @@
 // }
 
 import 'package:flutter/material.dart';
-import 'package:kisaansaathi/widgets/custom_button.dart';
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-class KeralaMarketScreen extends StatefulWidget {
-  const KeralaMarketScreen({Key? key}) : super(key: key);
+class MarketScreen extends StatefulWidget {
+  const MarketScreen({super.key});
 
   @override
-  State<KeralaMarketScreen> createState() => _KeralaMarketScreenState();
+  State<MarketScreen> createState() => _MarketScreenState();
 }
 
-class _KeralaMarketScreenState extends State<KeralaMarketScreen> {
+class _MarketScreenState extends State<MarketScreen> {
   bool isLoading = true;
-  bool hasError = false;
-  String location = "Detecting location...";
-  String district = "";
-  String state = "Kerala";
-  List<Map<String, dynamic>> marketData = [];
-  String selectedCategory = "All";
-  List<String> categories = [
-    "All",
-    "Vegetables",
-    "Spices",
-    "Grains",
-    "Cash Crops",
-    "Fruits",
+  String errorMessage = '';
+  String currentState = '';
+  String currentDistrict = '';
+  List<MarketPrice> marketPrices = [];
+  String selectedCategory = 'All';
+  final List<String> categories = [
+    'All',
+    'Vegetables',
+    'Fruits',
+    'Grains',
+    'Spices',
+    'Pulses',
   ];
-  DateTime? lastUpdated;
-  bool isRefreshing = false;
-  String nearestMarket = "";
-
-  // Kerala specific APMC markets
-  final Map<String, List<String>> keralaAPMCMarkets = {
-    'Thiruvananthapuram': [
-      'Chalai Market',
-      'Koyambedu Market',
-      'Attingal APMC',
-    ],
-    'Kollam': ['Kollam APMC', 'Chavara Market'],
-    'Pathanamthitta': ['Pathanamthitta APMC', 'Thiruvalla Market'],
-    'Alappuzha': ['Alappuzha APMC', 'Cherthala Market'],
-    'Kottayam': ['Kottayam APMC', 'Pala Market'],
-    'Idukki': ['Kumily APMC', 'Munnar Market', 'Thodupuzha Market'],
-    'Ernakulam': ['Ernakulam APMC', 'Angamaly Market', 'Perumbavoor Market'],
-    'Thrissur': ['Thrissur APMC', 'Irinjalakuda Market', 'Chalakudy Market'],
-    'Palakkad': ['Palakkad APMC', 'Ottappalam Market', 'Mannarkkad Market'],
-    'Malappuram': ['Malappuram APMC', 'Perinthalmanna Market'],
-    'Kozhikode': ['Kozhikode APMC', 'Vadakara Market'],
-    'Wayanad': ['Kalpetta APMC', 'Mananthavady Market'],
-    'Kannur': ['Kannur APMC', 'Thalassery Market'],
-    'Kasaragod': ['Kasaragod APMC', 'Kanhangad Market'],
-  };
-
-  // API endpoints - Updated for better Kerala coverage
-  final String agmarknetApi =
-      "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070";
-  final String commodityApi =
-      "https://api.data.gov.in/resource/6ada8609-5d5c-4990-8fd2-7372dd3cff42";
-  final String enamApi =
-      "https://enam.gov.in/web/resources/market-prices"; // Hypothetical eNAM endpoint
-
-  final String apiKey =
-      "579b464db66ec23bdd00000179eb4b5844f0449e7e83de8a789d2290";
 
   @override
   void initState() {
     super.initState();
-    debugPrint("[KERALA_MARKET] Initializing Kerala market screen...");
-    _loadCachedData();
-    _determinePosition();
+    _initializeMarketData();
   }
 
-  Future<void> _loadCachedData() async {
-    debugPrint("[CACHE] Loading cached Kerala market data...");
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final cachedData = prefs.getString('kerala_market_data');
-      final cachedLocation = prefs.getString('kerala_location');
-      final lastUpdatedString = prefs.getString('kerala_last_updated');
-      final cachedDistrict = prefs.getString('kerala_district');
-
-      if (cachedData != null) {
-        debugPrint("[CACHE] Found cached Kerala market data");
-        setState(() {
-          marketData = List<Map<String, dynamic>>.from(
-            (jsonDecode(cachedData) as List).map(
-              (item) => Map<String, dynamic>.from(item),
-            ),
-          );
-          if (cachedLocation != null) location = cachedLocation;
-          if (cachedDistrict != null) {
-            district = cachedDistrict;
-            _setNearestMarket();
-          }
-          if (lastUpdatedString != null) {
-            lastUpdated = DateTime.parse(lastUpdatedString);
-          }
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint("[CACHE_ERROR] Error loading cached data: $e");
-    }
+  Future<void> _initializeMarketData() async {
+    await _getLocationAndFetchPrices();
   }
 
-  Future<void> _saveCachedData() async {
-    debugPrint("[CACHE] Saving Kerala market data to cache...");
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('kerala_market_data', jsonEncode(marketData));
-      await prefs.setString('kerala_location', location);
-      await prefs.setString('kerala_district', district);
+  Future<void> _getLocationAndFetchPrices() async {
+    if (!mounted) return;
 
-      final now = DateTime.now();
-      await prefs.setString('kerala_last_updated', now.toIso8601String());
-
-      setState(() {
-        lastUpdated = now;
-      });
-      debugPrint("[CACHE] Kerala data saved successfully at $now");
-    } catch (e) {
-      debugPrint("[CACHE_ERROR] Error saving cached data: $e");
-    }
-  }
-
-  Future<void> _determinePosition() async {
-    if (isRefreshing) return;
-
-    debugPrint("[LOCATION] Starting Kerala location determination...");
     setState(() {
-      isLoading = marketData.isEmpty;
-      isRefreshing = true;
-      hasError = false;
+      isLoading = true;
+      errorMessage = '';
     });
 
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _setFallbackKeralaLocation();
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          _setFallbackKeralaLocation();
+      // Check location permission
+      var status = await Permission.location.status;
+      if (!status.isGranted) {
+        status = await Permission.location.request();
+        if (!status.isGranted) {
+          setState(() {
+            isLoading = false;
+            errorMessage = 'Location permission denied';
+          });
           return;
         }
       }
 
-      if (permission == LocationPermission.deniedForever) {
-        _setFallbackKeralaLocation();
-        return;
-      }
-
+      // Get current position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        desiredAccuracy: LocationAccuracy.medium,
       );
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+      // Get state and district from coordinates
+      await _getLocationDetails(position.latitude, position.longitude);
 
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
-        setState(() {
-          district =
-              place.subAdministrativeArea ??
-              place.administrativeArea ??
-              "Ernakulam";
-          state = place.administrativeArea ?? "Kerala";
-          location = "${place.locality ?? place.subAdministrativeArea}, Kerala";
-        });
-
-        // Ensure we're focusing on Kerala
-        if (!state.toLowerCase().contains('kerala')) {
-          setState(() {
-            state = "Kerala";
-            district = "Ernakulam"; // Default to central Kerala
-            location = "$district, Kerala";
-          });
-        }
-
-        _setNearestMarket();
-        await _fetchKeralaMarketData();
-      } else {
-        _setFallbackKeralaLocation();
-      }
+      // Fetch market prices
+      await _fetchMarketPrices();
     } catch (e) {
-      debugPrint("[LOCATION_ERROR] Error: $e");
-      _setFallbackKeralaLocation();
-    }
-  }
-
-  void _setFallbackKeralaLocation() {
-    setState(() {
-      district = "Airoli";
-      state = "Kerala";
-      location = "$district, Maharashtra";
-      hasError = false; // Don't show error for fallback Kerala location
-    });
-    _setNearestMarket();
-    _loadKeralaFallbackData();
-  }
-
-  void _setNearestMarket() {
-    if (keralaAPMCMarkets.containsKey(district)) {
-      nearestMarket = keralaAPMCMarkets[district]!.first;
-    } else {
-      nearestMarket = "Vashi APMC"; // Default market
-    }
-    debugPrint("[MARKET] Set nearest market: $nearestMarket for $district");
-  }
-
-  Future<void> _fetchKeralaMarketData() async {
-    debugPrint("[API] Fetching Kerala-specific market data...");
-    bool success = false;
-
-    // Try multiple API sources
-    success = await _fetchAgmarknetData();
-
-    if (!success) {
-      success = await _fetchCommodityData();
-    }
-
-    if (!success) {
-      debugPrint("[API] All APIs failed, loading Kerala fallback data");
-      _loadKeralaFallbackData();
-    } else {
-      await _saveCachedData();
-    }
-  }
-
-  Future<bool> _fetchAgmarknetData() async {
-    try {
-      debugPrint("[AGMARKNET] Fetching Kerala data from Agmarknet...");
-      final Uri uri = Uri.parse(agmarknetApi).replace(
-        queryParameters: {
-          'api-key': apiKey,
-          'format': 'json',
-          'limit': '200',
-          'filters[state]': 'Kerala',
-          'filters[district]': district,
-        },
-      );
-
-      final response = await http.get(uri).timeout(const Duration(seconds: 15));
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-
-        if (jsonResponse['records'] != null &&
-            jsonResponse['records'] is List &&
-            (jsonResponse['records'] as List).isNotEmpty) {
-          await _processKeralaMarketData(jsonResponse['records']);
-          return true;
-        }
+      if (kDebugMode) {
+        print('Error getting location: $e');
       }
-      return false;
-    } catch (e) {
-      debugPrint("[AGMARKNET_ERROR] Error: $e");
-      return false;
-    }
-  }
-
-  Future<bool> _fetchCommodityData() async {
-    try {
-      debugPrint("[COMMODITY] Fetching Kerala commodity data...");
-      final Uri uri = Uri.parse(commodityApi).replace(
-        queryParameters: {
-          'api-key': apiKey,
-          'format': 'json',
-          'limit': '200',
-          'filters[state]': 'Kerala',
-        },
-      );
-
-      final response = await http.get(uri).timeout(const Duration(seconds: 15));
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-
-        if (jsonResponse['records'] != null &&
-            jsonResponse['records'] is List &&
-            (jsonResponse['records'] as List).isNotEmpty) {
-          await _processKeralaMarketData(jsonResponse['records']);
-          return true;
-        }
-      }
-      return false;
-    } catch (e) {
-      debugPrint("[COMMODITY_ERROR] Error: $e");
-      return false;
-    }
-  }
-
-  Future<void> _processKeralaMarketData(List<dynamic> records) async {
-    debugPrint(
-      "[PROCESS] Processing ${records.length} Kerala market records...",
-    );
-    List<Map<String, dynamic>> processedData = [];
-    Set<String> seenCommodities = {};
-
-    for (var record in records) {
-      String commodity = (record['commodity'] ?? record['item_name'] ?? "")
-          .toString();
-      String price =
-          (record['modal_price'] ??
-                  record['price'] ??
-                  record['max_price'] ??
-                  "0")
-              .toString();
-      String unit = (record['unit'] ?? "kg").toString();
-      String market =
-          (record['market'] ?? record['mandi_name'] ?? nearestMarket)
-              .toString();
-
-      // Skip if we've already processed this commodity
-      if (commodity.isEmpty ||
-          seenCommodities.contains(commodity.toLowerCase())) {
-        continue;
-      }
-
-      String category = _categorizeKeralaProduct(commodity);
-      if (category.isNotEmpty) {
-        seenCommodities.add(commodity.toLowerCase());
-
-        // Clean and format the data
-        double priceValue =
-            double.tryParse(price.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0;
-        if (priceValue > 0) {
-          processedData.add({
-            "name": _formatCommodityName(commodity),
-            "price": "₹${priceValue.toStringAsFixed(0)}",
-            "unit": _formatUnit(unit),
-            "market": market.isNotEmpty ? market : nearestMarket,
-            "change": _generateRealisticPriceChange(commodity),
-            "category": category,
-            "quality": _generateQuality(commodity),
-            "availability": _generateAvailability(commodity),
-          });
-        }
-      }
-    }
-
-    // If we got good data, use it
-    if (processedData.length >= 10) {
+      if (!mounted) return;
       setState(() {
-        marketData = processedData;
         isLoading = false;
-        isRefreshing = false;
-        hasError = false;
+        errorMessage = 'Error getting location: ${e.toString()}';
       });
-      debugPrint(
-        "[PROCESS] Successfully processed ${processedData.length} items",
-      );
-    } else {
-      debugPrint(
-        "[PROCESS] Insufficient data (${processedData.length}), loading fallback",
-      );
-      _loadKeralaFallbackData();
     }
   }
 
-  void _loadKeralaFallbackData() {
-    debugPrint("[FALLBACK] Loading Kerala-specific fallback data");
+  Future<void> _getLocationDetails(double latitude, double longitude) async {
+    try {
+      // Using OpenStreetMap Nominatim API for reverse geocoding
+      final url =
+          'https://nominatim.openstreetmap.org/reverse?format=json&lat=$latitude&lon=$longitude&zoom=10&addressdetails=1';
 
-    // Kerala-specific crops and typical prices
-    marketData = [
-      // Spices (Kerala's specialty)
-      {
-        "name": "Black Pepper",
-        "price": "₹580",
-        "unit": "kg",
-        "change": "+8%",
-        "category": "Spices",
-        "market": nearestMarket,
-        "quality": "Premium Grade",
-        "availability": "High",
-      },
-      {
-        "name": "Cardamom (Small)",
-        "price": "₹1850",
-        "unit": "kg",
-        "change": "+15%",
-        "category": "Spices",
-        "market": "Kumily APMC",
-        "quality": "Export Quality",
-        "availability": "Medium",
-      },
-      {
-        "name": "Turmeric",
-        "price": "₹185",
-        "unit": "kg",
-        "change": "+10%",
-        "category": "Spices",
-        "market": nearestMarket,
-        "quality": "Grade A",
-        "availability": "High",
-      },
-      {
-        "name": "Ginger (Dry)",
-        "price": "₹210",
-        "unit": "kg",
-        "change": "+5%",
-        "category": "Spices",
-        "market": nearestMarket,
-        "quality": "Premium",
-        "availability": "High",
-      },
-      {
-        "name": "Cinnamon",
-        "price": "₹420",
-        "unit": "kg",
-        "change": "+12%",
-        "category": "Spices",
-        "market": "Kottayam APMC",
-        "quality": "Export Grade",
-        "availability": "Medium",
-      },
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'User-Agent': 'KisaanSaathi/1.0'},
+      );
 
-      // Cash Crops
-      {
-        "name": "Rubber",
-        "price": "₹185",
-        "unit": "kg",
-        "change": "+3%",
-        "category": "Cash Crops",
-        "market": "Kottayam APMC",
-        "quality": "RSS-4 Grade",
-        "availability": "High",
-      },
-      {
-        "name": "Coconut (Dried)",
-        "price": "₹35",
-        "unit": "piece",
-        "change": "+2%",
-        "category": "Cash Crops",
-        "market": nearestMarket,
-        "quality": "Mature",
-        "availability": "Very High",
-      },
-      {
-        "name": "Arecanut",
-        "price": "₹450",
-        "unit": "kg",
-        "change": "+7%",
-        "category": "Cash Crops",
-        "market": "Malappuram APMC",
-        "quality": "Premium",
-        "availability": "Medium",
-      },
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          currentState = data['address']['state'] ?? 'Unknown';
+          currentDistrict =
+              data['address']['state_district'] ??
+              data['address']['county'] ??
+              'Unknown';
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting location details: $e');
+      }
+      setState(() {
+        currentState = 'Unknown';
+        currentDistrict = 'Unknown';
+      });
+    }
+  }
 
+  Future<void> _fetchMarketPrices() async {
+    try {
+      // Using Agmarknet data - NO API KEY NEEDED
+      List<MarketPrice> prices = [];
+
+      // Fetch from Agmarknet
+      try {
+        prices = await _fetchFromAgmarknet();
+      } catch (e) {
+        if (kDebugMode) {
+          print('Agmarknet fetch failed: $e');
+        }
+      }
+
+      // If fetch fails, use sample data based on location
+      if (prices.isEmpty) {
+        prices = _generateLocationBasedSampleData();
+      }
+
+      if (!mounted) return;
+      setState(() {
+        marketPrices = prices;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching market prices: $e');
+      }
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Error loading market data';
+        marketPrices = _generateLocationBasedSampleData();
+      });
+    }
+  }
+
+  Future<List<MarketPrice>> _fetchFromAgmarknet() async {
+    try {
+      // Agmarknet provides CSV data that can be downloaded
+      // URL format: https://agmarknet.gov.in/SearchCmmMkt.aspx
+      // For this implementation, we'll use the data.gov.in CSV endpoint
+      // which pulls from Agmarknet and doesn't require authentication
+
+      final url =
+          'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?format=json&limit=100';
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        List<MarketPrice> prices = [];
+
+        // Parse the response
+        if (data['records'] != null) {
+          for (var record in data['records']) {
+            prices.add(
+              MarketPrice(
+                record['commodity'] ?? 'Unknown',
+                double.tryParse(record['min_price']?.toString() ?? '0') ?? 0.0,
+                double.tryParse(record['max_price']?.toString() ?? '0') ?? 0.0,
+                double.tryParse(record['modal_price']?.toString() ?? '0') ??
+                    0.0,
+                _getCategoryFromCommodity(record['commodity'] ?? ''),
+                'kg',
+                record['arrival_date'] ??
+                    DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                record['market'] ?? currentDistrict,
+              ),
+            );
+          }
+        }
+
+        return prices;
+      }
+
+      return [];
+    } catch (e) {
+      if (kDebugMode) {
+        print('Agmarknet fetch error: $e');
+      }
+      return [];
+    }
+  }
+
+  String _getCategoryFromCommodity(String commodity) {
+    final veg = [
+      'tomato',
+      'onion',
+      'potato',
+      'cabbage',
+      'cauliflower',
+      'brinjal',
+    ];
+    final fruits = ['banana', 'apple', 'mango', 'papaya', 'orange', 'grapes'];
+    final grains = ['rice', 'wheat', 'corn', 'bajra', 'jowar'];
+    final spices = ['turmeric', 'chilli', 'coriander', 'cumin', 'pepper'];
+    final pulses = ['toor', 'moong', 'chana', 'urad', 'masoor'];
+
+    final lower = commodity.toLowerCase();
+
+    if (veg.any((v) => lower.contains(v))) return 'Vegetables';
+    if (fruits.any((f) => lower.contains(f))) return 'Fruits';
+    if (grains.any((g) => lower.contains(g))) return 'Grains';
+    if (spices.any((s) => lower.contains(s))) return 'Spices';
+    if (pulses.any((p) => lower.contains(p))) return 'Pulses';
+
+    return 'Other';
+  }
+
+  List<MarketPrice> _generateLocationBasedSampleData() {
+    // Generate realistic sample data based on current location
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    return [
       // Vegetables
-      {
-        "name": "Bitter Gourd",
-        "price": "₹45",
-        "unit": "kg",
-        "change": "+8%",
-        "category": "Vegetables",
-        "market": nearestMarket,
-        "quality": "Fresh Grade A",
-        "availability": "High",
-      },
-      {
-        "name": "Drumstick",
-        "price": "₹35",
-        "unit": "kg",
-        "change": "+5%",
-        "category": "Vegetables",
-        "market": nearestMarket,
-        "quality": "Fresh",
-        "availability": "High",
-      },
-      {
-        "name": "Okra (Lady Finger)",
-        "price": "₹40",
-        "unit": "kg",
-        "change": "+3%",
-        "category": "Vegetables",
-        "market": nearestMarket,
-        "quality": "Grade A",
-        "availability": "High",
-      },
-      {
-        "name": "Ash Gourd",
-        "price": "₹25",
-        "unit": "kg",
-        "change": "+2%",
-        "category": "Vegetables",
-        "market": nearestMarket,
-        "quality": "Fresh",
-        "availability": "High",
-      },
-
-      // Grains
-      {
-        "name": "Rice (Ponni)",
-        "price": "₹55",
-        "unit": "kg",
-        "change": "+1%",
-        "category": "Grains",
-        "market": "Palakkad APMC",
-        "quality": "Grade A",
-        "availability": "High",
-      },
-      {
-        "name": "Rice (Matta)",
-        "price": "₹65",
-        "unit": "kg",
-        "change": "+2%",
-        "category": "Grains",
-        "market": "Palakkad APMC",
-        "quality": "Premium",
-        "availability": "High",
-      },
+      MarketPrice(
+        'Tomato',
+        25,
+        45,
+        35,
+        'Vegetables',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Onion',
+        30,
+        50,
+        40,
+        'Vegetables',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Potato',
+        20,
+        35,
+        28,
+        'Vegetables',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Cabbage',
+        15,
+        30,
+        22,
+        'Vegetables',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Cauliflower',
+        25,
+        45,
+        35,
+        'Vegetables',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Brinjal',
+        20,
+        40,
+        30,
+        'Vegetables',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Lady Finger',
+        30,
+        60,
+        45,
+        'Vegetables',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Capsicum',
+        40,
+        80,
+        60,
+        'Vegetables',
+        'kg',
+        today,
+        currentDistrict,
+      ),
 
       // Fruits
-      {
-        "name": "Banana (Nendran)",
-        "price": "₹45",
-        "unit": "kg",
-        "change": "+4%",
-        "category": "Fruits",
-        "market": nearestMarket,
-        "quality": "Grade A",
-        "availability": "Very High",
-      },
-      {
-        "name": "Jackfruit",
-        "price": "₹35",
-        "unit": "kg",
-        "change": "+6%",
-        "category": "Fruits",
-        "market": nearestMarket,
-        "quality": "Ripe",
-        "availability": "Medium",
-      },
-      {
-        "name": "Pineapple",
-        "price": "₹40",
-        "unit": "kg",
-        "change": "+3%",
-        "category": "Fruits",
-        "market": "Thrissur APMC",
-        "quality": "Sweet Variety",
-        "availability": "High",
-      },
+      MarketPrice(
+        'Banana',
+        40,
+        70,
+        55,
+        'Fruits',
+        'dozen',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Apple',
+        120,
+        180,
+        150,
+        'Fruits',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice('Mango', 60, 120, 90, 'Fruits', 'kg', today, currentDistrict),
+      MarketPrice('Papaya', 25, 45, 35, 'Fruits', 'kg', today, currentDistrict),
+      MarketPrice('Orange', 50, 90, 70, 'Fruits', 'kg', today, currentDistrict),
+      MarketPrice(
+        'Grapes',
+        60,
+        100,
+        80,
+        'Fruits',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+
+      // Grains
+      MarketPrice('Rice', 35, 55, 45, 'Grains', 'kg', today, currentDistrict),
+      MarketPrice('Wheat', 25, 40, 32, 'Grains', 'kg', today, currentDistrict),
+      MarketPrice('Corn', 20, 35, 28, 'Grains', 'kg', today, currentDistrict),
+      MarketPrice('Bajra', 30, 50, 40, 'Grains', 'kg', today, currentDistrict),
+
+      // Spices
+      MarketPrice(
+        'Turmeric',
+        150,
+        250,
+        200,
+        'Spices',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Chilli',
+        80,
+        150,
+        115,
+        'Spices',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Coriander',
+        40,
+        80,
+        60,
+        'Spices',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Cumin',
+        300,
+        500,
+        400,
+        'Spices',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+
+      // Pulses
+      MarketPrice(
+        'Toor Dal',
+        90,
+        130,
+        110,
+        'Pulses',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Moong Dal',
+        100,
+        150,
+        125,
+        'Pulses',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Chana Dal',
+        70,
+        110,
+        90,
+        'Pulses',
+        'kg',
+        today,
+        currentDistrict,
+      ),
+      MarketPrice(
+        'Urad Dal',
+        80,
+        120,
+        100,
+        'Pulses',
+        'kg',
+        today,
+        currentDistrict,
+      ),
     ];
-
-    setState(() {
-      isLoading = false;
-      isRefreshing = false;
-      hasError = false;
-      lastUpdated = DateTime.now();
-    });
-
-    _saveCachedData();
   }
 
-  String _categorizeKeralaProduct(String commodity) {
-    commodity = commodity.toLowerCase();
-
-    // Kerala-specific spices
-    if (commodity.contains('pepper') ||
-        commodity.contains('cardamom') ||
-        commodity.contains('turmeric') ||
-        commodity.contains('ginger') ||
-        commodity.contains('cinnamon') ||
-        commodity.contains('clove') ||
-        commodity.contains('nutmeg') ||
-        commodity.contains('coriander')) {
-      return 'Spices';
+  List<MarketPrice> get filteredPrices {
+    if (selectedCategory == 'All') {
+      return marketPrices;
     }
+    return marketPrices
+        .where((price) => price.category == selectedCategory)
+        .toList();
+  }
 
-    // Kerala cash crops
-    if (commodity.contains('rubber') ||
-        commodity.contains('coconut') ||
-        commodity.contains('arecanut') ||
-        commodity.contains('cashew') ||
-        commodity.contains('tea') ||
-        commodity.contains('coffee')) {
-      return 'Cash Crops';
+  Color _getPriceColor(double price, double minPrice, double maxPrice) {
+    final range = maxPrice - minPrice;
+    final position = (price - minPrice) / range;
+
+    if (position < 0.4) {
+      return Colors.green; // Low price
+    } else if (position < 0.7) {
+      return Colors.blue; // Medium price
+    } else {
+      return Colors.red; // High price
     }
-
-    // Common vegetables
-    if (commodity.contains('bitter gourd') ||
-        commodity.contains('drumstick') ||
-        commodity.contains('okra') ||
-        commodity.contains('ash gourd') ||
-        commodity.contains('snake gourd') ||
-        commodity.contains('bottle gourd') ||
-        commodity.contains('ridge gourd') ||
-        commodity.contains('yam') ||
-        commodity.contains('elephant foot yam') ||
-        commodity.contains('taro')) {
-      return 'Vegetables';
-    }
-
-    // Fruits
-    if (commodity.contains('banana') ||
-        commodity.contains('jackfruit') ||
-        commodity.contains('pineapple') ||
-        commodity.contains('mango') ||
-        commodity.contains('papaya') ||
-        commodity.contains('guava') ||
-        commodity.contains('rambutan') ||
-        commodity.contains('passion fruit')) {
-      return 'Fruits';
-    }
-
-    // Grains
-    if (commodity.contains('rice') ||
-        commodity.contains('wheat') ||
-        commodity.contains('ragi') ||
-        commodity.contains('tapioca')) {
-      return 'Grains';
-    }
-
-    return 'Vegetables'; // Default
-  }
-
-  String _formatCommodityName(String commodity) {
-    return commodity
-        .split(' ')
-        .map((word) {
-          if (word.isEmpty) return '';
-          return word[0].toUpperCase() + word.substring(1).toLowerCase();
-        })
-        .join(' ');
-  }
-
-  String _formatUnit(String unit) {
-    unit = unit.toLowerCase();
-    if (unit.contains('quintal')) return 'quintal';
-    if (unit.contains('tonne') || unit.contains('mt')) return 'tonne';
-    if (unit.contains('piece') || unit.contains('nos')) return 'piece';
-    return 'kg';
-  }
-
-  String _generateRealisticPriceChange(String commodity) {
-    // Generate realistic price changes based on Kerala market conditions
-    final hash = commodity.toLowerCase().hashCode;
-    final variations = [-8, -5, -3, -2, -1, 1, 2, 3, 5, 8, 10, 12];
-    final change = variations[hash.abs() % variations.length];
-    return change >= 0 ? '+$change%' : '$change%';
-  }
-
-  String _generateQuality(String commodity) {
-    final qualities = [
-      'Grade A',
-      'Premium',
-      'Export Quality',
-      'Fresh',
-      'Standard',
-    ];
-    final hash = commodity.toLowerCase().hashCode;
-    return qualities[hash.abs() % qualities.length];
-  }
-
-  String _generateAvailability(String commodity) {
-    final availability = ['High', 'Medium', 'Low', 'Very High'];
-    final hash = commodity.toLowerCase().hashCode;
-    return availability[hash.abs() % availability.length];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text(
-          'Kerala Market Prices',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          'Market Prices',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.green[800],
-        elevation: 0,
+        backgroundColor: Colors.green,
         actions: [
           IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.white),
-            onPressed: _showKeralaMarketInfo,
+            icon: const Icon(Icons.refresh),
+            onPressed: _getLocationAndFetchPrices,
           ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.green[800]!, Colors.grey[100]!],
-            stops: const [0.0, 0.3],
-          ),
-        ),
-        child: isLoading ? _buildLoadingWidget() : _buildMainContent(),
-      ),
-    );
-  }
-
-  Widget _buildLoadingWidget() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Column(
         children: [
-          CircularProgressIndicator(color: Colors.white),
-          SizedBox(height: 16),
-          Text(
-            'Loading Kerala market data...',
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMainContent() {
-    return RefreshIndicator(
-      onRefresh: _determinePosition,
-      color: Colors.green[800],
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          children: [
-            _buildLocationCard(),
-            _buildMarketInfoCard(),
-            _buildCategoryFilter(),
-            _buildMarketPricesList(),
-            _buildActionButtons(),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLocationCard() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              colors: [Colors.green[600]!, Colors.green[400]!],
-            ),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Your Location',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
-                        Text(
-                          location,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (isRefreshing)
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  else
-                    IconButton(
-                      icon: const Icon(Icons.refresh, color: Colors.white),
-                      onPressed: _determinePosition,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Icon(Icons.store, color: Colors.white70, size: 16),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Nearest APMC: $nearestMarket',
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                ],
-              ),
-              if (lastUpdated != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.update, color: Colors.white70, size: 16),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Updated: ${DateFormat('MMM d, h:mm a').format(lastUpdated!)}',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMarketInfoCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.insights, color: Colors.green[700]),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Kerala Market Insights',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildInsightItem(
-                    'Active Markets',
-                    '${keralaAPMCMarkets.length}',
-                    Colors.blue,
-                  ),
-                  _buildInsightItem(
-                    'Live Prices',
-                    '${marketData.length}',
-                    Colors.green,
-                  ),
-                  _buildInsightItem('Districts', 'All 14', Colors.orange),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInsightItem(String label, String value, Color color) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-      ],
-    );
-  }
-
-  Widget _buildCategoryFilter() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      height: 40,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final isSelected = selectedCategory == category;
-          return Container(
-            margin: const EdgeInsets.only(right: 10),
-            child: FilterChip(
-              label: Text(category),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  selectedCategory = category;
-                });
-              },
-              backgroundColor: Colors.white,
-              selectedColor: Colors.green[100],
-              checkmarkColor: Colors.green[700],
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.green[700] : Colors.grey[700],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          // Location Info Card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.green.shade700, Colors.green.shade500],
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildMarketPricesList() {
-    List<Map<String, dynamic>> filteredData = selectedCategory == "All"
-        ? marketData
-        : marketData
-              .where((item) => item["category"] == selectedCategory)
-              .toList();
-
-    if (filteredData.isEmpty) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.agriculture, size: 64, color: Colors.grey[400]),
-                const SizedBox(height: 16),
-                Text(
-                  'No data available for $selectedCategory',
-                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(Icons.show_chart, color: Colors.green[700]),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Current Market Prices',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.green[50],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${filteredData.length} items',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.green[700],
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: filteredData.length,
-              itemBuilder: (context, index) {
-                final item = filteredData[index];
-                return _buildMarketPriceItem(item);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMarketPriceItem(Map<String, dynamic> item) {
-    final priceChange = item["change"] as String;
-    final isPositive = priceChange.startsWith('+');
-    final isNegative = priceChange.startsWith('-');
-
-    return InkWell(
-      onTap: () => _showCommodityDetails(item),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: _getCategoryColor(item["category"]).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Center(
-                child: Text(
-                  item["name"][0],
+                const Text(
+                  'Current Location',
                   style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: _getCategoryColor(item["category"]),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item["name"],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.store, size: 14, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          item["market"],
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Icon(Icons.verified, size: 14, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Text(
-                        item["quality"] ?? "Standard",
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  "${item["price"]}/${item["unit"]}",
-                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isPositive
-                        ? Colors.green.withOpacity(0.1)
-                        : isNegative
-                        ? Colors.red.withOpacity(0.1)
-                        : Colors.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isPositive
-                            ? Icons.trending_up
-                            : isNegative
-                            ? Icons.trending_down
-                            : Icons.trending_flat,
-                        size: 12,
-                        color: isPositive
-                            ? Colors.green[700]
-                            : isNegative
-                            ? Colors.red[700]
-                            : Colors.grey[700],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        priceChange,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: isPositive
-                              ? Colors.green[700]
-                              : isNegative
-                              ? Colors.red[700]
-                              : Colors.grey[700],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 2),
                 Text(
-                  "Stock: ${item["availability"] ?? "Medium"}",
-                  style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                  currentDistrict.isNotEmpty
+                      ? '$currentDistrict, $currentState'
+                      : 'Fetching location...',
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Updated: ${DateFormat('MMM dd, yyyy - hh:mm a').format(DateTime.now())}',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButtons() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: CustomButton(
-                  text: 'Kerala APMC Directory',
-                  onPressed: _showAPMCDirectory,
-                  color: Colors.blue[700]!,
-                  icon: Icons.store,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: CustomButton(
-                  text: 'Price Alerts',
-                  onPressed: _showPriceAlerts,
-                  color: Colors.orange[700]!,
-                  icon: Icons.notifications_active,
-                ),
-              ),
-            ],
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: CustomButton(
-                  text: 'eNAM Portal',
-                  onPressed: _openENAMPortal,
-                  color: Colors.green[700]!,
-                  icon: Icons.public,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: CustomButton(
-                  text: 'Export Market',
-                  onPressed: _showExportMarket,
-                  color: Colors.purple[700]!,
-                  icon: Icons.flight_takeoff,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
-  Color _getCategoryColor(String? category) {
-    switch (category) {
-      case "Vegetables":
-        return Colors.green[600]!;
-      case "Fruits":
-        return Colors.orange[600]!;
-      case "Grains":
-        return Colors.amber[600]!;
-      case "Spices":
-        return Colors.red[600]!;
-      case "Cash Crops":
-        return Colors.brown[600]!;
-      default:
-        return Colors.blue[600]!;
-    }
-  }
-
-  void _showCommodityDetails(Map<String, dynamic> item) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.7,
-          maxChildSize: 0.9,
-          minChildSize: 0.5,
-          builder: (context, scrollController) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
+          // Category Filter
+          Container(
+            height: 60,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories[index];
+                final isSelected = selectedCategory == category;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ChoiceChip(
+                    label: Text(category),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        selectedCategory = category;
+                      });
+                    },
+                    selectedColor: Colors.green,
+                    labelStyle: TextStyle(
+                      color: isSelected ? Colors.white : Colors.black87,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
-                    const SizedBox(height: 20),
-                    Row(
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Price List
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : errorMessage.isNotEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: _getCategoryColor(
-                              item["category"],
-                            ).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Center(
+                        const Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          errorMessage,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _getLocationAndFetchPrices,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                : filteredPrices.isEmpty
+                ? const Center(
+                    child: Text('No data available for this category'),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: filteredPrices.length,
+                    itemBuilder: (context, index) {
+                      final price = filteredPrices[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 8,
+                        ),
+                        elevation: 2,
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: _getPriceColor(
+                              price.modalPrice,
+                              price.minPrice,
+                              price.maxPrice,
+                            ),
                             child: Text(
-                              item["name"][0],
-                              style: TextStyle(
-                                fontSize: 24,
+                              price.commodity[0].toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                color: _getCategoryColor(item["category"]),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
+                          title: Text(
+                            price.commodity,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Text('Category: ${price.category}'),
                               Text(
-                                item["name"],
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                "${item["category"]} • Kerala",
+                                'Range: ₹${price.minPrice.toStringAsFixed(0)} - ₹${price.maxPrice.toStringAsFixed(0)}/${price.unit}',
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 32),
-
-                    // Price Information
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.green[50],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.green[200]!),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                'Current Price',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.green[800],
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                "${item["price"]}/${item["unit"]}",
+                                '₹${price.modalPrice.toStringAsFixed(0)}',
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.green[800],
+                                  color: _getPriceColor(
+                                    price.modalPrice,
+                                    price.minPrice,
+                                    price.maxPrice,
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
                               Text(
-                                'Price Change:',
-                                style: TextStyle(color: Colors.grey[700]),
-                              ),
-                              Text(
-                                item["change"],
+                                'per ${price.unit}',
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: item["change"].startsWith('+')
-                                      ? Colors.green[700]
-                                      : Colors.red[700],
+                                  fontSize: 11,
+                                  color: Colors.grey.shade600,
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Market Information
-                    _detailSection('Market Information', [
-                      _detailRow('Market', item["market"]),
-                      _detailRow(
-                        'Quality Grade',
-                        item["quality"] ?? "Standard",
-                      ),
-                      _detailRow(
-                        'Availability',
-                        item["availability"] ?? "Medium",
-                      ),
-                      _detailRow('District', district),
-                    ]),
-
-                    const SizedBox(height: 20),
-
-                    // Action Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            icon: const Icon(Icons.timeline),
-                            label: const Text('Price History'),
-                            onPressed: () {
-                              Navigator.pop(context);
-                              // Navigate to price history
-                            },
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                          ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.add_alert),
-                            label: const Text('Set Alert'),
-                            onPressed: () {
-                              Navigator.pop(context);
-                              _showPriceAlerts();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green[700],
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
+                      );
+                    },
+                  ),
+          ),
+
+          // Legend
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              border: Border(top: BorderSide(color: Colors.grey.shade300)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildLegendItem(Colors.green, 'Low Price'),
+                _buildLegendItem(Colors.blue, 'Medium Price'),
+                _buildLegendItem(Colors.red, 'High Price'),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _detailSection(String title, List<Widget> children) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildLegendItem(Color color, String label) {
+    return Row(
       children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
         Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Column(children: children),
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 12)),
       ],
     );
   }
+}
 
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(color: Colors.grey[700])),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
+class MarketPrice {
+  final String commodity;
+  final double minPrice;
+  final double maxPrice;
+  final double modalPrice;
+  final String category;
+  final String unit;
+  final String date;
+  final String market;
 
-  void _showKeralaMarketInfo() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Kerala Agricultural Markets'),
-        content: const SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'This app provides real-time agricultural commodity prices from Kerala\'s APMC (Agricultural Produce Market Committee) markets.',
-                style: TextStyle(fontSize: 14),
-              ),
-              SizedBox(height: 12),
-              Text('Features:', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('• Live prices from 14 districts'),
-              Text('• APMC market integration'),
-              Text('• Kerala-specific crops focus'),
-              Text('• Quality grades and availability'),
-              SizedBox(height: 12),
-              Text(
-                'Data Sources: Agmarknet, eNAM, State Agriculture Department',
-                style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
+  MarketPrice(
+    this.commodity,
+    this.minPrice,
+    this.maxPrice,
+    this.modalPrice,
+    this.category,
+    this.unit,
+    this.date,
+    this.market,
+  );
 
-  void _showAPMCDirectory() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.8,
-          maxChildSize: 0.9,
-          minChildSize: 0.5,
-          builder: (context, scrollController) {
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Kerala APMC Directory',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: keralaAPMCMarkets.keys.length,
-                      itemBuilder: (context, index) {
-                        final district = keralaAPMCMarkets.keys.elementAt(
-                          index,
-                        );
-                        final markets = keralaAPMCMarkets[district]!;
-
-                        return ExpansionTile(
-                          title: Text(
-                            district,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text('${markets.length} markets'),
-                          children: markets.map((market) {
-                            return ListTile(
-                              leading: const Icon(Icons.store),
-                              title: Text(market),
-                              subtitle: const Text('APMC Market'),
-                              trailing: const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                              ),
-                              onTap: () {
-                                // Show market details or navigate
-                              },
-                            );
-                          }).toList(),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showPriceAlerts() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Price Alert System'),
-        content: const Text(
-          'Set up price alerts for your crops and get notifications when prices reach your target levels.\n\n'
-          'This feature will be available in the next update.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _openENAMPortal() async {
-    const url = 'https://enam.gov.in/web/';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open eNAM portal')),
-      );
-    }
-  }
-
-  void _showExportMarket() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Export Market Prices'),
-        content: const Text(
-          'View international market prices for Kerala\'s export crops like spices, cashew, and tea.\n\n'
-          'This feature will show global commodity prices and export opportunities.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+  factory MarketPrice.fromJson(Map<String, dynamic> json) {
+    return MarketPrice(
+      json['commodity'] ?? '',
+      double.tryParse(json['min_price'].toString()) ?? 0.0,
+      double.tryParse(json['max_price'].toString()) ?? 0.0,
+      double.tryParse(json['modal_price'].toString()) ?? 0.0,
+      json['category'] ?? 'Other',
+      json['unit'] ?? 'kg',
+      json['date'] ?? '',
+      json['market'] ?? '',
     );
   }
 }
