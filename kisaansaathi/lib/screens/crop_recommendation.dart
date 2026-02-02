@@ -5,7 +5,7 @@ import 'package:kisaansaathi/widgets/custom_button.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class CropRecommendationScreen extends StatefulWidget {
-  const CropRecommendationScreen({Key? key}) : super(key: key);
+  const CropRecommendationScreen({super.key});
 
   @override
   State<CropRecommendationScreen> createState() => _CropRecommendationScreenState();
@@ -128,14 +128,23 @@ For each crop provide:
 
       for (var line in lines.skip(1)) {
         line = line.trim();
-        if (line.startsWith('Why:')) reason = line.replaceAll('Why:', '').trim();
-        else if (line.startsWith('How:')) instructions = line.replaceAll('How:', '').trim();
-        else if (line.startsWith('Financial:')) financial = line.replaceAll('Financial:', '').trim();
-        else if (line.startsWith('Benefits:')) benefits = line.replaceAll('Benefits:', '').trim();
-        else if (reason.isEmpty) reason = line;
-        else if (instructions.isEmpty) instructions += '\n$line';
-        else if (financial.isEmpty) financial += '\n$line';
-        else benefits += '\n$line';
+        if (line.startsWith('Why:')) {
+          reason = line.replaceAll('Why:', '').trim();
+        } else if (line.startsWith('How:')) {
+          instructions = line.replaceAll('How:', '').trim();
+        } else if (line.startsWith('Financial:')) {
+          financial = line.replaceAll('Financial:', '').trim();
+        } else if (line.startsWith('Benefits:')) {
+          benefits = line.replaceAll('Benefits:', '').trim();
+        } else if (reason.isEmpty) {
+          reason = line;
+        } else if (instructions.isEmpty) {
+          instructions += '\n$line';
+        } else if (financial.isEmpty) {
+          financial += '\n$line';
+        } else {
+          benefits += '\n$line';
+        }
       }
 
       if (cropName.isNotEmpty) {

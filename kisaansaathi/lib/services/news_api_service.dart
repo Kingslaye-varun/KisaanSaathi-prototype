@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/news_model.dart';
 
@@ -24,7 +25,9 @@ class NewsApiService {
     final String url =
         "$baseUrl?q=$query&language=en&sortBy=publishedAt&apiKey=$apiKey";
 
-    print("Fetching news for category: $selectedCategory from URL: $url"); // Debugging
+    if (kDebugMode) {
+      debugPrint("Fetching news for category: $selectedCategory from URL: $url");
+    }
 
     final response = await http.get(Uri.parse(url));
 

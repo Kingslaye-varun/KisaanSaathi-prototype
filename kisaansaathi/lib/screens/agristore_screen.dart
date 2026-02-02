@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AgriStoreScreen extends StatelessWidget {
-  const AgriStoreScreen({Key? key}) : super(key: key);
+  const AgriStoreScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

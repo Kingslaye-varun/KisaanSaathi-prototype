@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/news_model.dart';
 import '../services/news_api_service.dart';
@@ -42,7 +43,9 @@ class _NewsScreenState extends State<NewsScreen> {
       final news = await _newsApiService.fetchFilteredNews(_selectedCategory); //fetch news with selected category
       _filterNews(news);
     } catch (e) {
-      print("Error fetching news: $e");
+      if (kDebugMode) {
+        debugPrint("Error fetching news: $e");
+      }
       setState(() => _isLoading = false);
     }
   }

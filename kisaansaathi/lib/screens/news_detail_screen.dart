@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 class DetailedNewsScreen extends StatelessWidget {
   final NewsArticle article;
 
-  const DetailedNewsScreen({Key? key, required this.article}) : super(key: key);
+  const DetailedNewsScreen({super.key, required this.article});
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +26,9 @@ class DetailedNewsScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                if (await canLaunch(article.url)) {
-                  await launch(article.url);
+                final uri = Uri.parse(article.url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri);
                 } else {
                   throw 'Could not launch ${article.url}';
                 }

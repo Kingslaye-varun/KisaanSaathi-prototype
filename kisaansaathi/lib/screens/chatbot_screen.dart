@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:kisaansaathi/services/api_service.dart';
 import 'package:kisaansaathi/services/conversation_history_service.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+// import 'package:speech_to_text/speech_to_text.dart' as stt; // Temporarily disabled
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ChatbotScreen extends StatefulWidget {
-  const ChatbotScreen({Key? key}) : super(key: key);
+  const ChatbotScreen({super.key});
 
   @override
   _ChatbotScreenState createState() => _ChatbotScreenState();
@@ -21,12 +21,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ApiService _apiService = ApiService();
-  final stt.SpeechToText _speech = stt.SpeechToText();
+  // final stt.SpeechToText _speech = stt.SpeechToText(); // Temporarily disabled
   final FlutterTts _flutterTts = FlutterTts();
   final ImagePicker _picker = ImagePicker();
 
   List<Map<String, String>> _conversationHistory = [];
-  bool _isListening = false;
+  final bool _isListening = false; // Speech-to-text temporarily disabled
   bool _isSpeaking = false;
   bool _isLoading = false;
   bool _autoSpeakEnabled = true;
@@ -84,17 +84,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Future<void> _initializeSpeech() async {
-    try {
-      bool available = await _speech.initialize(
-        onError: (error) => debugPrint('Speech error: $error'),
-        onStatus: (status) => debugPrint('Speech status: $status'),
-      );
-      if (!available) {
-        debugPrint('Speech recognition not available');
-      }
-    } catch (e) {
-      debugPrint('Error initializing speech: $e');
-    }
+    // Speech-to-text temporarily disabled due to NDK issues
+    // try {
+    //   bool available = await _speech.initialize(
+    //     onError: (error) => debugPrint('Speech error: $error'),
+    //     onStatus: (status) => debugPrint('Speech status: $status'),
+    //   );
+    //   if (!available) {
+    //     debugPrint('Speech recognition not available');
+    //   }
+    // } catch (e) {
+    //   debugPrint('Error initializing speech: $e');
+    // }
+    debugPrint('Speech-to-text temporarily disabled');
   }
 
   Future<void> _initializeTts() async {
@@ -485,45 +487,60 @@ ${remedies.map((remedy) => '• $remedy').join('\n')}
   }
 
   Future<void> _startListening() async {
-    if (_isSpeaking) {
-      await _flutterTts.stop();
-      setState(() {
-        _isSpeaking = false;
-        _currentlySpeakingMessageId = null;
-      });
-    }
+    // Speech-to-text temporarily disabled due to NDK issues
+    debugPrint('Speech-to-text feature temporarily disabled');
+    
+    // Show a snackbar to inform the user
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Voice input temporarily unavailable. Please type your message.'),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+      ),
+    );
+    
+    return;
+    
+    // Original speech-to-text code (commented out):
+    // if (_isSpeaking) {
+    //   await _flutterTts.stop();
+    //   setState(() {
+    //     _isSpeaking = false;
+    //     _currentlySpeakingMessageId = null;
+    //   });
+    // }
 
-    if (_isListening) {
-      await _speech.stop();
-      setState(() => _isListening = false);
-      return;
-    }
+    // if (_isListening) {
+    //   await _speech.stop();
+    //   setState(() => _isListening = false);
+    //   return;
+    // }
 
-    try {
-      setState(() => _isListening = true);
-      await _speech.listen(
-        onResult: (result) {
-          setState(() {
-            _messageController.text = result.recognizedWords;
-            if (result.finalResult) {
-              _isListening = false;
-              if (_messageController.text.isNotEmpty) {
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  _sendMessage(_messageController.text);
-                });
-              }
-            }
-          });
-        },
-        listenFor: const Duration(seconds: 30),
-        pauseFor: const Duration(seconds: 3),
-        localeId:
-            '${_languageCode.split('-')[0]}_${_languageCode.split('-')[1]}',
-      );
-    } catch (e) {
-      setState(() => _isListening = false);
-      debugPrint('Error listening: $e');
-    }
+    // try {
+    //   setState(() => _isListening = true);
+    //   await _speech.listen(
+    //     onResult: (result) {
+    //       setState(() {
+    //         _messageController.text = result.recognizedWords;
+    //         if (result.finalResult) {
+    //           _isListening = false;
+    //           if (_messageController.text.isNotEmpty) {
+    //             Future.delayed(const Duration(milliseconds: 500), () {
+    //               _sendMessage(_messageController.text);
+    //             });
+    //           }
+    //         }
+    //       });
+    //     },
+    //     listenFor: const Duration(seconds: 30),
+    //     pauseFor: const Duration(seconds: 3),
+    //     localeId:
+    //         '${_languageCode.split('-')[0]}_${_languageCode.split('-')[1]}',
+    //   );
+    // } catch (e) {
+    //   setState(() => _isListening = false);
+    //   debugPrint('Error listening: $e');
+    // }
   }
 
   Future<void> _speak(String text, String messageId) async {
@@ -981,7 +998,7 @@ ${remedies.map((remedy) => '• $remedy').join('\n')}
                 color: Colors.green.shade100,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 3,
                     offset: Offset(0, 2),
                   ),
@@ -1474,7 +1491,7 @@ ${remedies.map((remedy) => '• $remedy').join('\n')}
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
-    _speech.cancel();
+    // _speech.cancel(); // Temporarily disabled
     _flutterTts.stop();
     super.dispose();
   }
