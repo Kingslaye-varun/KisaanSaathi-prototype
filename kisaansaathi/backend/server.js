@@ -5,6 +5,7 @@ const cors = require('cors');
 const farmerRoutes = require('./routes/farmerRoutes');
 const postRoutes = require('./routes/postRoutes');
 const consumerRoutes = require('./routes/consumers');
+const chatRoutes = require('./routes/chat');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +32,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use('/api/farmers', farmerRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/consumers', consumerRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Start server
 app.listen(PORT, () => {
