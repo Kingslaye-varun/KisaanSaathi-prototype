@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/image_helper.dart';
 
 class ConsumerProfileScreen extends StatefulWidget {
   const ConsumerProfileScreen({super.key});
@@ -109,24 +110,10 @@ class _ConsumerProfileScreenState extends State<ConsumerProfileScreen> {
               child: Column(
                 children: [
                   // Profile Image
-                  CircleAvatar(
+                  ImageHelper.getProfileImage(
+                    imageUrl: _profileImageUrl,
+                    name: _consumerName,
                     radius: 60,
-                    backgroundColor: Colors.white,
-                    backgroundImage: _profileImageUrl.isNotEmpty
-                        ? NetworkImage(_profileImageUrl)
-                        : null,
-                    child: _profileImageUrl.isEmpty
-                        ? Text(
-                            _consumerName.isNotEmpty
-                                ? _consumerName[0].toUpperCase()
-                                : 'C',
-                            style: const TextStyle(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          )
-                        : null,
                   ),
                   const SizedBox(height: 16),
                   // Name

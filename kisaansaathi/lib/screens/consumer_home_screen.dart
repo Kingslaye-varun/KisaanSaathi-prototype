@@ -4,6 +4,8 @@ import '../screens/community_screen.dart';
 import '../screens/chatbot_screen.dart';
 import '../screens/consumer_chat_list_screen.dart';
 import '../screens/consumer_profile_screen.dart';
+import '../utils/image_helper.dart';
+import '../widgets/language_switcher.dart';
 
 class ConsumerHomeScreen extends StatefulWidget {
   const ConsumerHomeScreen({super.key});
@@ -63,6 +65,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
         backgroundColor: Colors.green.shade600,
         automaticallyImplyLeading: false, // Remove back button
         actions: [
+          // Language switcher
+          const LanguageSwitcher(),
           // Chat icon
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline),
@@ -71,24 +75,10 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
           ),
           // Profile icon
           IconButton(
-            icon: CircleAvatar(
+            icon: ImageHelper.getProfileImage(
+              imageUrl: _profileImageUrl,
+              name: _consumerName,
               radius: 16,
-              backgroundColor: Colors.white,
-              backgroundImage: _profileImageUrl.isNotEmpty
-                  ? NetworkImage(_profileImageUrl)
-                  : null,
-              child: _profileImageUrl.isEmpty
-                  ? Text(
-                      _consumerName.isNotEmpty
-                          ? _consumerName[0].toUpperCase()
-                          : 'C',
-                      style: TextStyle(
-                        color: Colors.green.shade700,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : null,
             ),
             onPressed: _openProfile,
             tooltip: 'Profile',
@@ -98,8 +88,8 @@ class _ConsumerHomeScreenState extends State<ConsumerHomeScreen> {
       ),
       body: Stack(
         children: [
-          // Main content - Community Screen
-          const CommunityScreen(),
+          // Main content - Community Screen (without its own AppBar)
+          const CommunityScreen(showAppBar: false),
 
           // Floating chatbot button (bottom right)
           if (!_showChatbot)

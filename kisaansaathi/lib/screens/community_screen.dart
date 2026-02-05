@@ -2,14 +2,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:kisaansaathi/screens/chat_screen.dart';
 import 'package:kisaansaathi/screens/notification_screen.dart';
+import 'package:kisaansaathi/screens/farmer_chat_detail_screen.dart';
+import 'package:kisaansaathi/screens/consumer_chat_detail_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../services/post_service.dart';
 
 class CommunityScreen extends StatefulWidget {
-  const CommunityScreen({Key? key}) : super(key: key);
+  final bool showAppBar;
+
+  const CommunityScreen({Key? key, this.showAppBar = true}) : super(key: key);
 
   @override
   State<CommunityScreen> createState() => _CommunityScreenState();
@@ -76,8 +79,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
   Future<void> _loadCurrentFarmer() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final farmerData = prefs.getString('farmerData');
 
+      // Try to load farmer data first
+      final farmerData = prefs.getString('farmerData');
       if (farmerData != null) {
         final farmer = json.decode(farmerData);
         setState(() {
@@ -85,20 +89,39 @@ class _CommunityScreenState extends State<CommunityScreen> {
           _currentFarmerName = farmer['name'];
           _currentFarmerImage = farmer['profileImage']?['url'];
         });
-        print('Set farmer ID: $_currentFarmerId, name: $_currentFarmerName');
-      } else {
-        print('No farmer data found in SharedPreferences');
+        print('✅ Loaded farmer: $_currentFarmerName (ID: $_currentFarmerId)');
+        return;
+      }
+
+      // If no farmer data, try consumer data
+      final consumerId = prefs.getString('consumerId');
+      final consumerName = prefs.getString('consumerName');
+      final consumerImage = prefs.getString('profileImageUrl');
+
+      if (consumerId != null) {
+        setState(() {
+          _currentFarmerId = consumerId; // Use consumerId as current user ID
+          _currentFarmerName = consumerName ?? 'Consumer';
+          _currentFarmerImage = consumerImage;
+        });
+        print('✅ Loaded consumer: $_currentFarmerName (ID: $_currentFarmerId)');
+        return;
+      }
+
+      // No user data found
+      print('❌ No user data found in SharedPreferences');
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No farmer data found. Please log in again.'),
-          ),
+          const SnackBar(content: Text('Please log in to view posts')),
         );
       }
     } catch (e) {
-      print('Error loading current farmer: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error loading farmer data: $e')));
+      print('❌ Error loading current user: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading user data: $e')));
+      }
     }
   }
 
@@ -336,12 +359,50 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  void _navigateToChat(String farmerId) {
-    // Navigate to chat screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ChatScreen()),
+  void _navigateToChat(String postAuthorId) async {
+    // Get post author details
+    final post = _posts.firstWhere(
+      (p) => p.authorId == postAuthorId,
+      orElse: () => _posts.first,
     );
+
+    print('💬 Opening chat with: ${post.authorName} (ID: $postAuthorId)');
+    print('💬 Current user: $_currentFarmerName (ID: $_currentFarmerId)');
+
+    // Check if current user is consumer or farmer
+    final prefs = await SharedPreferences.getInstance();
+    final consumerId = prefs.getString('consumerId');
+    final isConsumer = consumerId != null;
+
+    if (mounted) {
+      if (isConsumer) {
+        // Consumer chatting with farmer
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ConsumerChatDetailScreen(
+              otherUserId: postAuthorId,
+              otherUserName: post.authorName,
+              otherUserImage: post.authorProfileImage,
+              otherUserType: 'farmer',
+            ),
+          ),
+        );
+      } else {
+        // Farmer chatting with another farmer
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FarmerChatDetailScreen(
+              otherUserId: postAuthorId,
+              otherUserName: post.authorName,
+              otherUserImage: post.authorProfileImage,
+              otherUserType: 'farmer',
+            ),
+          ),
+        );
+      }
+    }
   }
 
   // Show post creation UI in bottom sheet
@@ -583,170 +644,178 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Farmer Community',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.green,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              _navigateToNotification(_currentFarmerId!);
-            },
-            tooltip: 'Notifications',
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        key: _refreshIndicatorKey,
-        onRefresh: _refreshPosts,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  // Post creation section
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage: _currentFarmerImage != null
-                              ? NetworkImage(_currentFarmerImage!)
-                              : null,
-                          child: _currentFarmerImage == null
-                              ? const Icon(Icons.person)
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              _showPostCreationSheet();
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(30),
-                                color: Colors.grey.shade100,
-                              ),
-                              child: Text(
-                                'What\'s on your mind?',
-                                style: TextStyle(color: Colors.grey.shade600),
-                              ),
+    final bodyContent = RefreshIndicator(
+      key: _refreshIndicatorKey,
+      onRefresh: _refreshPosts,
+      child: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                // Post creation section
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundImage: _currentFarmerImage != null
+                            ? NetworkImage(_currentFarmerImage!)
+                            : null,
+                        child: _currentFarmerImage == null
+                            ? const Icon(Icons.person)
+                            : null,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            _showPostCreationSheet();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(30),
+                              color: Colors.grey.shade100,
+                            ),
+                            child: Text(
+                              'What\'s on your mind?',
+                              style: TextStyle(color: Colors.grey.shade600),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  // Tag filters
-                  Container(
-                    height: 50,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _tags.length,
-                      itemBuilder: (context, index) {
-                        final tag = _tags[index];
-                        final isSelected =
-                            _selectedTag == tag ||
-                            (tag == 'All' && _selectedTag == null);
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: FilterChip(
-                            label: Text(
-                              tag.replaceAll('_', ' ').toCapitalized(),
-                            ),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setState(() {
-                                _selectedTag = selected
-                                    ? (tag == 'All' ? null : tag)
-                                    : null;
-                                _currentPage = 1;
-                                _posts = [];
-                                _isLoading = true;
-                              });
-                              _loadPosts();
-                            },
-                            backgroundColor: Colors.grey.shade200,
-                            selectedColor: Colors.green.shade100,
-                            checkmarkColor: Colors.green,
-                            labelStyle: TextStyle(
-                              color: isSelected
-                                  ? Colors.green.shade800
-                                  : Colors.black87,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
+                ),
+                // Tag filters
+                Container(
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _tags.length,
+                    itemBuilder: (context, index) {
+                      final tag = _tags[index];
+                      final isSelected =
+                          _selectedTag == tag ||
+                          (tag == 'All' && _selectedTag == null);
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: FilterChip(
+                          label: Text(tag.replaceAll('_', ' ').toCapitalized()),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedTag = selected
+                                  ? (tag == 'All' ? null : tag)
+                                  : null;
+                              _currentPage = 1;
+                              _posts = [];
+                              _isLoading = true;
+                            });
+                            _loadPosts();
+                          },
+                          backgroundColor: Colors.grey.shade200,
+                          selectedColor: Colors.green.shade100,
+                          checkmarkColor: Colors.green,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? Colors.green.shade800
+                                : Colors.black87,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
-                  const Divider(),
-                  // Posts list
-                  Expanded(
-                    child: _posts.isEmpty
-                        ? const Center(
-                            child: Text('No posts yet. Be the first to post!'),
-                          )
-                        : ListView.builder(
-                            controller: _scrollController,
-                            itemCount: _posts.length + (_hasMore ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (index == _posts.length) {
-                                return const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                              }
-
-                              final post = _posts[index];
-                              final isLiked = post.likes.contains(
-                                _currentFarmerId,
+                ),
+                const Divider(),
+                // Posts list
+                Expanded(
+                  child: _posts.isEmpty
+                      ? const Center(
+                          child: Text('No posts yet. Be the first to post!'),
+                        )
+                      : ListView.builder(
+                          controller: _scrollController,
+                          itemCount: _posts.length + (_hasMore ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == _posts.length) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(),
+                                ),
                               );
+                            }
 
-                              return PostCard(
-                                post: post,
-                                isLiked: isLiked,
-                                onLike: () => _toggleLike(post),
-                                onComment: () => _showComments(post),
-                                onProfileTap: () =>
-                                    _navigateToNotification(post.authorId),
-                                onChatTap: () => _navigateToChat(post.authorId),
-                                currentFarmerId: _currentFarmerId,
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              ),
-      ),
-      floatingActionButton: _currentFarmerId != null
-          ? FloatingActionButton(
-              onPressed: _showPostCreationSheet,
-              backgroundColor: Colors.green,
-              child: const Icon(Icons.add),
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            )
-          : null,
+                            final post = _posts[index];
+                            final isLiked = post.likes.contains(
+                              _currentFarmerId,
+                            );
+
+                            return PostCard(
+                              post: post,
+                              isLiked: isLiked,
+                              onLike: () => _toggleLike(post),
+                              onComment: () => _showComments(post),
+                              onProfileTap: () =>
+                                  _navigateToNotification(post.authorId),
+                              onChatTap: () => _navigateToChat(post.authorId),
+                              currentFarmerId: _currentFarmerId,
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
     );
+
+    final fab = _currentFarmerId != null
+        ? FloatingActionButton(
+            onPressed: _showPostCreationSheet,
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.add),
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          )
+        : null;
+
+    // Return with or without AppBar based on showAppBar parameter
+    if (widget.showAppBar) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Farmer Community',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.green,
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                _navigateToNotification(_currentFarmerId!);
+              },
+              tooltip: 'Notifications',
+            ),
+          ],
+        ),
+        body: bodyContent,
+        floatingActionButton: fab,
+      );
+    } else {
+      // For consumers - no AppBar, just the body content
+      return Scaffold(body: bodyContent, floatingActionButton: fab);
+    }
   }
 }
 

@@ -366,7 +366,7 @@ import 'l10n/app_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/farmer_home_screen_new.dart';
 import 'screens/chatbot_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/chat_screen.dart';
@@ -607,7 +607,7 @@ class _MainAppScaffoldState extends State<MainAppScaffold> {
   late int _currentIndex;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
+    const FarmerHomeScreenNew(),
     const CommunityScreen(),
     const AgriStoreScreen(),
     const ProfileScreen(),
