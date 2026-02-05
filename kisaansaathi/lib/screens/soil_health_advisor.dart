@@ -474,7 +474,7 @@ Error Details: $e
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        initialValue: _farmingType,
+                        value: _farmingType,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -545,7 +545,7 @@ Error Details: $e
                       const Text('Yield Trend:', style: TextStyle(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        initialValue: _yieldTrend,
+                        value: _yieldTrend,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -591,7 +591,7 @@ Error Details: $e
                                 const Text('Soil Color:', style: TextStyle(fontWeight: FontWeight.w500)),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  initialValue: _soilColor,
+                                  value: _soilColor,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -619,7 +619,7 @@ Error Details: $e
                                 const Text('Soil Texture:', style: TextStyle(fontWeight: FontWeight.w500)),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  initialValue: _soilTexture,
+                                  value: _soilTexture,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -651,7 +651,7 @@ Error Details: $e
                                 const Text('Water Retention:', style: TextStyle(fontWeight: FontWeight.w500)),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  initialValue: _waterRetention,
+                                  value: _waterRetention,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -679,7 +679,7 @@ Error Details: $e
                                 const Text('Drainage Quality:', style: TextStyle(fontWeight: FontWeight.w500)),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  initialValue: _drainageQuality,
+                                  value: _drainageQuality,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -745,7 +745,7 @@ Error Details: $e
                                 const Text('Fertilizer Usage Level:', style: TextStyle(fontWeight: FontWeight.w500)),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  initialValue: _fertilizerIntensity,
+                                  value: _fertilizerIntensity,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -773,7 +773,7 @@ Error Details: $e
                                 const Text('Organic Input Usage:', style: TextStyle(fontWeight: FontWeight.w500)),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  initialValue: _organicUsage,
+                                  value: _organicUsage,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -871,7 +871,7 @@ Error Details: $e
                                 const Text('Rainfall Pattern:', style: TextStyle(fontWeight: FontWeight.w500)),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  initialValue: _rainfallPattern,
+                                  value: _rainfallPattern,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -899,7 +899,7 @@ Error Details: $e
                                 const Text('Primary Goal:', style: TextStyle(fontWeight: FontWeight.w500)),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  initialValue: _farmerGoal,
+                                  value: _farmerGoal,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),

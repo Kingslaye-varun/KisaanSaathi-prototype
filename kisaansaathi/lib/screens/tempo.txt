@@ -1,0 +1,585 @@
+import 'package:flutter/material.dart';
+import 'package:kisaansaathi/l10n/app_localizations.dart';
+import 'dart:core';
+
+class GovernmentScheme {
+  final String id;
+  final Map<String, String> title;
+  final Map<String, String> description;
+  final String imageAsset;
+  final DateTime expiryDate;
+  final Map<String, String> department;
+  final List<String> farmingTypes;
+  final List<String> cropTypes;
+  final double minLandSize;
+  final double maxLandSize;
+  final bool requiresAadhar;
+  final Map<String, String> eligibilityCriteria;
+  final Map<String, List<String>> applicationSteps; // Changed to list of steps
+  final Map<String, String> benefits;
+  final Map<String, String> contactInfo;
+  final String youtubeVideoId; // YouTube video ID for tutorial
+  final Map<String, String> documentsRequired; // Required documents
+  final Map<String, String> importantNotes; // Additional important information
+
+  GovernmentScheme({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.imageAsset,
+    required this.expiryDate,
+    required this.department,
+    required this.farmingTypes,
+    required this.cropTypes,
+    this.minLandSize = 0.0,
+    this.maxLandSize = double.infinity,
+    this.requiresAadhar = true,
+    required this.eligibilityCriteria,
+    required this.applicationSteps,
+    required this.benefits,
+    required this.contactInfo,
+    required this.youtubeVideoId,
+    required this.documentsRequired,
+    required this.importantNotes,
+  });
+
+  // Helper methods to get localized strings
+  String getLocalizedTitle(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return title[locale] ?? title['en'] ?? '';
+  }
+
+  String getLocalizedDescription(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return description[locale] ?? description['en'] ?? '';
+  }
+
+  String getLocalizedDepartment(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return department[locale] ?? department['en'] ?? '';
+  }
+
+  String getLocalizedEligibility(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return eligibilityCriteria[locale] ?? eligibilityCriteria['en'] ?? '';
+  }
+
+  List<String> getLocalizedApplicationSteps(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return applicationSteps[locale] ?? applicationSteps['en'] ?? [];
+  }
+
+  String getLocalizedBenefits(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return benefits[locale] ?? benefits['en'] ?? '';
+  }
+
+  String getLocalizedContactInfo(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return contactInfo[locale] ?? contactInfo['en'] ?? '';
+  }
+
+  String getLocalizedDocumentsRequired(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return documentsRequired[locale] ?? documentsRequired['en'] ?? '';
+  }
+
+  String getLocalizedImportantNotes(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return importantNotes[locale] ?? importantNotes['en'] ?? '';
+  }
+}
+
+class GovernmentSchemesScreen extends StatefulWidget {
+  const GovernmentSchemesScreen({Key? key}) : super(key: key);
+
+  @override
+  _GovernmentSchemesScreenState createState() => _GovernmentSchemesScreenState();
+}
+
+class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
+  final List<GovernmentScheme> allSchemes = [
+    GovernmentScheme(
+      id: '1',
+      title: {
+        'en': 'PM Kisan Samman Nidhi',
+        'hi': 'पीएम किसान सम्मान निधि',
+        'pa': 'ਪੀਐਮ ਕਿਸਾਨ ਸਮਮਾਨ ਨਿਧੀ',
+        'bn': 'পিএম কিসান সম্মান নিধি',
+        'ta': 'பிஎம் கிசான் சம்மான் நிதி',
+        'te': 'పీఎం కిసాన్ సమ్మాన్ నిధి',
+        'mr': 'पीएम किसान सम्मान निधी',
+        'gu': 'પીએમ કિસાન સમ્માન નિધિ',
+      },
+      description: {
+        'en': 'Direct income support of ₹6,000 per year for all landholding farmer families in the country in three equal installments of ₹2,000 each every four months.',
+        'hi': 'देश के सभी भूमिधारक किसान परिवारों को प्रति वर्ष ₹6,000 की प्रत्यक्ष आय सहायता, हर चार महीने में ₹2,000 की तीन समान किस्तों में।',
+        'pa': 'ਦੇਸ਼ ਦੇ ਸਾਰੇ ਜ਼ਮੀਨਦਾਰ ਕਿਸਾਨ ਪਰਿਵਾਰਾਂ ਲਈ ਸਾਲਾਨਾ ₹6,000 ਦੀ ਸਿੱਧੀ ਆਮਦਨੀ ਸਹਾਇਤਾ, ਹਰ ਚਾਰ ਮਹੀਨਿਆਂ ਵਿੱਚ ₹2,000 ਦੀਆਂ ਤਿੰਨ ਬਰਾਬਰ ਕਿਸਤਾਂ ਵਿੱਚ।',
+        'bn': 'দেশের সমস্ত ভূমিধারী কৃষক পরিবারকে বছরে ₹৬,০০০ এর প্রত্যক্ষ আয় সহায়তা, প্রতি চার মাসে ₹২,০০০ করে তিনটি সমান কিস্তিতে।',
+        'ta': 'நாட்டின் அனைத்து நில உரிமை விவசாயிகளுக்கும் ஆண்டுக்கு ₹6,000 நேரடி வருமான உதவி, ஒவ்வொரு நான்கு மாதங்களுக்கும் ₹2,000 வீதம் மூன்று சம தவணைகளில்.',
+        'te': 'దేశంలోని అన్ని భూస్వామికి కుటుంబాలకు సంవత్సరానికి ₹6,000 ప్రత్యక్ష ఆదాయ మద్దతు, ప్రతి నాలుగు నెలలకు ₹2,000 చొప్పున మూడు సమాన భాగాల్లో.',
+        'mr': 'देशातील सर्व जमीनधारक शेतकरी कुटुंबांना दरवर्षी ₹६,००० ची थेट उत्पन्न आधार, दर चार महिन्यांनी ₹२,००० च्या तीन समान हप्त्यांमध्ये.',
+        'gu': 'દેશના તમામ જમીનધારક ખેડૂત પરિવારો માટે વાર્ષિક ₹6,000 ની સીધી આવક ટેકો, દર ચાર મહિને ₹2,000 ની ત્રણ સમાન હપ્તામાં.',
+      },
+      imageAsset: 'assets/gov_schemes/pmkisan.png',
+      expiryDate: DateTime(2025, 12, 31),
+      department: {
+        'en': 'Agriculture Department',
+        'hi': 'कृषि विभाग',
+        'pa': 'ਖੇਤੀਬਾੜੀ ਵਿਭਾਗ',
+        'bn': 'কৃষি বিভাগ',
+        'ta': 'விவசாயத் துறை',
+        'te': 'వ్యవసాయ శాఖ',
+        'mr': 'कृषी विभाग',
+        'gu': 'કૃષિ વિભાગ',
+      },
+      farmingTypes: ['All'],
+      cropTypes: ['All'],
+      minLandSize: 0.0,
+      maxLandSize: double.infinity,
+      requiresAadhar: true,
+      eligibilityCriteria: {
+        'en': 'All landholding farmer families with cultivable land. Institutional landholders are not eligible.',
+        'hi': 'कृषि योग्य भूमि वाले सभी भूमिधारक किसान परिवार। संस्थागत भूमिधारक पात्र नहीं हैं।',
+        'pa': 'ਖੇਤੀਯੋਗ ਜ਼ਮੀਨ ਵਾਲੇ ਸਾਰੇ ਜ਼ਮੀਨਦਾਰ ਕਿਸਾਨ ਪਰਿਵਾਰ। ਸੰਸਥਾਗਤ ਜ਼ਮੀਨਦਾਰ ਪਾਤਰ ਨਹੀਂ ਹਨ।',
+        'bn': 'চাষযোগ্য জমি সহ সমস্ত ভূমিধারী কৃষক পরিবার। প্রাতিষ্ঠানিক জমির মালিকেরা যোগ্য নন।',
+        'ta': 'விளைநிலம் கொண்ட அனைத்து நில உரிமையாளர் விவசாயிக் குடும்பங்கள். நிறுவன நில உரிமையாளர்கள் தகுதியற்றவர்கள்.',
+        'te': 'సాగు భూమి ఉన్న అన్ని భూస్వామికి కుటుంబాలు. సంస్థాగత భూస్వామికి అర్హులు కాదు.',
+        'mr': 'लागवडीची जमीन असलेले सर्व जमीनधारक शेतकरी कुटुंब. संस्थात्मक जमीनधारक पात्र नाहीत.',
+        'gu': 'ખેડાયોગ જમીન ધરાવતા તમામ જમીનધારક ખેડૂત પરિવારો. સંસ્થાગત જમીનધારકો પાત્ર નથી.',
+      },
+      applicationSteps: {
+        'en': [
+          'Visit the official PM-KISAN portal at pmkisan.gov.in',
+          'Click on "New Farmer Registration"',
+          'Fill in personal details including Aadhaar number',
+          'Enter land details and bank account information',
+          'Upload required documents (Aadhaar, land records)',
+          'Submit the application and note the reference number',
+          'Track application status online',
+          'Receive installment directly in bank account'
+        ],
+        'hi': [
+          'पीएम-किसान आधिकारिक पोर्टल pmkisan.gov.in पर जाएं',
+          '"नए किसान पंजीकरण" पर क्लिक करें',
+          'आधार नंबर सहित व्यक्तिगत विवरण भरें',
+          'भूमि विवरण और बैंक खाता जानकारी दर्ज करें',
+          'आवश्यक दस्तावेज अपलोड करें (आधार, भूमि रिकॉर्ड)',
+          'आवेदन जमा करें और संदर्भ संख्या नोट करें',
+          'आवेदन स्थिति ऑनलाइन ट्रैक करें',
+          'बैंक खाते में सीधे किस्त प्राप्त करें'
+        ],
+        'pa': [
+          'ਪੀਐਮ-ਕਿਸਾਨ ਅਧਿਕਾਰਤ ਪੋਰਟਲ pmkisan.gov.in \'ਤੇ ਜਾਓ',
+          '"ਨਵਾਂ ਕਿਸਾਨ ਰਜਿਸਟ੍ਰੇਸ਼ਨ" \'ਤੇ ਕਲਿੱਕ ਕਰੋ',
+          'ਆਧਾਰ ਨੰਬਰ ਸਮੇਤ ਨਿੱਜੀ ਵੇਰਵੇ ਭਰੋ',
+          'ਜ਼ਮੀਨ ਦੇ ਵੇਰਵੇ ਅਤੇ ਬੈਂਕ ਖਾਤੇ ਦੀ ਜਾਣਕਾਰੀ ਦਰਜ ਕਰੋ',
+          'ਲੋੜੀਂਦੇ ਦਸਤਾਵੇਜ਼ ਅੱਪਲੋਡ ਕਰੋ (ਆਧਾਰ, ਜ਼ਮੀਨ ਰਿਕਾਰਡ)',
+          'ਐਪਲੀਕੇਸ਼ਨ ਜਮ੍ਹਾ ਕਰੋ ਅਤੇ ਹਵਾਲਾ ਨੰਬਰ ਨੋਟ ਕਰੋ',
+          'ਐਪਲੀਕੇਸ਼ਨ ਸਥਿਤੀ ਔਨਲਾਈਨ ਟਰੈਕ ਕਰੋ',
+          'ਬੈਂਕ ਖਾਤੇ ਵਿੱਚ ਸਿੱਧੀ ਕਿਸਤ ਪ੍ਰਾਪਤ ਕਰੋ'
+        ],
+      },
+      benefits: {
+        'en': '₹6,000 per year in three equal installments of ₹2,000 each, transferred directly to farmers\' bank accounts.',
+        'hi': 'प्रत्येक ₹2,000 की तीन समान किस्तों में प्रति वर्ष ₹6,000, सीधे किसानों के बैंक खातों में हस्तांतरित।',
+        'pa': 'ਹਰੇਕ ₹2,000 ਦੀਆਂ ਤਿੰਨ ਬਰਾਬਰ ਕਿਸਤਾਂ ਵਿੱਚ ਸਾਲਾਨਾ ₹6,000, ਸਿੱਧਾ ਕਿਸਾਨਾਂ ਦੇ ਬੈਂਕ ਖਾਤਿਆਂ ਵਿੱਚ ਟ੍ਰਾਂਸਫਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।',
+        'bn': 'প্রতি বছর ₹৬,০০০, প্রতিটি ₹২,০০০ করে তিনটি সমান কিস্তিতে, সরাসরি কৃষকদের ব্যাংক অ্যাকাউন্টে স্থানান্তরিত।',
+        'ta': 'ஆண்டுக்கு ₹6,000, ஒவ்வொன்றும் ₹2,000 என்று மூன்று சம தவணைகளில், நேரடியாக விவசாயிகளின் வங்கி கணக்குகளுக்கு மாற்றப்படும்.',
+        'te': 'సంవత్సరానికి ₹6,000, ప్రతి ₹2,000 చొప్పున మూడు సమాన భాగాల్లో, నేరుగా రైతుల బ్యాంక్ ఖాతాలకు బదిలీ చేయబడుతుంది.',
+        'mr': 'दरवर्षी ₹६,०००, प्रत्येकी ₹२,००० अशा तीन समान हप्त्यांमध्ये, थेट शेतकऱ्यांच्या बँक खात्यात हस्तांतरित.',
+        'gu': 'વાર્ષિક ₹6,000, દરેક ₹2,000 ની ત્રણ સમાન હપ્તામાં, સીધા ખેડૂતોના બેંક ખાતામાં ટ્રાન્સફર થાય છે.',
+      },
+      contactInfo: {
+        'en': 'PM-KISAN Helpline: 155261 or 1800-115-526\nWebsite: pmkisan.gov.in\nEmail: pmkisan@gov.in',
+        'hi': 'पीएम-किसान हेल्पलाइन: 155261 या 1800-115-526\nवेबसाइट: pmkisan.gov.in\nईमेल: pmkisan@gov.in',
+        'pa': 'PM-KISAN ਹੈਲਪਲਾਈਨ: 155261 ਜਾਂ 1800-115-526\nਵੈੱਬਸਾਈਟ: pmkisan.gov.in\nਈਮੇਲ: pmkisan@gov.in',
+        'bn': 'পিএম-কিসান হেল্পলাইন: 155261 বা 1800-115-526\nওয়েবসাইট: pmkisan.gov.in\nইমেইল: pmkisan@gov.in',
+        'ta': 'பிஎம்-கிசான் உதவி மையம்: 155261 அல்லது 1800-115-526\nஇணையதளம்: pmkisan.gov.in\nமின்னஞ்சல்: pmkisan@gov.in',
+        'te': 'PM-KISAN హెల్ప్‌లైన్: 155261 లేదా 1800-115-526\nవెబ్‌సైట్: pmkisan.gov.in\nఇమెయిల్: pmkisan@gov.in',
+        'mr': 'पीएम-किसान हेल्पलाइन: 155261 किंवा 1800-115-526\nवेबसाइट: pmkisan.gov.in\nईमेल: pmkisan@gov.in',
+        'gu': 'PM-KISAN હેલ્પલાઇન: 155261 અથવા 1800-115-526\nવેબસાઇટ: pmkisan.gov.in\nઈમેલ: pmkisan@gov.in',
+      },
+      youtubeVideoId: 'https://www.youtube.com/watch?v=oC3MMuaZjpU', // Example video ID
+      documentsRequired: {
+        'en': 'Aadhaar Card, Land ownership documents, Bank account details, Mobile number linked with Aadhaar, Passport size photograph',
+        'hi': 'आधार कार्ड, भूमि स्वामित्व दस्तावेज, बैंक खाता विवरण, आधार से लिंक मोबाइल नंबर, पासपोर्ट आकार की तस्वीर',
+        'pa': 'ਆਧਾਰ ਕਾਰਡ, ਜ਼ਮੀਨ ਦੀ ਮਲਕੀਅਤ ਦੇ ਦਸਤਾਵੇਜ਼, ਬੈਂਕ ਖਾਤੇ ਦੇ ਵੇਰਵੇ, ਆਧਾਰ ਨਾਲ ਜੁੜਿਆ ਮੋਬਾਈਲ ਨੰਬਰ, ਪਾਸਪੋਰਟ ਆਕਾਰ ਦੀ ਫੋਟੋ',
+        'bn': 'আধার কার্ড, জমির মালিকানার নথি, ব্যাংক অ্যাকাউন্টের বিবরণ, আধারের সাথে লিঙ্কযুক্ত মোবাইল নম্বর, পাসপোর্ট সাইজের ছবি',
+        'ta': 'ஆதார் அட்டை, நில உரிமை ஆவணங்கள், வங்கி கணக்கு விவரங்கள், ஆதாருடன் இணைக்கப்பட்ட மொபைல் எண், பாஸ்போர்ட் அளவு புகைப்படம்',
+        'te': 'ఆధార్ కార్డ్, భూమి యాజమాన్య పత్రాలు, బ్యాంక్ ఖాతా వివరాలు, ఆధార్‌తో లింక్ చేయబడిన మొబైల్ నంబర్, పాస్పోర్ట్ సైజు ఫోటో',
+        'mr': 'आधार कार्ड, जमीन मालकीची कागदपत्रे, बँक खात्याची माहिती, आधारशी लिंक केलेला मोबाइल नंबर, पासपोर्ट आकाराचे फोटो',
+        'gu': 'આધાર કાર્ડ, જમીન માલિકીના દસ્તાવેજો, બેંક એકાઉન્ટ વિગતો, આધાર સાથે લિંક કરેલ મોબાઇલ નંબર, પાસપોર્ટ કદનું ફોટો',
+      },
+      importantNotes: {
+        'en': 'Installments are transferred every 4 months. Ensure bank account is linked with Aadhaar. Update land records regularly.',
+        'hi': 'किस्तें हर 4 महीने में स्थानांतरित की जाती हैं। सुनिश्चित करें कि बैंक खाता आधार से लिंक है। भूमि रिकॉर्ड नियमित रूप से अपडेट करें।',
+        'pa': 'ਕਿਸਤਾਂ ਹਰ 4 ਮਹੀਨੇ ਬਾਅਦ ਟ੍ਰਾਂਸਫਰ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਬੈਂਕ ਖਾਤਾ ਆਧਾਰ ਨਾਲ ਜੁੜਿਆ ਹੈ। ਜ਼ਮੀਨ ਰਿਕਾਰਡ ਨਿਯਮਿਤ ਅੱਪਡੇਟ ਕਰੋ।',
+        'bn': 'কিস্তি প্রতি ৪ মাসে স্থানান্তরিত হয়। নিশ্চিত করুন যে ব্যাংক অ্যাকাউন্ট আধারের সাথে লিঙ্ক করা আছে। নিয়মিত জমির রেকর্ড আপডেট করুন।',
+        'ta': 'தவணைகள் ஒவ்வொரு 4 மாதங்களுக்கும் மாற்றப்படும். வங்கி கணக்கு ஆதாருடன் இணைக்கப்பட்டுள்ளது என்பதை உறுதிப்படுத்தவும். நில பதிவேடுகளை தவறாமல் புதுப்பிக்கவும்.',
+        'te': 'భాగాలు ప్రతి 4 నెలలకు బదిలీ చేయబడతాయి. బ్యాంక్ ఖాతా ఆధార్‌తో లింక్ అయ్యిందని నిర్ధారించుకోండి. భూమి రికార్డులను నియమితంగా నవీకరించండి.',
+        'mr': 'हप्ते दर 4 महिन्यांनी हस्तांतरित केले जातात. बँक खाते आधारशी लिंक केलेले आहे याची खात्री करा. जमीन नोंदी नियमित अपडेट करा.',
+        'gu': 'હપ્તા દર 4 મહિને ટ્રાન્સફર થાય છે. ખાતરી કરો કે બેંક એકાઉન્ટ આધાર સાથે લિંક થયેલ છે. જમીન રેકોર્ડ નિયમિત અપડેટ કરો.',
+      },
+    ),
+    GovernmentScheme(
+      id: '2',
+      title: {
+        'en': 'Pradhan Mantri Fasal Bima Yojana (PMFBY)',
+        'hi': 'प्रधानमंत्री फसल बीमा योजना',
+        'pa': 'ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਫਸਲ ਬੀਮਾ ਯੋਜਨਾ',
+        'bn': 'প্রধানমন্ত্রী ফসল বীমা যোজনা',
+        'ta': 'பிரதமர் பயிர் காப்பீட்டு திட்டம்',
+        'te': 'ప్రధాన మంత్రి పంట బీమా యోజన',
+        'mr': 'प्रधानमंत्री फसल बीमा योजना',
+        'gu': 'પ્રધાનમંત્રી ફસલ બીમા યોજના',
+      },
+      description: {
+        'en': 'Crop insurance scheme to provide financial support to farmers in case of crop failure due to natural calamities, pests & diseases.',
+        'hi': 'प्राकृतिक आपदाओं, कीटों और बीमारियों के कारण फसल विफलता की स्थिति में किसानों को वित्तीय सहायता प्रदान करने के लिए फसल बीमा योजना।',
+        'pa': 'ਕੁਦਰਤੀ ਆਫਤਾਂ, ਕੀੜੇ-ਮਕੌੜੇ ਅਤੇ ਬਿਮਾਰੀਆਂ ਕਾਰਨ ਫਸਲ ਫੇਲ੍ਹ ਹੋਣ ਦੀ ਸਥਿਤੀ ਵਿੱਚ ਕਿਸਾਨਾਂ ਨੂੰ ਵਿੱਤੀ ਸਹਾਇਤਾ ਪ੍ਰਦਾਨ ਕਰਨ ਲਈ ਫਸਲ ਬੀਮਾ ਯੋਜਨਾ।',
+        'bn': 'প্রাকৃতিক দুর্যোগ, পোকামাকড় ও রোগের কারণে ফসল বিফল হলে কৃষকদের আর্থিক সহায়তা প্রদানের জন্য ফসল বীমা প্রকল্প।',
+        'ta': 'இயற்கை பேரழிவுகள், பூச்சிகள் & நோய்கள் காரணமாக பயிர் தோல்வியடைந்தால் விவசாயிகளுக்கு நிதி உதவி வழங்க பயிர் காப்பீட்டுத் திட்டம்.',
+        'te': 'ప్రకృతి వైపరీత్యాలు, కీటకాలు & వ్యాధుల వలన పంట వైఫల్యం సందర్భంలో రైతులకు ఆర్థిక మద్దతు అందించడానికి పంట బీమా పథకం.',
+        'mr': 'नैसर्गिक आपत्ती, कीटक आणि रोगांमुळे पीक अयशस्वी झाल्यास शेतकऱ्यांना आर्थिक सहाय्य देण्यासाठी पीक विमा योजना.',
+        'gu': 'નૈસર્ગિક આપત્તિ, કીટકો અને રોગોના કારણે પાક નિષ્ફળ થવાની સ્થિતિમાં ખેડૂતોને નાણાકીય સહાય પૂરી પાડવા માટે પાક વીમા યોજના.',
+      },
+      imageAsset: 'assets/gov_schemes/pmfby.png',
+      expiryDate: DateTime(2026, 3, 31),
+      department: {
+        'en': 'Agriculture Insurance',
+        'hi': 'कृषि बीमा',
+        'pa': 'ਖੇਤੀਬਾੜੀ ਬੀਮਾ',
+        'bn': 'কৃষি বীমা',
+        'ta': 'விவசாய காப்பீடு',
+        'te': 'వ్యవసాయ బీమా',
+        'mr': 'कृषी विमा',
+        'gu': 'કૃષિ વીમો',
+      },
+      farmingTypes: ['Traditional', 'Organic'],
+      cropTypes: ['Rice', 'Wheat', 'Pulses', 'Cotton', 'Sugarcane'],
+      minLandSize: 0.1,
+      maxLandSize: 20.0,
+      requiresAadhar: true,
+      eligibilityCriteria: {
+        'en': 'All farmers including sharecroppers, tenant farmers growing notified crops in notified areas.',
+        'hi': 'अधिसूचित क्षेत्रों में अधिसूचित फसलें उगाने वाले बटाईदार, किरायेदार किसान सहित सभी किसान।',
+        'pa': 'ਐਲਾਨੀਤ ਖੇਤਰਾਂ ਵਿੱਚ ਐਲਾਨੀਤ ਫਸਲਾਂ ਉਗਾਉਣ ਵਾਲੇ ਸ਼ੇਅਰਕਰੋਪਰਾਂ, ਕਿਰਾਏਦਾਰ ਕਿਸਾਨਾਂ ਸਮੇਤ ਸਾਰੇ ਕਿਸਾਨ।',
+        'bn': 'অধিসূচিত এলাকায় অধিসূচিত ফসল চাষকারী ভাগচাষী, ভাড়াটিয়া কৃষকসহ সমস্ত কৃষক।',
+        'ta': 'அறிவிக்கப்பட்ட பகுதிகளில் அறிவிக்கப்பட்ட பயிர்களை வளர்க்கும் பங்குதாரர்கள், குத்தகைதாரர் விவசாயிகள் உட்பட அனைத்து விவசாயிகளும்.',
+        'te': 'ప్రకటించిన ప్రాంతాలలో ప్రకటించిన పంటలను పండించే షేర్ క్రాప్పర్లు, టెనెంట్ రైతులు సహా అన్ని రైతులు.',
+        'mr': 'जाहीर केलेल्या भागात जाहीर केलेली पिके घेणाऱ्या वाटेकऱ्यांसह भाडेकऱ्यांसह सर्व शेतकरी.',
+        'gu': 'જાહેર કરેલા વિસ્તારોમાં જાહેર કરેલી પાકો ઉગાડતા શેરક્રોપર્સ, ભાડુઆત ખેડૂતો સહિતના તમામ ખેડૂતો.',
+      },
+      applicationSteps: {
+        'en': [
+          'Contact nearest Common Service Center (CSC) or bank',
+          'Fill the proposal form with crop and land details',
+          'Provide Aadhaar number and bank account details',
+          'Pay the premium amount (1.5-5% of sum insured)',
+          'Submit the form and get acknowledgement slip',
+          'Receive insurance certificate via SMS/email',
+          'Claim process starts automatically if crop loss occurs'
+        ],
+        'hi': [
+          'निकटतम सामान्य सेवा केंद्र (सीएससी) या बैंक से संपर्क करें',
+          'फसल और भूमि विवरण के साथ प्रस्ताव फॉर्म भरें',
+          'आधार नंबर और बैंक खाता विवरण प्रदान करें',
+          'प्रीमियम राशि का भुगतान करें (बीमित राशि का 1.5-5%)',
+          'फॉर्म जमा करें और पावती स्लिप प्राप्त करें',
+          'एसएमएस/ईमेल के माध्यम से बीमा प्रमाणपत्र प्राप्त करें',
+          'फसल नुकसान होने पर दावा प्रक्रिया स्वचालित रूप से शुरू होती है'
+        ],
+      },
+      benefits: {
+        'en': 'Premium rates: 1.5% for Rabi crops, 2% for Kharif crops, 5% for horticultural crops. Government subsidizes premium.',
+        'hi': 'प्रीमियम दरें: रबी फसलों के लिए 1.5%, खरीफ फसलों के लिए 2%, बागवानी फसलों के लिए 5%। सरकार प्रीमियम का सब्सिडी देती है।',
+        'pa': 'ਪ੍ਰੀਮੀਅਮ ਦਰਾਂ: ਰਬੀ ਫਸਲਾਂ ਲਈ 1.5%, ਖਰੀਫ ਫਸਲਾਂ ਲਈ 2%, ਬਾਗਬਾਨੀ ਫਸਲਾਂ ਲਈ 5%। ਸਰਕਾਰ ਪ੍ਰੀਮੀਅਮ ਨੂੰ ਸਬਸਿਡੀ ਦਿੰਦੀ ਹੈ।',
+        'bn': 'প্রিমিয়াম হার: রবি ফসলের জন্য ১.৫%, খরিফ ফসলের জন্য ২%, বাগিচা ফসলের জন্য ৫%। সরকার প্রিমিয়াম ভর্তুকি দেয়।',
+        'ta': 'பிரீமியம் விகிதங்கள்: ரபி பயிர்களுக்கு 1.5%, காரிப் பயிர்களுக்கு 2%, தோட்டக்கலை பயிர்களுக்கு 5%. அரசு பிரீமியத்திற்கு உதவித் தொகை வழங்குகிறது.',
+        'te': 'ప్రీమియం రేట్లు: రబీ పంటలకు 1.5%, ఖరీఫ్ పంటలకు 2%, ఉద్యానవన పంటలకు 5%. ప్రీమియంకు ప్రభుత్వం సబ్సిడీ ఇస్తుంది.',
+        'mr': 'प्रीमियम दर: रबी पिकांसाठी 1.5%, खरीप पिकांसाठी 2%, बागायत पिकांसाठी 5%. सरकार प्रीमियमला सबसिडी देते.',
+        'gu': 'પ્રીમિયમ દરો: રબી પાકો માટે 1.5%, ખરીફ પાકો માટે 2%, બાગાયત પાકો માટે 5%. સરકાર પ્રીમિયમને સબસિડી આપે છે.',
+      },
+      contactInfo: {
+        'en': 'PMFBY Helpline: 1800-180-1551\nWebsite: pmfby.gov.in\nEmail: help@pmfby.gov.in',
+        'hi': 'पीएमएफबीवाई हेल्पलाइन: 1800-180-1551\nवेबसाइट: pmfby.gov.in\nईमेल: help@pmfby.gov.in',
+        'pa': 'PMFBY ਹੈਲਪਲਾਈਨ: 1800-180-1551\nਵੈੱਬਸਾਈਟ: pmfby.gov.in\nਈਮੇਲ: help@pmfby.gov.in',
+        'bn': 'পিএমএফবিওয়াই হেল্পলাইন: 1800-180-1551\nওয়েবসাইট: pmfby.gov.in\nইমেইল: help@pmfby.gov.in',
+        'ta': 'பிஎம்பிஎஃப்பிஒய் உதவி மையம்: 1800-180-1551\nஇணையதளம்: pmfby.gov.in\nமின்னஞ்சல்: help@pmfby.gov.in',
+        'te': 'PMFBY హెల్ప్‌లైన్: 1800-180-1551\nవెబ్‌సైట్: pmfby.gov.in\nఇమెయిల్: help@pmfby.gov.in',
+        'mr': 'पीएमएफबीवाय हेल्पलाइन: 1800-180-1551\nवेबसाइट: pmfby.gov.in\nईमेल: help@pmfby.gov.in',
+        'gu': 'PMFBY હેલ્પલાઇન: 1800-180-1551\nવેબસાઇટ: pmfby.gov.in\nઈમેલ: help@pmfby.gov.in',
+      },
+      youtubeVideoId: 'abc123def456', // Example video ID
+      documentsRequired: {
+        'en': 'Aadhaar Card, Land records, Bank passbook, Crop details, Sowing certificate',
+        'hi': 'आधार कार्ड, भूमि रिकॉर्ड, बैंक पासबुक, फसल विवरण, बुवाई प्रमाणपत्र',
+        'pa': 'ਆਧਾਰ ਕਾਰਡ, ਜ਼ਮੀਨ ਰਿਕਾਰਡ, ਬੈਂਕ ਪਾਸਬੁੱਕ, ਫਸਲ ਦੇ ਵੇਰਵੇ, ਬੀਜਣ ਦਾ ਸਰਟੀਫਿਕੇਟ',
+        'bn': 'আধার কার্ড, জমির রেকর্ড, ব্যাংক পাসবুক, ফসলের বিবরণ, বপনের শংসাপত্র',
+        'ta': 'ஆதார் அட்டை, நில பதிவேடுகள், வங்கி பாஸ்புக், பயிர் விவரங்கள், விதைப்பு சான்றிதழ்',
+        'te': 'ఆధార్ కార్డ్, భూమి రికార్డులు, బ్యాంక్ పాస్‌బుక్, పంట వివరాలు, విత్తన ప్రమాణపత్రం',
+        'mr': 'आधार कार्ड, जमीन नोंदी, बँक पासबुक, पीक तपशील, पेरणी प्रमाणपत्र',
+        'gu': 'આધાર કાર્ડ, જમીન રેકોર્ડ્સ, બેંક પાસબુક, પાક વિગતો, વાવણી પ્રમાણપત્ર',
+      },
+      importantNotes: {
+        'en': 'Insurance premium varies by crop and season. Claims settled within 45 days of crop loss assessment.',
+        'hi': 'बीमा प्रीमियम फसल और मौसम के अनुसार अलग-अलग होता है। फसल नुकसान आकलन के 45 दिनों के भीतर दावे निपटाए जाते हैं।',
+        'pa': 'ਬੀਮਾ ਪ੍ਰੀਮੀਅਮ ਫਸਲ ਅਤੇ ਮੌਸਮ ਦੇ ਅਨੁਸਾਰ ਬਦਲਦਾ ਹੈ। ਫਸਲ ਦੇ ਨੁਕਸਾਨ ਦੇ ਮੁਲਾਂਕਣ ਦੇ 45 ਦਿਨਾਂ ਦੇ ਅੰਦਰ ਦਾਅਵੇ ਨਿਪਟਾਏ ਜਾਂਦੇ ਹਨ।',
+        'bn': 'বীমা প্রিমিয়াম ফসল ও মৌসুম অনুযায়ী পরিবর্তিত হয়। ফসলের ক্ষতি মূল্যায়নের ৪৫ দিনের মধ্যে দাবি নিষ্পত্তি করা হয়।',
+        'ta': 'காப்பீட்டு பிரீமியம் பயிர் மற்றும் பருவத்திற்கு ஏற்ப மாறுபடும். பயிர் இழப்பு மதிப்பீட்டின் 45 நாட்களுக்குள் உரிமைகோரல்கள் தீர்க்கப்படும்.',
+        'te': 'వీమా ప్రీమియం పంట మరియు సీజన్ ప్రకారం మారుతుంది. పంట నష్టం అంచనా తర్వాత 45 రోజుల్లోకి దావాలు తీర్చబడతాయి.',
+        'mr': 'विमा प्रीमियम पीक आणि हंगामानुसार बदलते. पीक तोटा मूल्यांकनाच्या 45 दिवसांच्या आत दावे मंजूर केले जातात.',
+        'gu': 'વીમા પ્રીમિયમ પાક અને સિઝન મુજબ બદલાય છે. પાકની હાનિના મૂલ્યાંકનના 45 દિવસની અંદર દાવાઓનો નિકાલ થાય છે.',
+      },
+    ),
+    // Add more schemes here following the same structure
+  ];
+
+  List<GovernmentScheme> filteredSchemes = [];
+  String? selectedDepartment;
+  String? selectedFarmingType;
+  String? selectedCropType;
+  RangeValues landSizeRange = const RangeValues(0.0, 10.0);
+  bool? aadharFilter;
+  String searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    filteredSchemes = List.from(allSchemes);
+  }
+
+  void applyFilters() {
+    setState(() {
+      filteredSchemes = allSchemes.where((scheme) {
+        if (selectedDepartment != null &&
+            selectedDepartment != 'All' &&
+            scheme.getLocalizedDepartment(context) != selectedDepartment) {
+          return false;
+        }
+
+        if (selectedFarmingType != null &&
+            selectedFarmingType != 'All' &&
+            !scheme.farmingTypes.contains(selectedFarmingType) &&
+            !scheme.farmingTypes.contains('All')) {
+          return false;
+        }
+
+        if (selectedCropType != null &&
+            selectedCropType != 'All' &&
+            !scheme.cropTypes.contains(selectedCropType) &&
+            !scheme.cropTypes.contains('All')) {
+          return false;
+        }
+
+        if (scheme.minLandSize > landSizeRange.end ||
+            scheme.maxLandSize < landSizeRange.start) {
+          return false;
+        }
+
+        if (aadharFilter != null && scheme.requiresAadhar != aadharFilter) {
+          return false;
+        }
+
+        if (searchQuery.isNotEmpty) {
+          final title = scheme.getLocalizedTitle(context).toLowerCase();
+          final description = scheme.getLocalizedDescription(context).toLowerCase();
+          if (!title.contains(searchQuery.toLowerCase()) &&
+              !description.contains(searchQuery.toLowerCase())) {
+            return false;
+          }
+        }
+
+        return true;
+      }).toList();
+    });
+  }
+
+  void clearFilters() {
+    setState(() {
+      selectedDepartment = null;
+      selectedFarmingType = null;
+      selectedCropType = null;
+      landSizeRange = const RangeValues(0.0, 10.0);
+      aadharFilter = null;
+      searchQuery = '';
+      filteredSchemes = List.from(allSchemes);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(localizations.governmentSchemesTitle),
+        backgroundColor: Colors.green,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: clearFilters,
+            tooltip: localizations.clearFilters,
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: localizations.searchSchemesHint,
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                  applyFilters();
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: filteredSchemes.isEmpty
+                ? Center(child: Text(localizations.noSchemesFound))
+                : ListView.builder(
+                    itemCount: filteredSchemes.length,
+                    itemBuilder: (context, index) {
+                      final scheme = filteredSchemes[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: ListTile(
+                          leading: Icon(Icons.agriculture, color: Colors.green),
+                          title: Text(scheme.getLocalizedTitle(context)),
+                          subtitle: Text(scheme.getLocalizedDescription(context), maxLines: 2),
+                          trailing: Icon(Icons.arrow_forward_ios),
+                          onTap: () => _showSchemeDetails(context, scheme),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSchemeDetails(BuildContext context, GovernmentScheme scheme) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          maxChildSize: 0.9,
+          minChildSize: 0.5,
+          initialChildSize: 0.7,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      scheme.getLocalizedTitle(context),
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 16),
+                    
+                    // YouTube Video Section
+                    if (scheme.youtubeVideoId.isNotEmpty) ...[
+                      Text(
+                        'Video Tutorial',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 8),
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.play_circle_fill, size: 64, color: Colors.red),
+                              SizedBox(height: 8),
+                              Text('Watch Application Tutorial'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                    ],
+
+                    // Application Steps
+                    Text(
+                      'Application Steps',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    ...scheme.getLocalizedApplicationSteps(context).asMap().entries.map((entry) {
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.green,
+                          child: Text('${entry.key + 1}', style: TextStyle(color: Colors.white)),
+                        ),
+                        title: Text(entry.value),
+                      );
+                    }).toList(),
+
+                    // Documents Required
+                    SizedBox(height: 16),
+                    Text(
+                      'Documents Required',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(scheme.getLocalizedDocumentsRequired(context)),
+
+                    // Contact Information
+                    SizedBox(height: 16),
+                    Text(
+                      'Contact Information',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(scheme.getLocalizedContactInfo(context)),
+
+                    // Important Notes
+                    SizedBox(height: 16),
+                    Text(
+                      'Important Notes',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(scheme.getLocalizedImportantNotes(context)),
+
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Implement apply functionality
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        minimumSize: Size(double.infinity, 50),
+                      ),
+                      child: Text('Apply Now', style: TextStyle(fontSize: 16)),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}

@@ -1,45 +1,42 @@
 import 'package:flutter/material.dart';
 
 class ImageHelper {
+  // Get profile image widget with fallback to local asset
   static Widget getProfileImage({
-    required String imageUrl,
+    String? imageUrl,
     required String name,
     double radius = 20,
   }) {
-    if (imageUrl.isNotEmpty) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundImage: NetworkImage(imageUrl),
-        onBackgroundImageError: (_, __) {},
-        child: imageUrl.isEmpty ? _getInitials(name, radius) : null,
-      );
-    } else {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: Colors.green.shade700,
-        child: _getInitials(name, radius),
-      );
-    }
+    // Always use local placeholder for now
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: Colors.green.shade100,
+      child: Text(
+        name.isNotEmpty ? name[0].toUpperCase() : '?',
+        style: TextStyle(
+          fontSize: radius * 0.8,
+          fontWeight: FontWeight.bold,
+          color: Colors.green.shade700,
+        ),
+      ),
+    );
   }
 
-  static Widget _getInitials(String name, double radius) {
-    String initials = '';
-    if (name.isNotEmpty) {
-      List<String> nameParts = name.split(' ');
-      if (nameParts.isNotEmpty) {
-        initials = nameParts[0][0].toUpperCase();
-        if (nameParts.length > 1) {
-          initials += nameParts[1][0].toUpperCase();
-        }
-      }
-    }
-    return Text(
-      initials,
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: radius * 0.8,
-        fontWeight: FontWeight.bold,
+  // Get post image widget with fallback
+  static Widget getPostImage({
+    String? imageUrl,
+    double? width,
+    double? height,
+  }) {
+    // Use placeholder image
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(12),
       ),
+      child: Icon(Icons.image, size: 50, color: Colors.grey.shade400),
     );
   }
 }

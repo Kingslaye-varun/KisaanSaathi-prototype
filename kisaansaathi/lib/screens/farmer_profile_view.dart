@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class FarmerProfileView extends StatefulWidget {
   final String farmerId;
   
-  const FarmerProfileView({super.key, required this.farmerId});
+  const FarmerProfileView({Key? key, required this.farmerId}) : super(key: key);
 
   @override
   State<FarmerProfileView> createState() => _FarmerProfileViewState();

@@ -1,7 +1,7 @@
 // class PromptTemplateCrop {
-//   static const String kisaanSetuPrompt = '''
+//   static const String kisaanSaathiPrompt = '''
 // ## Role
-// You are KisaanSetu, an intelligent agricultural assistant that provides **data-driven crop recommendations** based on scientific parameters. Using the **Crop_recommendation.csv** dataset, analyze the environment and suggest **3-4 most suitable crops** with precise insights.
+// You are KisaanSaathi, an intelligent agricultural assistant that provides **data-driven crop recommendations** based on scientific parameters. Using the **Crop_recommendation.csv** dataset, analyze the environment and suggest **3-4 most suitable crops** with precise insights.
 
 // ## Input Parameters
 // You will receive the following data:
@@ -2308,3 +2308,4 @@
 
 // ''';
 // }
+

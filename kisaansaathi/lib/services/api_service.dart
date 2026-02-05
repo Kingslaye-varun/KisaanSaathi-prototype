@@ -1,26 +1,28 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:kisaansaathi/services/prompt_template.dart';
 
 class ApiService {
   // Weather API - OpenWeatherMap (using your existing key)
-  static final String _weatherApiKey = "7e3cac2d274dba29e7551e1f3b582971";
+  static final String _weatherApiKey = dotenv.env['WEATHER_API_KEY'] ?? '';
   static const String _weatherBaseUrl =
       'https://api.openweathermap.org/data/2.5';
 
   static String get weatherApiKey => _weatherApiKey;
 
   // Gemini API - Using your existing Gemini key
-  static final String _geminiApiKey = 'AIzaSyCdoMX-rv2O4N0NzaSLsU2bQ_FbbpM4aCs';
-  static final String _geminiApiKey2 =
-      'AIzaSyAM_B2UajrTC3nhcwe-K4VbqUAa6CSyLs0';
+  static final String _geminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+  static final String _geminiApiKey2 = dotenv.env['GEMINI_API_KEY_2'] ?? '';
+
+  // Use gemini-2.5-flash - latest model
   static const String _geminiBaseUrl =
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
   // Free farming API alternatives
   static final String _agriApiKey =
-      '579b464db66ec23bdd000001217d96c60c1646086c4cc3cc5dfc348d'; // Will explain in comments how to get this
+      '579b464db66ec23bdd000001217d96c60c1646086c4cc3cc5dfc348d';
 
   // Market prices API - Farmers Portal API from data.gov.in
   static const String _marketPricesApi =
@@ -165,7 +167,7 @@ $languagePrompt
 $terminologyGuidance
 $voiceFriendlyGuidance
 
-${PromptTemplate.kisaanSetuPrompt}''',
+${PromptTemplate.kisaanSaathiPrompt}''',
                 },
               ],
             },
@@ -174,10 +176,60 @@ ${PromptTemplate.kisaanSetuPrompt}''',
             'temperature': 0.7,
             'topK': 40,
             'topP': 0.95,
-            'maxOutputTokens': 1024,
+            'maxOutputTokens': 8192, // Increased to get full responses
           },
         }),
       );
+
+      // If first API key fails with quota error, try second key
+      if (response.statusCode == 429 && _geminiApiKey2.isNotEmpty) {
+        debugPrint('⚠️ First API key quota exceeded, trying backup key...');
+
+        final response2 = await http.post(
+          Uri.parse('$_geminiBaseUrl?key=$_geminiApiKey2'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'contents': [
+              {
+                'parts': [
+                  {
+                    'text':
+                        '''Help the farmer with their query: $message
+
+LOCATION AND WEATHER CONTEXT:
+$locationContext
+$weatherContext
+
+CONVERSATION HISTORY:
+$conversationContext
+
+LANGUAGE INSTRUCTIONS:
+$languagePrompt
+$terminologyGuidance
+$voiceFriendlyGuidance
+
+${PromptTemplate.kisaanSaathiPrompt}''',
+                  },
+                ],
+              },
+            ],
+            'generationConfig': {
+              'temperature': 0.7,
+              'topK': 40,
+              'topP': 0.95,
+              'maxOutputTokens': 8192, // Increased to get full responses
+            },
+          }),
+        );
+
+        if (response2.statusCode == 200) {
+          final data = jsonDecode(response2.body);
+          String responseText =
+              data['candidates'][0]['content']['parts'][0]['text'] ??
+              'Sorry, I couldn\'t understand that.';
+          return responseText;
+        }
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -199,6 +251,17 @@ ${PromptTemplate.kisaanSetuPrompt}''',
         debugPrint(
           'Gemini API error: ${response.statusCode} - ${response.body}',
         );
+
+        // If API key is leaked/blocked
+        if (response.statusCode == 403) {
+          return '🔑 API Key Error: Your Gemini API key has been reported as leaked and blocked by Google. Please:\n\n1. Go to https://aistudio.google.com/app/apikey\n2. Delete the old key\n3. Generate a NEW API key\n4. Update your .env file\n5. Restart the app\n\nNever commit API keys to Git!';
+        }
+
+        // If quota exceeded, provide helpful message
+        if (response.statusCode == 429) {
+          return 'API quota exceeded. Please wait a few minutes and try again, or contact support for a new API key.';
+        }
+
         throw Exception('Failed to get response: ${response.statusCode}');
       }
     } catch (e) {
@@ -294,7 +357,7 @@ $languagePrompt
 Use simple farming terminology. Avoid complex technical jargon.
 Format your response to be voice-friendly with clear section separation.
 
-${PromptTemplate.kisaanSetuPrompt}
+${PromptTemplate.kisaanSaathiPrompt}
 ''';
 
       final response = await http.post(

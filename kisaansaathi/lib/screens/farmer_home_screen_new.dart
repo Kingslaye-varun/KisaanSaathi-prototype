@@ -13,9 +13,6 @@ import '../screens/nearby_store_screen.dart';
 import '../screens/farmers_list_screen.dart';
 import '../utils/image_helper.dart';
 import '../widgets/language_switcher.dart';
-import '../widgets/tutorial_overlay.dart';
-import '../widgets/daily_quote_dialog.dart';
-import '../services/quote_service.dart';
 
 class FarmerHomeScreenNew extends StatefulWidget {
   const FarmerHomeScreenNew({super.key});
@@ -28,131 +25,10 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
   String _farmerName = '';
   String _profileImageUrl = '';
 
-  // Tutorial keys
-  final GlobalKey _weatherKey = GlobalKey();
-  final GlobalKey _cropAdviceKey = GlobalKey();
-  final GlobalKey _fertilizerKey = GlobalKey();
-  final GlobalKey _soilHealthKey = GlobalKey();
-  final GlobalKey _marketKey = GlobalKey();
-  final GlobalKey _aiAssistantKey = GlobalKey();
-  final GlobalKey _tutorialButtonKey = GlobalKey();
-
   @override
   void initState() {
     super.initState();
     _loadFarmerData();
-    // Show tutorial and quote after a delay
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showTutorialAndQuote();
-    });
-  }
-
-  Future<void> _showTutorialAndQuote() async {
-    // Wait for widgets to build and be laid out
-    await Future.delayed(const Duration(milliseconds: 1500));
-    
-    if (!mounted) return;
-
-    // Show daily quote first
-    try {
-      await DailyQuoteDialog.show(context);
-    } catch (e) {
-      print('Error showing quote: $e');
-    }
-    
-    if (!mounted) return;
-
-    // Wait a bit more before tutorial
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    if (!mounted) return;
-
-    // Then show tutorial
-    _showTutorial();
-  }
-
-  Future<void> _showTutorial() async {
-    // Wait a bit for layout
-    await Future.delayed(const Duration(milliseconds: 300));
-    
-    if (!mounted) return;
-
-    // Show tutorial - only if all keys are valid
-    try {
-      if (_weatherKey.currentContext != null &&
-          _cropAdviceKey.currentContext != null &&
-          _aiAssistantKey.currentContext != null) {
-        await TutorialOverlay.show(
-          context: context,
-          screenName: 'farmer_home_${DateTime.now().millisecondsSinceEpoch}', // Always show
-          steps: [
-            TutorialStep(
-              title: '🌤️ मौसम की जानकारी / Weather Forecast',
-              description:
-                  'अपने क्षेत्र का 7 दिन का मौसम पूर्वानुमान देखें। तापमान, बारिश, और हवा की जानकारी पाएं। फसल की बुवाई और कटाई की योजना बनाने में मदद करता है।\n\nView 7-day weather forecast for your area. Get temperature, rainfall, and wind information to plan your farming activities.',
-              targetKey: _weatherKey,
-            ),
-            TutorialStep(
-              title: '🌾 फसल सलाह / Crop Recommendation',
-              description:
-                  'AI-आधारित फसल सिफारिश प्राप्त करें। अपनी मिट्टी का प्रकार, मौसम, और क्षेत्र के आधार पर सबसे उपयुक्त फसल चुनें। अधिकतम उपज के लिए सुझाव पाएं।\n\nGet AI-powered crop recommendations based on your soil type, climate, and region for maximum yield.',
-              targetKey: _cropAdviceKey,
-            ),
-            TutorialStep(
-              title: '🧪 उर्वरक गाइड / Fertilizer Guide',
-              description:
-                  'अपनी फसल के लिए सही उर्वरक और मात्रा की जानकारी पाएं। NPK अनुपात, जैविक विकल्प, और उपयोग का सही समय जानें। मिट्टी की उर्वरता बढ़ाएं।\n\nGet the right fertilizer recommendations with NPK ratios, organic options, and application timing.',
-              targetKey: _fertilizerKey,
-            ),
-            TutorialStep(
-              title: '🌱 मिट्टी स्वास्थ्य / Soil Health Advisor',
-              description:
-                  'अपनी मिट्टी की सेहत की जांच करें। pH स्तर, पोषक तत्व, और नमी की जानकारी पाएं। मिट्टी सुधार के उपाय और सुझाव प्राप्त करें।\n\nCheck your soil health including pH levels, nutrients, and moisture. Get improvement suggestions.',
-              targetKey: _soilHealthKey,
-            ),
-            TutorialStep(
-              title: '📈 बाजार भाव / Market Prices',
-              description:
-                  'आज के ताजा मंडी भाव देखें। विभिन्न फसलों की कीमतें, मांग-आपूर्ति की स्थिति, और मूल्य रुझान जानें। सही समय पर बेचकर अधिक लाभ कमाएं।\n\nCheck live market prices, demand-supply status, and price trends to sell at the best time.',
-              targetKey: _marketKey,
-            ),
-            TutorialStep(
-              title: '🤖 AI सहायक / AI Assistant',
-              description:
-                  'खेती से जुड़े किसी भी सवाल का तुरंत जवाब पाएं। फसल रोग, कीट नियंत्रण, सिंचाई, और अन्य समस्याओं का समाधान। 24/7 उपलब्ध आपका व्यक्तिगत कृषि सलाहकार।\n\nAsk any farming question and get instant answers. Your 24/7 personal agriculture advisor.',
-              targetKey: _aiAssistantKey,
-            ),
-          ],
-        );
-        
-        // After main tutorial, show hint about tutorial button
-        if (!mounted) return;
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (!mounted) return;
-        
-        // Show tutorial button hint only once
-        await _showTutorialButtonHint();
-      }
-    } catch (e) {
-      print('Error showing tutorial: $e');
-    }
-  }
-
-  Future<void> _showTutorialButtonHint() async {
-    if (_tutorialButtonKey.currentContext == null) return;
-    
-    await TutorialOverlay.show(
-      context: context,
-      screenName: 'tutorial_button_hint',
-      steps: [
-        TutorialStep(
-          title: '❓ ट्यूटोरियल बटन / Tutorial Button',
-          description:
-              'किसी भी समय इस बटन पर क्लिक करके ट्यूटोरियल दोबारा देख सकते हैं। यह आपको ऐप की सभी सुविधाओं को समझने में मदद करेगा।\n\nClick this button anytime to replay the tutorial. It will help you understand all app features.',
-          targetKey: _tutorialButtonKey,
-        ),
-      ],
-    );
   }
 
   Future<void> _loadFarmerData() async {
@@ -201,9 +77,15 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text(
-          'KisaanSaathi',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        title: Row(
+          children: const [
+            Icon(Icons.agriculture, size: 24),
+            SizedBox(width: 8),
+            Text(
+              'KisaanSaathi',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         backgroundColor: Colors.green.shade700,
         elevation: 0,
@@ -211,66 +93,7 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
         actions: [
           const LanguageSwitcher(),
           IconButton(
-            key: _tutorialButtonKey,
-            icon: const Icon(Icons.help_outline, size: 20),
-            tooltip: 'Tutorial',
-            onPressed: () async {
-              // Wait a bit for any animations to complete
-              await Future.delayed(const Duration(milliseconds: 100));
-              
-              if (!mounted) return;
-              
-              // Check if keys are available
-              if (_weatherKey.currentContext == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please wait, loading tutorial...'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
-                return;
-              }
-              
-              TutorialOverlay.show(
-                context: context,
-                screenName: 'farmer_home_replay_${DateTime.now().millisecondsSinceEpoch}',
-                steps: [
-                  TutorialStep(
-                    title: '🌤️ मौसम की जानकारी / Weather Forecast',
-                    description: 'अपने क्षेत्र का 7 दिन का मौसम पूर्वानुमान देखें। तापमान, बारिश, और हवा की जानकारी पाएं। फसल की बुवाई और कटाई की योजना बनाने में मदद करता है।\n\nView 7-day weather forecast for your area. Get temperature, rainfall, and wind information to plan your farming activities.',
-                    targetKey: _weatherKey,
-                  ),
-                  TutorialStep(
-                    title: '🌾 फसल सलाह / Crop Recommendation',
-                    description: 'AI-आधारित फसल सिफारिश प्राप्त करें। अपनी मिट्टी का प्रकार, मौसम, और क्षेत्र के आधार पर सबसे उपयुक्त फसल चुनें। अधिकतम उपज के लिए सुझाव पाएं।\n\nGet AI-powered crop recommendations based on your soil type, climate, and region for maximum yield.',
-                    targetKey: _cropAdviceKey,
-                  ),
-                  TutorialStep(
-                    title: '🧪 उर्वरक गाइड / Fertilizer Guide',
-                    description: 'अपनी फसल के लिए सही उर्वरक और मात्रा की जानकारी पाएं। NPK अनुपात, जैविक विकल्प, और उपयोग का सही समय जानें। मिट्टी की उर्वरता बढ़ाएं।\n\nGet the right fertilizer recommendations with NPK ratios, organic options, and application timing.',
-                    targetKey: _fertilizerKey,
-                  ),
-                  TutorialStep(
-                    title: '🌱 मिट्टी स्वास्थ्य / Soil Health Advisor',
-                    description: 'अपनी मिट्टी की सेहत की जांच करें। pH स्तर, पोषक तत्व, और नमी की जानकारी पाएं। मिट्टी सुधार के उपाय और सुझाव प्राप्त करें।\n\nCheck your soil health including pH levels, nutrients, and moisture. Get improvement suggestions.',
-                    targetKey: _soilHealthKey,
-                  ),
-                  TutorialStep(
-                    title: '📈 बाजार भाव / Market Prices',
-                    description: 'आज के ताजा मंडी भाव देखें। विभिन्न फसलों की कीमतें, मांग-आपूर्ति की स्थिति, और मूल्य रुझान जानें। सही समय पर बेचकर अधिक लाभ कमाएं।\n\nCheck live market prices, demand-supply status, and price trends to sell at the best time.',
-                    targetKey: _marketKey,
-                  ),
-                  TutorialStep(
-                    title: '🤖 AI सहायक / AI Assistant',
-                    description: 'खेती से जुड़े किसी भी सवाल का तुरंत जवाब पाएं। फसल रोग, कीट नियंत्रण, सिंचाई, और अन्य समस्याओं का समाधान। 24/7 उपलब्ध आपका व्यक्तिगत कृषि सलाहकार।\n\nAsk any farming question and get instant answers. Your 24/7 personal agriculture advisor.',
-                    targetKey: _aiAssistantKey,
-                  ),
-                ],
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, size: 20),
+            icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
           ),
           Padding(
@@ -320,12 +143,6 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
               ),
             ),
             const SizedBox(height: 20),
-            // Daily Quote Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _buildQuoteCard(),
-            ),
-            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -343,9 +160,9 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                     crossAxisCount: 2,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    childAspectRatio: 1.8,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 1.5,
                     children: [
                       _buildCard(
                         Icons.wb_sunny_outlined,
@@ -357,7 +174,6 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                             builder: (context) => const WeatherScreen(),
                           ),
                         ),
-                        key: _weatherKey,
                       ),
                       _buildCard(
                         Icons.grass_outlined,
@@ -370,7 +186,6 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                                 const CropRecommendationScreen(),
                           ),
                         ),
-                        key: _cropAdviceKey,
                       ),
                       _buildCard(
                         Icons.science_outlined,
@@ -383,7 +198,6 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                                 const FertilizerRecommendationScreen(),
                           ),
                         ),
-                        key: _fertilizerKey,
                       ),
                       _buildCard(
                         Icons.eco_outlined,
@@ -396,7 +210,6 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                                 const SoilHealthAdvisorScreen(),
                           ),
                         ),
-                        key: _soilHealthKey,
                       ),
                       _buildCard(
                         Icons.trending_up,
@@ -408,7 +221,6 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                             builder: (context) => const MarketScreen(),
                           ),
                         ),
-                        key: _marketKey,
                       ),
                       _buildCard(
                         Icons.ac_unit,
@@ -442,7 +254,6 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                             builder: (context) => const ChatbotScreen(),
                           ),
                         ),
-                        key: _aiAssistantKey,
                       ),
                     ],
                   ),
@@ -530,21 +341,19 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
     IconData icon,
     String title,
     Color color,
-    VoidCallback onTap, {
-    Key? key,
-  }) {
+    VoidCallback onTap,
+  ) {
     return InkWell(
-      key: key,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 3,
+              blurRadius: 4,
               spreadRadius: 1,
             ),
           ],
@@ -553,100 +362,20 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, color: color, size: 32),
             ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuoteCard() {
-    final quote = QuoteService.getRandomQuote();
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.green.shade400, Colors.green.shade600],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.format_quote,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  quote['quote']!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    height: 1.3,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '- ${quote['author']}',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 11,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white, size: 20),
-            onPressed: () {
-              setState(() {
-                // Refresh quote
-              });
-            },
-          ),
-        ],
       ),
     );
   }
