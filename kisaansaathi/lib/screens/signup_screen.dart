@@ -7,13 +7,13 @@ import 'package:image_picker/image_picker.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/farmer_service.dart';
+import '../services/consumer_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _SignupScreenState createState() => _SignupScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
 class _SignupScreenState extends State<SignupScreen> {
@@ -25,19 +25,19 @@ class _SignupScreenState extends State<SignupScreen> {
   String _selectedLanguage = 'English';
   File? _profileImage;
   final ImagePicker _picker = ImagePicker();
+  String _userType = 'farmer'; // Will be set from route arguments
 
-  // Map language names to their locale codes
   final Map<String, Locale> _languageMap = {
-    'English': Locale('en'),
-    'Malayalam': Locale('ml'),
-    'Tamil': Locale('ta'),
-    'Telugu': Locale('te'),
-    'Kannada': Locale('kn'),
-    'Hindi': Locale('hi'),
-    'Punjabi': Locale('pa'),
-    'Bengali': Locale('bn'),
-    'Marathi': Locale('mr'),
-    'Gujarati': Locale('gu'),
+    'English': const Locale('en'),
+    'Malayalam': const Locale('ml'),
+    'Tamil': const Locale('ta'),
+    'Telugu': const Locale('te'),
+    'Kannada': const Locale('kn'),
+    'Hindi': const Locale('hi'),
+    'Punjabi': const Locale('pa'),
+    'Bengali': const Locale('bn'),
+    'Marathi': const Locale('mr'),
+    'Gujarati': const Locale('gu'),
   };
 
   @override
@@ -46,7 +46,19 @@ class _SignupScreenState extends State<SignupScreen> {
     _loadSavedLanguage();
   }
 
-  // Load any previously saved language preference
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get user type from route arguments
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args['userType'] != null) {
+      setState(() {
+        _userType = args['userType'];
+      });
+    }
+  }
+
   Future<void> _loadSavedLanguage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -54,7 +66,6 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-  // Pick image from gallery or camera
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -76,7 +87,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  // Show image picker options
   void _showImagePickerOptions() {
     showModalBottomSheet(
       context: context,
@@ -107,7 +117,6 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // Save user data to MongoDB
   Future<void> _saveUserData() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -116,10 +125,9 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Check if profile image is selected
       if (_profileImage == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Please select a profile image'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 3),
@@ -129,46 +137,17 @@ class _SignupScreenState extends State<SignupScreen> {
         return;
       }
 
-      // Register farmer in MongoDB
-      final result = await FarmerService.registerFarmer(
-        name: _nameController.text.trim(),
-        phoneNumber: _phoneController.text.trim(),
-        language: _selectedLanguage,
-        profileImage: _profileImage,
-        farmerId: _farmerIdController.text.trim().isNotEmpty ? _farmerIdController.text.trim() : null,
-      );
-
-      if (result.success) {
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Registration successful!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        
-        // Update app locale immediately
-        Locale newLocale = _languageMap[_selectedLanguage] ?? Locale('en');
-        KisaanSaathiApp.of(context).setLocale(newLocale);
-
-        // Navigate to home screen
-        Navigator.pushReplacementNamed(context, '/home');
+      if (_userType == 'farmer') {
+        await _registerAsFarmer();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.message),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
-          ),
-        );
+        await _registerAsConsumer();
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
@@ -176,27 +155,92 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = false);
   }
 
+  Future<void> _registerAsFarmer() async {
+    final result = await FarmerService.registerFarmer(
+      name: _nameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      language: _selectedLanguage,
+      profileImage: _profileImage,
+      farmerId: _farmerIdController.text.trim().isNotEmpty
+          ? _farmerIdController.text.trim()
+          : null,
+    );
+
+    if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration successful!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');
+      KisaanSaathiApp.of(context).setLocale(newLocale);
+
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  Future<void> _registerAsConsumer() async {
+    final result = await ConsumerService.registerConsumer(
+      name: _nameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      language: _selectedLanguage,
+      profileImage: _profileImage,
+    );
+
+    if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration successful!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');
+      KisaanSaathiApp.of(context).setLocale(newLocale);
+
+      Navigator.pushReplacementNamed(context, '/consumer_home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   void _skipToHome() async {
-    // Even when skipping, save the selected language
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selectedLanguage', _selectedLanguage);
 
-    // Update app locale immediately
-    Locale newLocale = _languageMap[_selectedLanguage] ?? Locale('en');
+    Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');
     KisaanSaathiApp.of(context).setLocale(newLocale);
 
-    // Navigate to home screen without authentication
-    Navigator.pushReplacementNamed(context, '/home');
+    if (_userType == 'consumer') {
+      Navigator.pushReplacementNamed(context, '/consumer_home');
+    } else {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get current localization
     final localizations = AppLocalizations.of(context);
 
-    // Get list of languages with their localized names
     final languages = _languageMap.keys.map((langName) {
-      // Use localized name if available, otherwise use original name
       return localizations.languageNames[_languageMap[langName]!
               .languageCode] ??
           langName;
@@ -220,12 +264,15 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header with skip option
                     Padding(
                       padding: const EdgeInsets.only(top: 16.0),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () => Navigator.pop(context),
+                          ),
                           TextButton(
                             onPressed: _skipToHome,
                             style: TextButton.styleFrom(
@@ -237,9 +284,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
 
-                    // Title
                     Text(
-                      localizations.loginTitle,
+                      _userType == 'farmer'
+                          ? 'Farmer Registration'
+                          : 'Consumer Registration',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -256,7 +304,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Language selection first
+                    // Language selection
                     Text(
                       localizations.selectLanguageTitle,
                       style: TextStyle(
@@ -272,7 +320,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha: 0.1),
                             spreadRadius: 1,
                             blurRadius: 4,
                             offset: const Offset(0, 2),
@@ -294,7 +342,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 _selectedLanguage = newValue;
                               });
                               Locale newLocale =
-                                  _languageMap[newValue] ?? Locale('en');
+                                  _languageMap[newValue] ?? const Locale('en');
                               KisaanSaathiApp.of(context).setLocale(newLocale);
                             }
                           },
@@ -352,7 +400,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Name input field
+                    // Name input
                     Text(
                       "Name",
                       style: TextStyle(
@@ -368,7 +416,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha: 0.1),
                             spreadRadius: 1,
                             blurRadius: 4,
                             offset: const Offset(0, 2),
@@ -377,10 +425,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       child: TextFormField(
                         controller: _nameController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: "Enter your full name",
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
+                          contentPadding: EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 16,
                           ),
@@ -395,7 +443,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Phone input field
+                    // Phone input
                     Text(
                       localizations.phoneNumberLabel,
                       style: TextStyle(
@@ -411,7 +459,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha: 0.1),
                             spreadRadius: 1,
                             blurRadius: 4,
                             offset: const Offset(0, 2),
@@ -453,55 +501,57 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    
-                    // Farmer ID field (optional)
-                    Text(
-                      "Farmer Unique ID (Optional)",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
-                            spreadRadius: 1,
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextFormField(
-                        controller: _farmerIdController,
-                        decoration: InputDecoration(
-                          hintText: "Enter your KL-format Farmer ID",
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          helperText: "Enter to get verified farmer status",
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return null; // Optional field
-                          }
-                          if (!RegExp(r'^KL\d{12}$').hasMatch(value)) {
-                            return "Invalid format. Must be KL followed by 12 digits";
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 8),
 
-                    // Continue button
+                    // Farmer ID field (only for farmers)
+                    if (_userType == 'farmer') ...[
+                      Text(
+                        "Farmer Unique ID (Optional)",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withValues(alpha: 0.1),
+                              spreadRadius: 1,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: TextFormField(
+                          controller: _farmerIdController,
+                          decoration: const InputDecoration(
+                            hintText: "Enter your KL-format Farmer ID",
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            helperText: "Enter to get verified farmer status",
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return null;
+                            }
+                            if (!RegExp(r'^KL\d{12}$').hasMatch(value)) {
+                              return "Invalid format. Must be KL followed by 12 digits";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Register button
                     _isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : SizedBox(
@@ -528,7 +578,6 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                     const SizedBox(height: 24),
 
-                    // Note about language
                     Center(
                       child: Text(
                         localizations.voiceAssistantLanguageNote,
@@ -547,293 +596,3 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 }
-// import 'package:flutter/material.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import '../l10n/app_localizations.dart';
-// import '../main.dart';
-
-// class LoginScreen extends StatefulWidget {
-//   const LoginScreen({super.key});
-
-//   @override
-//   _LoginScreenState createState() => _LoginScreenState();
-// }
-
-// class _LoginScreenState extends State<LoginScreen> {
-//   final _phoneController = TextEditingController();
-//   final _formKey = GlobalKey<FormState>();
-//   bool _isLoading = false;
-//   String _selectedLanguage = 'English';
-  
-//   final Map<String, Locale> _languageMap = {
-//     'English': Locale('en'),
-//     'Hindi': Locale('hi'),
-//     'Punjabi': Locale('pa'),
-//     'Bengali': Locale('bn'),
-//     'Tamil': Locale('ta'),
-//     'Telugu': Locale('te'),
-//     'Marathi': Locale('mr'),
-//     'Gujarati': Locale('gu'),
-//   };
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _loadSavedLanguage();
-//   }
-
-//   Future<void> _loadSavedLanguage() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     setState(() {
-//       _selectedLanguage = prefs.getString('selectedLanguage') ?? 'English';
-//     });
-//   }
-
-//   Future<void> _saveUserData() async {
-//     if (_phoneController.text.isEmpty || _phoneController.text.length < 10) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text(AppLocalizations.of(context).invalidPhoneNumber))
-//       );
-//       return;
-//     }
-
-//     setState(() => _isLoading = true);
-
-//     try {
-//       final prefs = await SharedPreferences.getInstance();
-//       await prefs.setString('phoneNumber', _phoneController.text.trim());
-//       await prefs.setString('selectedLanguage', _selectedLanguage);
-//       Locale newLocale = _languageMap[_selectedLanguage] ?? Locale('en');
-//       KisaanSaathiApp.of(context).setLocale(newLocale);
-//       Navigator.pushReplacementNamed(context, '/home');
-//     } catch (e) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('Error: $e'))
-//       );
-//     }
-
-//     setState(() => _isLoading = false);
-//   }
-
-//   void _continueToHome() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     await prefs.setString('selectedLanguage', _selectedLanguage);
-//     Locale newLocale = _languageMap[_selectedLanguage] ?? Locale('en');
-//     KisaanSaathiApp.of(context).setLocale(newLocale);
-//     Navigator.pushReplacementNamed(context, '/home');
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final localizations = AppLocalizations.of(context);
-//     final languages = _languageMap.keys.map((langName) {
-//       return localizations.languageNames[_languageMap[langName]!.languageCode] ?? langName;
-//     }).toList();
-
-//     return Scaffold(
-//       body: Container(
-//         decoration: BoxDecoration(
-//           gradient: LinearGradient(
-//             begin: Alignment.topCenter,
-//             end: Alignment.bottomCenter,
-//             colors: [
-//               Colors.green.shade50,
-//               Colors.white,
-//             ],
-//           ),
-//         ),
-//         child: SafeArea(
-//           child: Padding(
-//             padding: const EdgeInsets.symmetric(horizontal: 24.0),
-//             child: Column(
-//               children: [
-//                 // Header (now empty since we moved the button)
-//                 const SizedBox(height: 16),
-                
-//                 // Welcome content
-//                 Expanded(
-//                   child: SingleChildScrollView(
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         // Title
-//                         Text(
-//                           localizations.loginTitle,
-//                           style: TextStyle(
-//                             fontSize: 32,
-//                             fontWeight: FontWeight.bold,
-//                             color: Colors.green.shade900,
-//                           ),
-//                         ),
-//                         const SizedBox(height: 8),
-//                         Text(
-//                           "Welcome back! Please enter your details",
-//                           style: TextStyle(
-//                             fontSize: 16,
-//                             color: Colors.grey.shade600,
-//                           ),
-//                         ),
-//                         const SizedBox(height: 40),
-                        
-//                         // Phone input field
-//                         Text(
-//                           localizations.phoneNumberLabel,
-//                           style: TextStyle(
-//                             fontSize: 14,
-//                             fontWeight: FontWeight.w500,
-//                             color: Colors.grey.shade700,
-//                           ),
-//                         ),
-//                         const SizedBox(height: 8),
-//                         Container(
-//                           decoration: BoxDecoration(
-//                             color: Colors.white,
-//                             borderRadius: BorderRadius.circular(12),
-//                             boxShadow: [
-//                               BoxShadow(
-//                                 color: Colors.grey.withOpacity(0.1),
-//                                 spreadRadius: 1,
-//                                 blurRadius: 4,
-//                                 offset: const Offset(0, 2),
-//                               ),
-//                             ],
-//                           ),
-//                           child: TextFormField(
-//                             controller: _phoneController,
-//                             decoration: InputDecoration(
-//                               hintText: localizations.phoneHint,
-//                               border: InputBorder.none,
-//                               contentPadding: const EdgeInsets.symmetric(
-//                                 horizontal: 16,
-//                                 vertical: 16,
-//                               ),
-//                               prefixIcon: Padding(
-//                                 padding: const EdgeInsets.only(left: 16),
-//                                 child: Text(
-//                                   '+91 ',
-//                                   style: TextStyle(
-//                                     fontSize: 16,
-//                                     color: Colors.grey.shade700,
-//                                   ),
-//                                 ),
-//                               ),
-//                               prefixIconConstraints: const BoxConstraints(
-//                                 minWidth: 0,
-//                                 minHeight: 0,
-//                               ),
-//                             ),
-//                             keyboardType: TextInputType.phone,
-//                             maxLength: 10,
-//                             validator: (value) {
-//                               if (value == null || value.length != 10) {
-//                                 return localizations.invalidPhoneNumber;
-//                               }
-//                               return null;
-//                             },
-//                           ),
-//                         ),
-//                         const SizedBox(height: 24),
-                        
-//                         // Language dropdown
-//                         Text(
-//                           localizations.selectLanguageTitle,
-//                           style: TextStyle(
-//                             fontSize: 14,
-//                             fontWeight: FontWeight.w500,
-//                             color: Colors.grey.shade700,
-//                           ),
-//                         ),
-//                         const SizedBox(height: 8),
-//                         Container(
-//                           decoration: BoxDecoration(
-//                             color: Colors.white,
-//                             borderRadius: BorderRadius.circular(12),
-//                             boxShadow: [
-//                               BoxShadow(
-//                                 color: Colors.grey.withOpacity(0.1),
-//                                 spreadRadius: 1,
-//                                 blurRadius: 4,
-//                                 offset: const Offset(0, 2),
-//                               ),
-//                             ],
-//                           ),
-//                           padding: const EdgeInsets.symmetric(horizontal: 16),
-//                           child: DropdownButtonHideUnderline(
-//                             child: DropdownButton<String>(
-//                               value: _selectedLanguage,
-//                               isExpanded: true,
-//                               icon: Icon(Icons.arrow_drop_down,
-//                                   color: Colors.grey.shade700),
-//                               onChanged: (String? newValue) {
-//                                 if (newValue != null) {
-//                                   setState(() {
-//                                     _selectedLanguage = newValue;
-//                                   });
-//                                   Locale newLocale = _languageMap[newValue] ?? Locale('en');
-//                                   KisaanSaathiApp.of(context).setLocale(newLocale);
-//                                 }
-//                               },
-//                               items: languages.map<DropdownMenuItem<String>>((String value) {
-//                                 return DropdownMenuItem<String>(
-//                                   value: _languageMap.keys.toList()[languages.indexOf(value)],
-//                                   child: Text(
-//                                     value,
-//                                     style: TextStyle(
-//                                       fontSize: 16,
-//                                       color: Colors.grey.shade800,
-//                                     ),
-//                                   ),
-//                                 );
-//                               }).toList(),
-//                             ),
-//                           ),
-//                         ),
-//                         const SizedBox(height: 40),
-                        
-//                         // Continue button (formerly skip login)
-//                         SizedBox(
-//                           width: double.infinity,
-//                           height: 52,
-//                           child: ElevatedButton(
-//                             onPressed: _continueToHome,
-//                             style: ElevatedButton.styleFrom(
-//                               backgroundColor: Colors.green.shade700,
-//                               shape: RoundedRectangleBorder(
-//                                 borderRadius: BorderRadius.circular(12),
-//                               ),
-//                               elevation: 0,
-//                             ),
-//                             child: Text(
-//                               "Continue", // Renamed from skip login
-//                               style: const TextStyle(
-//                                 fontSize: 16,
-//                                 fontWeight: FontWeight.w600,
-//                                 color: Colors.white,
-//                               ),
-//                             ),
-//                           ),
-//                         ),
-//                         const SizedBox(height: 16),
-//                         const SizedBox(height: 24),
-                        
-//                         // Footer note
-//                         Text(
-//                           localizations.voiceAssistantLanguageNote,
-//                           style: TextStyle(
-//                             color: Colors.grey.shade600,
-//                             fontSize: 12,
-//                           ),
-//                           textAlign: TextAlign.center,
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

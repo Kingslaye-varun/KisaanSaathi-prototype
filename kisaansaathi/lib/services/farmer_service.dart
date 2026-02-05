@@ -24,7 +24,9 @@ class FarmerService {
     try {
       return await request().timeout(timeout);
     } on TimeoutException {
-      throw TimeoutException('Request timed out after ${timeout.inSeconds} seconds');
+      throw TimeoutException(
+        'Request timed out after ${timeout.inSeconds} seconds',
+      );
     } on SocketException {
       throw Exception('Network error: Please check your internet connection');
     } on HttpException {
@@ -45,46 +47,53 @@ class FarmerService {
     String? farmerId,
   }) async {
     try {
-      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/register'));
-      
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/register'),
+      );
+
       // Add text fields
       request.fields['name'] = name;
       request.fields['phoneNumber'] = phoneNumber;
       request.fields['language'] = language;
-      
+
       // Add farmerId if provided
       if (farmerId != null && farmerId.isNotEmpty) {
         request.fields['farmerId'] = farmerId;
       }
-      
+
       // Add profile image if provided
       if (profileImage != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-          'profileImage',
-          profileImage.path,
-        ));
+        request.files.add(
+          await http.MultipartFile.fromPath('profileImage', profileImage.path),
+        );
       }
-      
+
       // Send request with timeout
       var streamedResponse = await _makeRequest(() async {
         return await http.Response.fromStream(await request.send());
       });
 
       // Check if response is HTML instead of JSON (common with server errors)
-      if (streamedResponse.body.trim().startsWith('<!DOCTYPE html>') || 
+      if (streamedResponse.body.trim().startsWith('<!DOCTYPE html>') ||
           streamedResponse.body.trim().startsWith('<html>')) {
         return ServiceResponse.error(
-          message: 'Server returned HTML instead of JSON. The server might be down or experiencing issues.',
+          message:
+              'Server returned HTML instead of JSON. The server might be down or experiencing issues.',
           statusCode: streamedResponse.statusCode,
         );
       }
-      
+
       try {
         final responseData = json.decode(streamedResponse.body);
-        
-        if (streamedResponse.statusCode == 201 || streamedResponse.statusCode == 200) {
-          await _saveFarmerToPrefs(responseData['data'], token: responseData['token']);
-          
+
+        if (streamedResponse.statusCode == 201 ||
+            streamedResponse.statusCode == 200) {
+          await _saveFarmerToPrefs(
+            responseData['data'],
+            token: responseData['token'],
+          );
+
           return ServiceResponse.success(
             data: responseData['data'],
             message: responseData['message'],
@@ -98,14 +107,18 @@ class FarmerService {
         }
       } catch (e) {
         return ServiceResponse.error(
-          message: 'Failed to parse server response: ${e.toString()}. Response body: ${streamedResponse.body.substring(0, streamedResponse.body.length > 100 ? 100 : streamedResponse.body.length)}...',
+          message:
+              'Failed to parse server response: ${e.toString()}. Response body: ${streamedResponse.body.substring(0, streamedResponse.body.length > 100 ? 100 : streamedResponse.body.length)}...',
           statusCode: streamedResponse.statusCode,
         );
       }
     } on TimeoutException catch (e) {
       return ServiceResponse.error(message: e.message ?? 'Request timed out');
     } on FormatException catch (e) {
-      return ServiceResponse.error(message: 'Invalid response format. The server might be down or experiencing issues.');
+      return ServiceResponse.error(
+        message:
+            'Invalid response format. The server might be down or experiencing issues.',
+      );
     } catch (e) {
       return ServiceResponse.error(message: e.toString());
     }
@@ -114,26 +127,29 @@ class FarmerService {
   // Get farmer by phone number
   static Future<ServiceResponse> getFarmerByPhone(String phoneNumber) async {
     try {
-      final response = await _makeRequest(() => _client.get(
-        Uri.parse('$baseUrl/$phoneNumber'),
-        headers: defaultHeaders,
-      ));
+      final response = await _makeRequest(
+        () => _client.get(
+          Uri.parse('$baseUrl/$phoneNumber'),
+          headers: defaultHeaders,
+        ),
+      );
 
       // Check if response is HTML instead of JSON
-      if (response.body.trim().startsWith('<!DOCTYPE html>') || 
+      if (response.body.trim().startsWith('<!DOCTYPE html>') ||
           response.body.trim().startsWith('<html>')) {
         return ServiceResponse.error(
-          message: 'Server returned HTML instead of JSON. The server might be down or experiencing issues.',
+          message:
+              'Server returned HTML instead of JSON. The server might be down or experiencing issues.',
           statusCode: response.statusCode,
         );
       }
-      
+
       try {
         final responseData = json.decode(response.body);
-        
+
         if (response.statusCode == 200) {
           await _saveFarmerToPrefs(responseData['data']);
-          
+
           return ServiceResponse.success(
             data: responseData['data'],
             message: 'Farmer retrieved successfully',
@@ -142,15 +158,18 @@ class FarmerService {
           String message;
           switch (response.statusCode) {
             case 404:
-              message = 'Farmer not found. Please check your phone number or register.';
+              message =
+                  'Farmer not found. Please check your phone number or register.';
               break;
             case 401:
               message = 'Authentication error. Please login again.';
               break;
             default:
-              message = responseData['message'] ?? 'Failed to get farmer: HTTP ${response.statusCode}';
+              message =
+                  responseData['message'] ??
+                  'Failed to get farmer: HTTP ${response.statusCode}';
           }
-          
+
           return ServiceResponse.error(
             message: message,
             statusCode: response.statusCode,
@@ -178,31 +197,34 @@ class FarmerService {
     String? farmerId,
   }) async {
     try {
-      var request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/$phoneNumber'));
-      
+      var request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('$baseUrl/$phoneNumber'),
+      );
+
       // Add text fields if provided
       if (name != null) request.fields['name'] = name;
       if (language != null) request.fields['language'] = language;
-      if (farmerId != null && farmerId.isNotEmpty) request.fields['farmerId'] = farmerId;
-      
+      if (farmerId != null && farmerId.isNotEmpty)
+        request.fields['farmerId'] = farmerId;
+
       // Add profile image if available
       if (profileImage != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-          'profileImage', 
-          profileImage.path,
-        ));
+        request.files.add(
+          await http.MultipartFile.fromPath('profileImage', profileImage.path),
+        );
       }
-      
+
       // Send the request with timeout
       var streamedResponse = await _makeRequest(() async {
         return await http.Response.fromStream(await request.send());
       });
 
       final responseData = json.decode(streamedResponse.body);
-      
+
       if (streamedResponse.statusCode == 200) {
         await _saveFarmerToPrefs(responseData['data']);
-        
+
         return ServiceResponse.success(
           data: responseData['data'],
           message: responseData['message'] ?? 'Profile updated successfully',
@@ -228,30 +250,32 @@ class FarmerService {
     File? profileImage,
   }) async {
     try {
-      var request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/$farmerId'));
-      
+      var request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('$baseUrl/$farmerId'),
+      );
+
       // Add text fields
       request.fields['name'] = name;
       request.fields['phoneNumber'] = phoneNumber;
-      
+
       // Add profile image if provided
       if (profileImage != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-          'profileImage',
-          profileImage.path,
-        ));
+        request.files.add(
+          await http.MultipartFile.fromPath('profileImage', profileImage.path),
+        );
       }
-      
+
       // Send request with timeout
       var streamedResponse = await _makeRequest(() async {
         return await http.Response.fromStream(await request.send());
       });
 
       final responseData = json.decode(streamedResponse.body);
-      
+
       if (streamedResponse.statusCode == 200) {
         await _saveFarmerToPrefs(responseData['data']);
-        
+
         return ServiceResponse.success(
           data: responseData['data'],
           message: 'Farmer updated successfully',
@@ -270,25 +294,32 @@ class FarmerService {
   }
 
   // Save farmer data to shared preferences
-  static Future<void> _saveFarmerToPrefs(Map<String, dynamic> farmer, {String? token}) async {
+  static Future<void> _saveFarmerToPrefs(
+    Map<String, dynamic> farmer, {
+    String? token,
+  }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
+      // Save user type
+      await prefs.setString('userType', 'farmer');
+
       // Save individual fields
       await prefs.setString('farmerId', farmer['_id'] ?? '');
       await prefs.setString('farmerName', farmer['name'] ?? '');
       await prefs.setString('phoneNumber', farmer['phoneNumber'] ?? '');
       await prefs.setString('selectedLanguage', farmer['language'] ?? 'en');
-      
+
       // Save profile image URL if available
-      if (farmer['profileImage'] != null && farmer['profileImage']['url'] != null) {
+      if (farmer['profileImage'] != null &&
+          farmer['profileImage']['url'] != null) {
         await prefs.setString('profileImageUrl', farmer['profileImage']['url']);
       }
-      
+
       // Save the entire farmer object as JSON
       await prefs.setString('farmerData', json.encode(farmer));
       await prefs.setBool('keepMeLoggedIn', true);
-      
+
       // Save token if provided
       if (token != null && token.isNotEmpty) {
         await prefs.setString('token', token);
@@ -303,7 +334,7 @@ class FarmerService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final farmerJson = prefs.getString('farmerData');
-      
+
       if (farmerJson != null) {
         return json.decode(farmerJson) as Map<String, dynamic>;
       }
@@ -317,8 +348,8 @@ class FarmerService {
   static Future<bool> isLoggedIn() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('farmerId') != null && 
-             prefs.getBool('keepMeLoggedIn') == true;
+      return prefs.getString('farmerId') != null &&
+          prefs.getBool('keepMeLoggedIn') == true;
     } catch (e) {
       return false;
     }
@@ -328,10 +359,10 @@ class FarmerService {
   static Future<void> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Keep language preference
       final language = prefs.getString('selectedLanguage');
-      
+
       // Clear all farmer-related data
       await prefs.remove('farmerId');
       await prefs.remove('farmerName');
@@ -340,7 +371,7 @@ class FarmerService {
       await prefs.remove('farmerData');
       await prefs.remove('token');
       await prefs.setBool('keepMeLoggedIn', false);
-      
+
       // Restore language preference
       if (language != null) {
         await prefs.setString('selectedLanguage', language);

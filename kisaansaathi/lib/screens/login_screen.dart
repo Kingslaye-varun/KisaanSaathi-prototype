@@ -5,12 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/farmer_service.dart';
+import '../services/consumer_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -19,7 +20,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _keepMeLoggedIn = true;
   String _selectedLanguage = 'English';
-  
+  String _userType = 'farmer'; // 'farmer' or 'consumer'
+
   final Map<String, Locale> _languageMap = {
     'English': const Locale('en'),
     'Hindi': const Locale('hi'),
@@ -63,11 +65,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _checkIfLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     final keepLoggedIn = prefs.getBool('keepMeLoggedIn') ?? false;
-    final farmerData = prefs.getString('farmer');
-    
-    if (keepLoggedIn && farmerData != null) {
-      // User is already logged in, navigate to home
-      Navigator.pushReplacementNamed(context, '/home');
+    final userType = prefs.getString('userType');
+
+    if (keepLoggedIn && userType != null) {
+      if (userType == 'consumer') {
+        Navigator.pushReplacementNamed(context, '/consumer_home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     }
   }
 
@@ -81,53 +86,15 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final result = await FarmerService.getFarmerByPhone(_phoneController.text);
-      
-      if (result.success) {
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login successful!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        
-        // Check if farmer is verified (has farmerId)
-        final farmerData = result.data;
-        final bool isVerified = farmerData != null && 
-            farmerData['farmerId'] != null && 
-            farmerData['farmerId'].toString().isNotEmpty;
-        
-        // Save login preference
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('keepMeLoggedIn', _keepMeLoggedIn);
-        await prefs.setString('selectedLanguage', _selectedLanguage);
-        await prefs.setBool('isVerifiedFarmer', isVerified);
-        
-        // Update app locale
-        Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');
-        KisaanSaathiApp.of(context).setLocale(newLocale);
-        
-        // Navigate to home screen
-        Navigator.pushReplacementNamed(context, '/home');
+      if (_userType == 'farmer') {
+        await _loginAsFarmer();
       } else {
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.message),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
-          ),
-        );
-        
-        // Farmer not found, navigate to signup
-        Navigator.pushReplacementNamed(context, '/signup');
+        await _loginAsConsumer();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() {
         _isLoading = false;
@@ -135,24 +102,99 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _loginAsFarmer() async {
+    final result = await FarmerService.getFarmerByPhone(_phoneController.text);
+
+    if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login successful!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('keepMeLoggedIn', _keepMeLoggedIn);
+      await prefs.setString('selectedLanguage', _selectedLanguage);
+      await prefs.setString('userType', 'farmer');
+
+      Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');
+      KisaanSaathiApp.of(context).setLocale(newLocale);
+
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+
+      Navigator.pushNamed(
+        context,
+        '/signup',
+        arguments: {'userType': 'farmer'},
+      );
+    }
+  }
+
+  Future<void> _loginAsConsumer() async {
+    final result = await ConsumerService.getConsumerByPhone(
+      _phoneController.text,
+    );
+
+    if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login successful!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('keepMeLoggedIn', _keepMeLoggedIn);
+      await prefs.setString('selectedLanguage', _selectedLanguage);
+      await prefs.setString('userType', 'consumer');
+
+      Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');
+      KisaanSaathiApp.of(context).setLocale(newLocale);
+
+      Navigator.pushReplacementNamed(context, '/consumer_home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+
+      Navigator.pushNamed(
+        context,
+        '/signup',
+        arguments: {'userType': 'consumer'},
+      );
+    }
+  }
+
   void _navigateToSignup() {
-    Navigator.pushReplacementNamed(context, '/signup');
+    Navigator.pushNamed(context, '/signup', arguments: {'userType': _userType});
   }
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.green.shade50,
-              Colors.white,
-            ],
+            colors: [Colors.green.shade50, Colors.white],
           ),
         ),
         child: SafeArea(
@@ -162,22 +204,15 @@ class _LoginScreenState extends State<LoginScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  // Header with logo
                   const SizedBox(height: 40),
-                  Image.asset(
-                    'assets/logo.jpg',
-                    height: 100,
-                    width: 100,
-                  ),
+                  Image.asset('assets/logo.jpg', height: 100, width: 100),
                   const SizedBox(height: 40),
-                  
-                  // Welcome content
+
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Title
                           Text(
                             "Login",
                             style: TextStyle(
@@ -188,14 +223,47 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            "Welcome back! Please enter your phone number",
+                            "Welcome back! Please enter your details",
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey.shade600,
                             ),
                           ),
-                          const SizedBox(height: 40),
-                          
+                          const SizedBox(height: 32),
+
+                          // User Type Selection
+                          Text(
+                            "I am a",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildUserTypeCard(
+                                  'farmer',
+                                  'Farmer',
+                                  Icons.agriculture,
+                                  'Sell & Trade Products',
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildUserTypeCard(
+                                  'consumer',
+                                  'Consumer',
+                                  Icons.shopping_bag,
+                                  'Buy Fresh Products',
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+
                           // Phone input field
                           Text(
                             localizations.phoneNumberLabel,
@@ -212,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.1),
+                                  color: Colors.grey.withValues(alpha: 0.1),
                                   spreadRadius: 1,
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
@@ -254,7 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          
+
                           // Keep me logged in checkbox
                           Row(
                             children: [
@@ -269,14 +337,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               Text(
                                 "Keep me logged in",
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                ),
+                                style: TextStyle(color: Colors.grey.shade700),
                               ),
                             ],
                           ),
                           const SizedBox(height: 24),
-                          
+
                           // Language dropdown
                           Text(
                             localizations.selectLanguageTitle,
@@ -293,7 +359,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.1),
+                                  color: Colors.grey.withValues(alpha: 0.1),
                                   spreadRadius: 1,
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
@@ -305,18 +371,26 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: DropdownButton<String>(
                                 value: _selectedLanguage,
                                 isExpanded: true,
-                                icon: Icon(Icons.arrow_drop_down,
-                                    color: Colors.grey.shade700),
+                                icon: Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.grey.shade700,
+                                ),
                                 onChanged: (String? newValue) {
                                   if (newValue != null) {
                                     setState(() {
                                       _selectedLanguage = newValue;
                                     });
-                                    Locale newLocale = _languageMap[newValue] ?? const Locale('en');
-                                    KisaanSaathiApp.of(context).setLocale(newLocale);
+                                    Locale newLocale =
+                                        _languageMap[newValue] ??
+                                        const Locale('en');
+                                    KisaanSaathiApp.of(
+                                      context,
+                                    ).setLocale(newLocale);
                                   }
                                 },
-                                items: languages.map<DropdownMenuItem<String>>((String value) {
+                                items: languages.map<DropdownMenuItem<String>>((
+                                  String value,
+                                ) {
                                   return DropdownMenuItem<String>(
                                     value: value,
                                     child: Text(
@@ -332,7 +406,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: 40),
-                          
+
                           // Login button
                           SizedBox(
                             width: double.infinity,
@@ -347,7 +421,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 elevation: 0,
                               ),
                               child: _isLoading
-                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
                                   : const Text(
                                       "Login",
                                       style: TextStyle(
@@ -359,16 +435,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          
+
                           // Sign up option
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 "Don't have an account? ",
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                ),
+                                style: TextStyle(color: Colors.grey.shade700),
                               ),
                               TextButton(
                                 onPressed: _navigateToSignup,
@@ -391,6 +465,69 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserTypeCard(
+    String type,
+    String title,
+    IconData icon,
+    String subtitle,
+  ) {
+    final isSelected = _userType == type;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _userType = type;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.green.shade50 : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.green.shade700 : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: Colors.green.withValues(alpha: 0.2),
+                spreadRadius: 2,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 40,
+              color: isSelected ? Colors.green.shade700 : Colors.grey.shade600,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isSelected
+                    ? Colors.green.shade700
+                    : Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            ),
+          ],
         ),
       ),
     );
