@@ -4,6 +4,8 @@ import '../services/news_api_service.dart';
 import 'news_detail_screen.dart';
 
 class NewsScreen extends StatefulWidget {
+  const NewsScreen({super.key});
+
   @override
   _NewsScreenState createState() => _NewsScreenState();
 }
@@ -49,7 +51,11 @@ class _NewsScreenState extends State<NewsScreen> {
 
   void _filterNews(List<NewsArticle> articles) {
     final filtered = articles.where((article) {
+<<<<<<< Updated upstream
       final text = "${article.title.toLowerCase()} ${article.description.toLowerCase()}";
+=======
+      final text = "${article.title.toLowerCase() ?? ''} ${article.description.toLowerCase() ?? ''}";
+>>>>>>> Stashed changes
       return _farmingKeywords.any((keyword) => text.contains(keyword.toLowerCase()));
     }).toList();
 
@@ -119,7 +125,7 @@ class _NewsScreenState extends State<NewsScreen> {
                                   children: [
                                     // Image
                                     if (article.imageUrl != null)
-                                      Container(
+                                      SizedBox(
                                         width: 100,
                                         height: 100,
                                         child: Image.network(

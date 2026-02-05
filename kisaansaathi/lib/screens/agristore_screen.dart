@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AgriStoreScreen extends StatelessWidget {
-  const AgriStoreScreen({Key? key}) : super(key: key);
+  const AgriStoreScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -77,14 +77,14 @@ class ProductCard extends StatelessWidget {
   final String flipkartUrl;
 
   const ProductCard({
-    Key? key,
+    super.key,
     required this.name,
     required this.description,
     required this.imageAsset,
     required this.price,
     required this.amazonUrl,
     required this.flipkartUrl,
-  }) : super(key: key);
+  });
 
   Future<void> _launchUrl(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {

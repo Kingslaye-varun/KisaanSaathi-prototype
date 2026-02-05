@@ -3,6 +3,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NearbyStorageScreen extends StatefulWidget {
+  const NearbyStorageScreen({super.key});
+
   @override
   _NearbyStorageScreenState createState() => _NearbyStorageScreenState();
 }
@@ -11,6 +13,7 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
   bool _isLoading = false;
   String _statusMessage = 'Find nearby storage facilities!';
   double _searchRadius = 5.0;
+<<<<<<< Updated upstream
   String _selectedStorageType = 'Cold Storage'; // Default selection
   final List<String> _storageTypes = [
     'Cold Storage',
@@ -18,6 +21,69 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
     'Refrigerated Storage',
     'Agricultural Storage'
   ];
+=======
+  String _selectedStorageType = ''; // Will be set in initState
+  List<String> _storageTypes = [];
+  
+  // Storage type descriptions for farmers
+  final Map<String, Map<String, String>> _storageInfo = {
+    'Cold Storage': {
+      'description': 'Temperature-controlled facility for preserving perishable crops like fruits and vegetables.',
+      'benefits': 'Extends shelf life, reduces spoilage, and helps get better market prices during off-season.',
+      'ideal_for': 'Potatoes, apples, tomatoes, onions, and other perishable produce.'
+    },
+    'Warehouse': {
+      'description': 'Large storage facility for bulk agricultural products and equipment.',
+      'benefits': 'Protects crops from weather, pests, and theft. Allows selling when prices are favorable.',
+      'ideal_for': 'Grains, pulses, seeds, and farming equipment.'
+    },
+    'Refrigerated Storage': {
+      'description': 'Specialized cold storage with precise temperature control for highly perishable items.',
+      'benefits': 'Maintains freshness and nutritional value. Prevents quality degradation.',
+      'ideal_for': 'Dairy products, meat, exotic fruits, and vegetables requiring specific temperatures.'
+    },
+    'Agricultural Storage': {
+      'description': 'Multi-purpose storage designed specifically for farm produce with pest control measures.',
+      'benefits': 'Reduces post-harvest losses and provides safe storage for various crop types.',
+      'ideal_for': 'Mixed farming produce, fertilizers, and seasonal crops.'
+    }
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with default values
+    _statusMessage = 'Find nearby storage facilities!';
+    _selectedStorageType = 'Cold Storage';
+    _storageTypes = [
+      'Cold Storage',
+      'Warehouse',
+      'Refrigerated Storage',
+      'Agricultural Storage',
+    ];
+
+    // Update with localized strings after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          try {
+            _statusMessage = AppLocalizations.of(context).findNearbyStorage;
+            _selectedStorageType = AppLocalizations.of(context).coldStorage;
+            _storageTypes = [
+              AppLocalizations.of(context).coldStorage,
+              AppLocalizations.of(context).warehouse,
+              AppLocalizations.of(context).refrigeratedStorage,
+              AppLocalizations.of(context).agriculturalStorage,
+            ];
+          } catch (e) {
+            // Fallback to English if translations fail
+            print('Error loading translations: $e');
+          }
+        });
+      }
+    });
+  }
+>>>>>>> Stashed changes
 
   Future<void> _findStorageFacilities() async {
     setState(() {

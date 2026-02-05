@@ -85,7 +85,7 @@ class ApiService {
           final humidity = currentWeather['main']['humidity'];
           final location = currentWeather['name'];
           weatherContext =
-              'Current weather in $location: $conditions, temperature ${temp.toStringAsFixed(1)}°C, humidity ${humidity}%. ';
+              'Current weather in $location: $conditions, temperature ${temp.toStringAsFixed(1)}°C, humidity $humidity%. ';
         } catch (e) {
           debugPrint('Error parsing weather data: $e');
         }
@@ -259,7 +259,7 @@ ${PromptTemplate.kisaanSetuPrompt}''',
           final humidity = weatherData['main']['humidity'];
           final location = weatherData['name'];
           weatherContext =
-              'Current weather in $location: $conditions, temperature ${temp.toStringAsFixed(1)}°C, humidity ${humidity}%. ';
+              'Current weather in $location: $conditions, temperature ${temp.toStringAsFixed(1)}°C, humidity $humidity%. ';
         } catch (e) {
           debugPrint('Error parsing weather data: $e');
         }
@@ -507,8 +507,8 @@ ${PromptTemplate.kisaanSetuPrompt}
   }) async {
     try {
       final queryParams = {
-        if (category != null) 'category': category,
-        if (state != null) 'state': state,
+        'category': ?category,
+        'state': ?state,
         'language': language.toLowerCase(),
       };
 

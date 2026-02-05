@@ -147,3 +147,114 @@ class _KisaanSetuAppState extends State<KisaanSetuApp> {
     );
   }
 }
+<<<<<<< Updated upstream
+=======
+
+class MainAppScaffold extends StatefulWidget {
+  final int initialIndex;
+
+  const MainAppScaffold({super.key, this.initialIndex = 0});
+
+  @override
+  State<MainAppScaffold> createState() => _MainAppScaffoldState();
+}
+
+class _MainAppScaffoldState extends State<MainAppScaffold> {
+  late int _currentIndex;
+
+  final List<Widget> _screens = [
+    const FarmerHomeScreenNew(),
+    const CommunityScreen(
+      isEmbedded: true,
+    ), // Embedded in MainAppScaffold - no duplicate Scaffold
+    const AgriStoreScreen(),
+    const ProfileScreen(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    if (kDebugMode) {
+      print("📱 MainAppScaffold initialized with index: $_currentIndex");
+    }
+  }
+
+  Future<bool> _onWillPop() async {
+    // If not on home screen, navigate to home screen first
+    if (_currentIndex != 0) {
+      setState(() {
+        _currentIndex = 0;
+      });
+      return false; // Don't exit the app
+    }
+
+    // If on home screen, show exit confirmation dialog
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Exit App'),
+              content: const Text('Are you sure you want to quit?'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('No'),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: const Text('Yes'),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (kDebugMode) {
+      print("🔄 Building MainAppScaffold with index: $_currentIndex");
+    }
+
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: _screens[_currentIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          selectedItemColor: Colors.green,
+          unselectedItemColor: Colors.grey,
+          type: BottomNavigationBarType.fixed,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.people),
+              label: 'Community',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart),
+              label: 'Agri Store',
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          ],
+          onTap: (index) {
+            if (kDebugMode) {
+              print("🎯 Navigation bar tapped: $index");
+            }
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+        ),
+      ),
+    );
+  }
+}
+>>>>>>> Stashed changes

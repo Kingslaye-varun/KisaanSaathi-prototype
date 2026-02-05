@@ -212,9 +212,116 @@ For each crop provide:
               ),
             ),
             const SizedBox(height: 8),
+<<<<<<< Updated upstream
             Text(
               content,
               style: const TextStyle(fontSize: 15),
+=======
+            DropdownButtonFormField<String>(
+              initialValue: _selectedCropType,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              items: _cropTypes.map((type) {
+                return DropdownMenuItem(value: type, child: Text(type));
+              }).toList(),
+              onChanged: (value) {
+                setState(() => _selectedCropType = value!);
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Budget Input
+            Text(
+              AppLocalizations.of(context).budget,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _budgetController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context).budgetHint,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                prefixIcon: const Icon(Icons.currency_rupee),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Land Size Selection
+            Text(
+              AppLocalizations.of(context).landSize,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedLandSize,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              items: _landSizes.map((size) {
+                return DropdownMenuItem(value: size, child: Text(size));
+              }).toList(),
+              onChanged: (value) {
+                setState(() => _selectedLandSize = value!);
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Water Availability Selection
+            Text(
+              AppLocalizations.of(context).waterAvailability,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedWaterAvailability,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              items: _waterAvailability.map((water) {
+                return DropdownMenuItem(value: water, child: Text(water));
+              }).toList(),
+              onChanged: (value) {
+                setState(() => _selectedWaterAvailability = value!);
+              },
+>>>>>>> Stashed changes
             ),
           ],
         ),

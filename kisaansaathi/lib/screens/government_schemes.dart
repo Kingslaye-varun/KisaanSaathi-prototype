@@ -81,7 +81,7 @@ class GovernmentScheme {
 }
 
 class GovernmentSchemesScreen extends StatefulWidget {
-  const GovernmentSchemesScreen({Key? key}) : super(key: key);
+  const GovernmentSchemesScreen({super.key});
 
   @override
   _GovernmentSchemesScreenState createState() =>
@@ -3342,6 +3342,7 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
                         label: Text(
                           '${localizations.expires} ${scheme.expiryDate.day}/${scheme.expiryDate.month}/${scheme.expiryDate.year}',
                         ),
+<<<<<<< Updated upstream
                         backgroundColor:
                             scheme.expiryDate.isAfter(
                                   DateTime.now().add(const Duration(days: 30)),
@@ -3357,6 +3358,86 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
                                   )
                                   ? Colors.green[800]
                                   : Colors.orange[800],
+=======
+                      ),
+                      SizedBox(height: 16),
+                    ],
+
+                    // Application Steps
+                    Text(
+                      'Application Steps',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    ...scheme
+                        .getLocalizedApplicationSteps(context)
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.green,
+                              child: Text(
+                                '${entry.key + 1}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            title: Text(entry.value),
+                          );
+                        })
+                        ,
+
+                    // Documents Required
+                    SizedBox(height: 16),
+                    Text(
+                      'Documents Required',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(scheme.getLocalizedDocumentsRequired(context)),
+
+                    // Apply Now Button
+                    SizedBox(height: 24),
+                    if (scheme.applicationUrl.isNotEmpty) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final url = scheme.applicationUrl;
+                            if (await canLaunchUrl(Uri.parse(url))) {
+                              await launchUrl(
+                                Uri.parse(url),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Could not open application website',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: Text(
+                            'Apply Now',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+>>>>>>> Stashed changes
                         ),
                       ),
                     ],

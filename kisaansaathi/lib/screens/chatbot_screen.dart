@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ChatbotScreen extends StatefulWidget {
-  const ChatbotScreen({Key? key}) : super(key: key);
+  const ChatbotScreen({super.key});
 
   @override
   _ChatbotScreenState createState() => _ChatbotScreenState();
@@ -909,7 +909,7 @@ ${remedies.map((remedy) => '• $remedy').join('\n')}
                   ),
                 ),
               )
-              .toList(),
+              ,
         ],
       ),
     );

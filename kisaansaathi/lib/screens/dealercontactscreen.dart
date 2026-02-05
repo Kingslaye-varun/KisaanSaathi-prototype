@@ -365,6 +365,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NearbyTradersScreen extends StatefulWidget {
+  const NearbyTradersScreen({super.key});
+
   @override
   _NearbyTradersScreenState createState() => _NearbyTradersScreenState();
 }
@@ -373,6 +375,7 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
   bool _isLoading = false;
   String _statusMessage = 'Find nearby crop traders!';
   double _searchRadius = 10.0;
+<<<<<<< Updated upstream
   String _selectedTraderType = 'Commission Agent';
   final List<String> _traderTypes = [
     'Commission Agent',
@@ -382,34 +385,103 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
     'Processing Unit',
     'Cooperative Society'
   ];
+=======
+  int _selectedTraderIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTraderIndex = 0;
+  }
+
+  List<String> _getTraderTypes(BuildContext context) {
+    return [
+      AppLocalizations.of(context).commissionAgent,
+      AppLocalizations.of(context).mandiTrader,
+      AppLocalizations.of(context).bulkBuyer,
+      AppLocalizations.of(context).exportTrader,
+      AppLocalizations.of(context).processingUnit,
+      AppLocalizations.of(context).cooperativeSociety,
+    ];
+  }
+
+  String _getSearchTerm(int index) {
+    const searchTerms = [
+      'commission agent agriculture',
+      'APMC mandi trader',
+      'agricultural produce buyer',
+      'agricultural export trader',
+      'crop processing unit',
+      'farmer cooperative society'
+    ];
+    return searchTerms[index];
+  }
+
+  IconData _getIconForTraderIndex(int index) {
+    const icons = [
+      Icons.account_balance,
+      Icons.store,
+      Icons.shopping_cart,
+      Icons.airport_shuttle,
+      Icons.factory,
+      Icons.people,
+    ];
+    return icons[index];
+  }
+>>>>>>> Stashed changes
 
   Future<void> _findTraders() async {
     setState(() {
       _isLoading = true;
+<<<<<<< Updated upstream
       _statusMessage = 'Locating your position...';
+=======
+      _statusMessage = AppLocalizations.of(context).locatingPosition ?? 'Locating your position...';
+>>>>>>> Stashed changes
     });
 
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         bool enabled = await Geolocator.openLocationSettings();
+<<<<<<< Updated upstream
         if (!enabled) throw 'Please enable location services';
+=======
+        if (!enabled) {
+          throw AppLocalizations.of(context).enableLocationServices ?? 'Please enable location services';
+        }
+>>>>>>> Stashed changes
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.deniedForever) {
+<<<<<<< Updated upstream
         throw 'Location permissions permanently denied. Please enable in app settings.';
+=======
+        throw AppLocalizations.of(context).locationPermissionsDenied ?? 
+            'Location permissions permanently denied. Please enable in app settings.';
+>>>>>>> Stashed changes
       }
 
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission != LocationPermission.whileInUse &&
             permission != LocationPermission.always) {
+<<<<<<< Updated upstream
           throw 'Location permissions required';
         }
       }
 
       setState(() => _statusMessage = 'Finding nearby traders...');
+=======
+          throw AppLocalizations.of(context).locationPermissionsRequired ?? 
+              'Location permissions required';
+        }
+      }
+
+      setState(() => _statusMessage = AppLocalizations.of(context).findingNearbyTraders ?? 
+          'Finding nearby traders...');
+>>>>>>> Stashed changes
       Position position = await Geolocator.getCurrentPosition();
 
       final searchTermMap = {
@@ -433,7 +505,15 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
           Uri.parse(mapsUrl),
           mode: LaunchMode.externalApplication,
         );
+<<<<<<< Updated upstream
         _statusMessage = 'Showing $_selectedTraderType within ${_searchRadius.round()} km';
+=======
+        final traderTypes = _getTraderTypes(context);
+        _statusMessage = AppLocalizations.of(context).showingTraders(
+          traderTypes[_selectedTraderIndex], 
+          _searchRadius.round()
+        ) ?? 'Showing ${traderTypes[_selectedTraderIndex]} within ${_searchRadius.round()} km';
+>>>>>>> Stashed changes
       }
       else if (await canLaunchUrl(Uri.parse(webUrl))) {
         await launchUrl(
@@ -447,13 +527,22 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
           mode: LaunchMode.externalApplication,
         );
       } else {
+<<<<<<< Updated upstream
         throw 'Could not launch maps application';
+=======
+        throw AppLocalizations.of(context).couldNotLaunchMaps ?? 
+            'Could not launch maps application';
+>>>>>>> Stashed changes
       }
     } catch (e) {
       setState(
         () =>
             _statusMessage =
+<<<<<<< Updated upstream
                 'Error: ${e.toString().replaceAll('Exception:', '')}',
+=======
+                '${AppLocalizations.of(context).error ?? "Error"}: ${e.toString().replaceAll('Exception:', '')}',
+>>>>>>> Stashed changes
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -473,9 +562,15 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+<<<<<<< Updated upstream
         title: const Text(
           'Crop Trader Finder',
           style: TextStyle(fontWeight: FontWeight.bold),
+=======
+        title: Text(
+          AppLocalizations.of(context).cropTraderFinder,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+>>>>>>> Stashed changes
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -527,7 +622,13 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
                       ),
                       const SizedBox(height: 15),
                       Text(
+<<<<<<< Updated upstream
                         _statusMessage,
+=======
+                        _statusMessage.isEmpty 
+                            ? AppLocalizations.of(context).findNearbyTraders
+                            : _statusMessage,
+>>>>>>> Stashed changes
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 18,
@@ -583,18 +684,30 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
                           onChanged: (value) => setState(() => _searchRadius = value),
                         ),
                       ),
+<<<<<<< Updated upstream
                       const Text(
                         'Search Radius',
                         style: TextStyle(color: Colors.white70),
+=======
+                      Text(
+                        AppLocalizations.of(context).searchRadius,
+                        style: const TextStyle(color: Colors.white70),
+>>>>>>> Stashed changes
                       ),
                       const SizedBox(height: 15),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.search),
+<<<<<<< Updated upstream
                           label: const Text(
                             'FIND TRADERS',
                             style: TextStyle(fontSize: 18),
+=======
+                          label: Text(
+                            AppLocalizations.of(context).findTraders.toUpperCase(),
+                            style: const TextStyle(fontSize: 18),
+>>>>>>> Stashed changes
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber[700],

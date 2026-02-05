@@ -6,7 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class FertilizerRecommendationScreen extends StatefulWidget {
-  const FertilizerRecommendationScreen({Key? key}) : super(key: key);
+  const FertilizerRecommendationScreen({super.key});
 
   @override
   _FertilizerRecommendationScreenState createState() =>
@@ -170,6 +170,287 @@ Respond in this exact structured format:
     }
   }
 
+<<<<<<< Updated upstream
+=======
+  Widget _buildCropSelection() {
+    final cropNames = _getCropNames(context);
+
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.only(bottom: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context).selectYourCrop,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1.2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemCount: cropNames.length,
+              itemBuilder: (context, index) {
+                final isSelected = _selectedCropIndex == index;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedCropIndex = index),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected ? Colors.green : Colors.grey.shade300,
+                        width: isSelected ? 3 : 1,
+                      ),
+                      color: isSelected ? Colors.green.shade50 : Colors.white,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            image: DecorationImage(
+                              image: AssetImage(cropImages[index]['image']!),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          cropNames[index],
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: isSelected
+                                ? Colors.green.shade700
+                                : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSoilSelection() {
+    final soilNames = _getSoilTypeNames(context);
+    final soilDescriptions = _getSoilDescriptions(context);
+
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.only(bottom: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context).selectSoilType,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1.0,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemCount: soilNames.length,
+              itemBuilder: (context, index) {
+                final isSelected = _selectedSoilIndex == index;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedSoilIndex = index),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected ? Colors.brown : Colors.grey.shade300,
+                        width: isSelected ? 3 : 1,
+                      ),
+                      color: isSelected ? Colors.brown.shade50 : Colors.white,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.brown.shade100,
+                          ),
+                          child: Icon(
+                            Icons.landscape,
+                            size: 30,
+                            color: Colors.brown.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          soilNames[index],
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            color: isSelected
+                                ? Colors.brown.shade700
+                                : Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          soilDescriptions[index],
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLandSizeAndBudget() {
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.only(bottom: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context).landSizeAndBudget,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade700,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Land Size
+            Text(
+              '${AppLocalizations.of(context).landSize}: ${_landSize.toStringAsFixed(1)} ${AppLocalizations.of(context).acres}',
+            ),
+            Slider(
+              value: _landSize,
+              min: 0.1,
+              max: 10.0,
+              divisions: 99,
+              label:
+                  '${_landSize.toStringAsFixed(1)} ${AppLocalizations.of(context).acres}',
+              activeColor: Colors.green,
+              onChanged: (value) => setState(() => _landSize = value),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Budget
+            Text(
+              '${AppLocalizations.of(context).budget}: ₹${_budget.toStringAsFixed(0)}',
+            ),
+            Slider(
+              value: _budget,
+              min: 1000,
+              max: 50000,
+              divisions: 49,
+              label: '₹${_budget.toStringAsFixed(0)}',
+              activeColor: Colors.green,
+              onChanged: (value) => setState(() => _budget = value),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMonthSelection() {
+    final monthNames = _getMonthNames(context);
+
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.only(bottom: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context).plantingMonth,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<int>(
+              initialValue: _selectedMonthIndex == -1 ? null : _selectedMonthIndex,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              hint: Text(AppLocalizations.of(context).selectPlantingMonth),
+              items: List.generate(monthNames.length, (index) {
+                return DropdownMenuItem<int>(
+                  value: index,
+                  child: Text(monthNames[index]),
+                );
+              }),
+              onChanged: (value) =>
+                  setState(() => _selectedMonthIndex = value ?? -1),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+>>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return Scaffold(
