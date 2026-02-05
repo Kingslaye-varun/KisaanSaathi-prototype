@@ -18,7 +18,7 @@ class _NearbyStorageScreenState extends State<NearbyStorageScreen> {
   List<String> _storageTypes = [];
   
   // Storage type descriptions for farmers
-  Map<String, Map<String, String>> _storageInfo = {
+  final Map<String, Map<String, String>> _storageInfo = {
     'Cold Storage': {
       'description': 'Temperature-controlled facility for preserving perishable crops like fruits and vegetables.',
       'benefits': 'Extends shelf life, reduces spoilage, and helps get better market prices during off-season.',

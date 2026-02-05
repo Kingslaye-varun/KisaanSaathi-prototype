@@ -15,10 +15,10 @@ class CommunityScreen extends StatefulWidget {
   isEmbedded; // New parameter to indicate if embedded in another Scaffold
 
   const CommunityScreen({
-    Key? key,
+    super.key,
     this.showAppBar = true,
     this.isEmbedded = false,
-  }) : super(key: key);
+  });
 
   @override
   State<CommunityScreen> createState() => _CommunityScreenState();
@@ -787,11 +787,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
         ? FloatingActionButton(
             onPressed: _showPostCreationSheet,
             backgroundColor: Colors.green,
-            child: const Icon(Icons.add),
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
+            child: const Icon(Icons.add),
           )
         : null;
 
@@ -846,7 +846,7 @@ class PostCard extends StatelessWidget {
   final String? currentFarmerId;
 
   const PostCard({
-    Key? key,
+    super.key,
     required this.post,
     required this.isLiked,
     required this.onLike,
@@ -854,7 +854,7 @@ class PostCard extends StatelessWidget {
     required this.onProfileTap,
     required this.onChatTap,
     required this.currentFarmerId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1130,11 +1130,11 @@ class CommentBottomSheet extends StatefulWidget {
   final VoidCallback onCommentAdded;
 
   const CommentBottomSheet({
-    Key? key,
+    super.key,
     required this.post,
     required this.currentFarmerId,
     required this.onCommentAdded,
-  }) : super(key: key);
+  });
 
   @override
   State<CommentBottomSheet> createState() => _CommentBottomSheetState();

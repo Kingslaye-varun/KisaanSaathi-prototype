@@ -736,12 +736,12 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
 
   List<String> _getTraderTypes(BuildContext context) {
     return [
-      AppLocalizations.of(context)!.commissionAgent,
-      AppLocalizations.of(context)!.mandiTrader,
-      AppLocalizations.of(context)!.bulkBuyer,
-      AppLocalizations.of(context)!.exportTrader,
-      AppLocalizations.of(context)!.processingUnit,
-      AppLocalizations.of(context)!.cooperativeSociety,
+      AppLocalizations.of(context).commissionAgent,
+      AppLocalizations.of(context).mandiTrader,
+      AppLocalizations.of(context).bulkBuyer,
+      AppLocalizations.of(context).exportTrader,
+      AppLocalizations.of(context).processingUnit,
+      AppLocalizations.of(context).cooperativeSociety,
     ];
   }
 
@@ -772,7 +772,7 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
   Future<void> _findTraders() async {
     setState(() {
       _isLoading = true;
-      _statusMessage = AppLocalizations.of(context)!.locatingPosition ?? 'Locating your position...';
+      _statusMessage = AppLocalizations.of(context).locatingPosition ?? 'Locating your position...';
     });
 
     try {
@@ -780,13 +780,13 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
       if (!serviceEnabled) {
         bool enabled = await Geolocator.openLocationSettings();
         if (!enabled) {
-          throw AppLocalizations.of(context)!.enableLocationServices ?? 'Please enable location services';
+          throw AppLocalizations.of(context).enableLocationServices ?? 'Please enable location services';
         }
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.deniedForever) {
-        throw AppLocalizations.of(context)!.locationPermissionsDenied ?? 
+        throw AppLocalizations.of(context).locationPermissionsDenied ?? 
             'Location permissions permanently denied. Please enable in app settings.';
       }
 
@@ -794,12 +794,12 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
         permission = await Geolocator.requestPermission();
         if (permission != LocationPermission.whileInUse &&
             permission != LocationPermission.always) {
-          throw AppLocalizations.of(context)!.locationPermissionsRequired ?? 
+          throw AppLocalizations.of(context).locationPermissionsRequired ?? 
               'Location permissions required';
         }
       }
 
-      setState(() => _statusMessage = AppLocalizations.of(context)!.findingNearbyTraders ?? 
+      setState(() => _statusMessage = AppLocalizations.of(context).findingNearbyTraders ?? 
           'Finding nearby traders...');
       Position position = await Geolocator.getCurrentPosition();
 
@@ -816,7 +816,7 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
           mode: LaunchMode.externalApplication,
         );
         final traderTypes = _getTraderTypes(context);
-        _statusMessage = AppLocalizations.of(context)!.showingTraders(
+        _statusMessage = AppLocalizations.of(context).showingTraders(
           traderTypes[_selectedTraderIndex], 
           _searchRadius.round()
         ) ?? 'Showing ${traderTypes[_selectedTraderIndex]} within ${_searchRadius.round()} km';
@@ -833,14 +833,14 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
           mode: LaunchMode.externalApplication,
         );
       } else {
-        throw AppLocalizations.of(context)!.couldNotLaunchMaps ?? 
+        throw AppLocalizations.of(context).couldNotLaunchMaps ?? 
             'Could not launch maps application';
       }
     } catch (e) {
       setState(
         () =>
             _statusMessage =
-                '${AppLocalizations.of(context)!.error ?? "Error"}: ${e.toString().replaceAll('Exception:', '')}',
+                '${AppLocalizations.of(context).error ?? "Error"}: ${e.toString().replaceAll('Exception:', '')}',
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -863,7 +863,7 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
-          AppLocalizations.of(context)!.cropTraderFinder,
+          AppLocalizations.of(context).cropTraderFinder,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -913,7 +913,7 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
                       const SizedBox(height: 15),
                       Text(
                         _statusMessage.isEmpty 
-                            ? AppLocalizations.of(context)!.findNearbyTraders
+                            ? AppLocalizations.of(context).findNearbyTraders
                             : _statusMessage,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
@@ -974,7 +974,7 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
                         ),
                       ),
                       Text(
-                        AppLocalizations.of(context)!.searchRadius,
+                        AppLocalizations.of(context).searchRadius,
                         style: const TextStyle(color: Colors.white70),
                       ),
                       const SizedBox(height: 15),
@@ -985,7 +985,7 @@ class _NearbyTradersScreenState extends State<NearbyTradersScreen> {
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.search),
                           label: Text(
-                            AppLocalizations.of(context)!.findTraders.toUpperCase(),
+                            AppLocalizations.of(context).findTraders.toUpperCase(),
                             style: const TextStyle(fontSize: 18),
                           ),
                           style: ElevatedButton.styleFrom(

@@ -114,7 +114,7 @@ class FarmerService {
       }
     } on TimeoutException catch (e) {
       return ServiceResponse.error(message: e.message ?? 'Request timed out');
-    } on FormatException catch (e) {
+    } on FormatException {
       return ServiceResponse.error(
         message:
             'Invalid response format. The server might be down or experiencing issues.',
@@ -205,8 +205,9 @@ class FarmerService {
       // Add text fields if provided
       if (name != null) request.fields['name'] = name;
       if (language != null) request.fields['language'] = language;
-      if (farmerId != null && farmerId.isNotEmpty)
+      if (farmerId != null && farmerId.isNotEmpty) {
         request.fields['farmerId'] = farmerId;
+      }
 
       // Add profile image if available
       if (profileImage != null) {

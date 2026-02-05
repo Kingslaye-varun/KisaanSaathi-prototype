@@ -8,11 +8,7 @@ plugins {
 android {
     namespace = "com.example.kisaansaathi"
     compileSdk = 36
-    ndkVersion = "27.0.12077973"
-=======
-    compileSdk = 36
     ndkVersion = "28.2.13676358"
->>>>>>> Stashed changes
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

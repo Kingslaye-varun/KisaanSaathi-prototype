@@ -580,7 +580,7 @@ class _NewsScreenState extends State<NewsScreen> {
 
   void _filterNews(List<NewsArticle> articles) {
     final filtered = articles.where((article) {
-      final text = "${article.title?.toLowerCase() ?? ''} ${article.description?.toLowerCase() ?? ''}";
+      final text = "${article.title.toLowerCase() ?? ''} ${article.description.toLowerCase() ?? ''}";
       return _farmingKeywords.any((keyword) => text.contains(keyword.toLowerCase()));
     }).toList();
 

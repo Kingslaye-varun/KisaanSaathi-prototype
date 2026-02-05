@@ -597,7 +597,7 @@ class _KisaanSaathiAppState extends State<KisaanSaathiApp> {
 class MainAppScaffold extends StatefulWidget {
   final int initialIndex;
 
-  const MainAppScaffold({Key? key, this.initialIndex = 0}) : super(key: key);
+  const MainAppScaffold({super.key, this.initialIndex = 0});
 
   @override
   State<MainAppScaffold> createState() => _MainAppScaffoldState();

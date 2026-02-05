@@ -759,7 +759,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _selectedCropType,
+              initialValue: _selectedCropType,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -816,7 +816,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _selectedLandSize,
+              initialValue: _selectedLandSize,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -846,7 +846,7 @@ Remember: Keep all language simple and conversational. Avoid technical terms. If
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _selectedWaterAvailability,
+              initialValue: _selectedWaterAvailability,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),

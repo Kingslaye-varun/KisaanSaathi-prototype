@@ -632,7 +632,7 @@ class _FertilizerRecommendationScreenState
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<int>(
-              value: _selectedMonthIndex == -1 ? null : _selectedMonthIndex,
+              initialValue: _selectedMonthIndex == -1 ? null : _selectedMonthIndex,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),

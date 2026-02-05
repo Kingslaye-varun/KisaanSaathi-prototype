@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class KrishiBhavanScreen extends StatefulWidget {
-  const KrishiBhavanScreen({Key? key}) : super(key: key);
+  const KrishiBhavanScreen({super.key});
 
   @override
   State<KrishiBhavanScreen> createState() => _KrishiBhavanScreenState();
@@ -801,7 +801,7 @@ class _KrishiBhavanScreenState extends State<KrishiBhavanScreen> {
           .map((e) => e['designation']!)
           .where((designation) => designation.isNotEmpty)
           .toSet()
-          .toList(),
+          ,
     ];
 
     return Scaffold(
