@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:kisaansaathi/main.dart';
-import 'package:kisaansaathi/screens/call_screen.dart';
 import 'package:kisaansaathi/screens/chatbot_screen.dart';
 import 'package:kisaansaathi/screens/dealercontactscreen.dart';
 import 'package:kisaansaathi/screens/fertilizer_recommendation.dart';
@@ -9,6 +8,7 @@ import 'package:kisaansaathi/screens/government_schemes.dart';
 import 'package:kisaansaathi/screens/nearby_store_screen.dart';
 import 'package:kisaansaathi/screens/weather_screen.dart';
 import 'package:kisaansaathi/screens/market_prices.dart';
+import 'package:kisaansaathi/screens/soil_health_advisor.dart';
 import 'package:kisaansaathi/widgets/custom_button.dart';
 import 'package:kisaansaathi/screens/crop_recommendation.dart';
 import 'package:kisaansaathi/services/api_service.dart';
@@ -476,6 +476,32 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
+                    _buildFeatureCard(
+                      context,
+                      'Soil Health Advisor',
+                      Icons.eco_outlined,
+                      Colors.brown.shade700,
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SoilHealthAdvisorScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    // _buildFeatureCard(
+                    //   context,
+                    //   localizations.cropyeild,
+                    //   Icons.crop_outlined, //News Icon
+                    //   Colors.blueGrey.shade700,
+                    //   () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(builder: (context) => CropYeild()),
+                    //     );
+                    //   },
+                    // ),
                   ],
                 ),
               ),

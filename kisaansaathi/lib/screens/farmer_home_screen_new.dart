@@ -8,6 +8,7 @@ import '../screens/fertilizer_recommendation.dart';
 import '../screens/government_schemes.dart';
 import '../screens/market_prices.dart';
 import '../screens/news_screen.dart';
+import '../screens/soil_health_advisor.dart';
 import '../screens/nearby_store_screen.dart';
 import '../screens/farmers_list_screen.dart';
 import '../utils/image_helper.dart';
@@ -52,6 +53,8 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
           return loc.aiAssistant;
         case 'govt_schemes':
           return loc.governmentSchemes;
+        case 'soil_health':
+          return 'Soil Health Advisor';
         default:
           return {
                 'welcome_back': 'Welcome back,',
@@ -193,6 +196,18 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                           MaterialPageRoute(
                             builder: (context) =>
                                 const FertilizerRecommendationScreen(),
+                          ),
+                        ),
+                      ),
+                      _buildCard(
+                        Icons.eco_outlined,
+                        _getText('soil_health'),
+                        Colors.brown.shade600,
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const SoilHealthAdvisorScreen(),
                           ),
                         ),
                       ),

@@ -126,10 +126,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/news_model.dart';
+import 'package:kisaansaathi/config/secrets.dart';
 
 class NewsApiService {
-  static const String apiKey =
-      "5a81b673171f4a339728a27500a2dc53"; // Replace with your actual API key
+  static String get apiKey => Secrets.newsApiKey;
   static const String baseUrl = "https://newsapi.org/v2/everything";
 
   // Fetch filtered news based on the selected category
@@ -154,7 +154,7 @@ class NewsApiService {
         categoryKeywords[selectedCategory] ?? categoryKeywords["All"]!;
 
     final String url =
-        "$baseUrl?q=agriculture OR farming OR crops OR livestock&language=en&sortBy=publishedAt&apiKey=$apiKey&domains=thehindu.com,indianexpress.com,agriguru.in,krishijagran.com";
+        "$baseUrl?q=$query&language=en&sortBy=publishedAt&apiKey=$apiKey&domains=thehindu.com,indianexpress.com,agriguru.in,krishijagran.com";
 
     print(
       "Fetching news for category: $selectedCategory from URL: $url",
