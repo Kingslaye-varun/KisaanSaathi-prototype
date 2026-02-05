@@ -9,6 +9,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:weather_icons/weather_icons.dart';
+import '../widgets/data_source_badge.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -190,14 +191,16 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   Widget _buildWeatherView() {
-    return RefreshIndicator(
-      onRefresh: _fetchWeatherData,
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: _fetchWeatherData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildCurrentWeather(),
               const SizedBox(height: 24),
@@ -214,7 +217,16 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ),
         ),
       ),
-    );
+    ),
+    
+    // Data Source Badge
+    const DataSourceBadge(
+      source: 'OpenWeatherMap API',
+      sourceUrl: 'https://openweathermap.org',
+      isVerified: false,
+    ),
+  ],
+);
   }
 
   Widget _buildCurrentWeather() {

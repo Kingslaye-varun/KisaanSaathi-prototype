@@ -1231,14 +1231,17 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
                 children: [
                   Icon(Icons.language, color: Colors.green.shade800, size: 18),
                   const SizedBox(width: 4),
-                  Text(
-                    _selectedLanguage,
-                    style: TextStyle(
-                      color: Colors.green.shade800,
-                      fontWeight: FontWeight.w500,
+                  Flexible(
+                    child: Text(
+                      _selectedLanguage,
+                      style: TextStyle(
+                        color: Colors.green.shade800,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   Icon(
                     _isSpeaking
                         ? Icons.record_voice_over

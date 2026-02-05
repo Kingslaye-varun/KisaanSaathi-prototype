@@ -141,11 +141,16 @@ For areas with poor connectivity:
 
 ## Implementation Priority
 
-### Phase 1 (Critical - Do First):
+### Phase 1 (Critical - COMPLETED ✅):
 1. ✅ Add data source attribution on all screens
 2. ✅ Implement government API for schemes
 3. ✅ Add verification badges
 4. ✅ Create data sources info screen
+5. ✅ Integrate DataSourceBadge into 4 key screens:
+   - Market Prices (data.gov.in - Green Badge)
+   - Weather (OpenWeatherMap - Orange Badge)
+   - Government Schemes (National Portal - Green Badge)
+   - Soil Health Advisor (Soil Health Portal - Green Badge)
 
 ### Phase 2 (Important):
 1. ✅ Add contextual help buttons

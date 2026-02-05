@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kisaansaathi/l10n/app_localizations.dart';
 import 'dart:core';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/data_source_badge.dart';
 
 class GovernmentScheme {
   final String id;
@@ -2094,7 +2095,9 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
+        children: [
+          Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -2144,6 +2147,15 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
           ),
         ],
       ),
+      
+      // Data Source Badge
+      const DataSourceBadge(
+        source: 'National Portal of India',
+        sourceUrl: 'https://www.india.gov.in',
+        isVerified: true,
+      ),
+    ],
+  ),
     );
   }
 

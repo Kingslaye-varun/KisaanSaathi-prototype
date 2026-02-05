@@ -1443,6 +1443,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import '../widgets/data_source_badge.dart';
 
 class MarketScreen extends StatefulWidget {
   const MarketScreen({super.key});
@@ -1915,7 +1916,9 @@ class _MarketScreenState extends State<MarketScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
+        children: [
+          Column(
         children: [
           // Location Info Card
           Container(
@@ -2114,6 +2117,15 @@ class _MarketScreenState extends State<MarketScreen> {
           ),
         ],
       ),
+      
+      // Data Source Badge
+      const DataSourceBadge(
+        source: 'data.gov.in - Agmarknet',
+        sourceUrl: 'https://data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070',
+        isVerified: true,
+      ),
+    ],
+  ),
     );
   }
 

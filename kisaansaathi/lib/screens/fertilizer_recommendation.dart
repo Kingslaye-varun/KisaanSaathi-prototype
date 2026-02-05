@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:kisaansaathi/services/api_service.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,6 +8,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:kisaansaathi/l10n/app_localizations.dart';
+import 'package:kisaansaathi/config/secrets.dart';
+import '../widgets/data_source_badge.dart';
 
 class FertilizerRecommendationScreen extends StatefulWidget {
   const FertilizerRecommendationScreen({super.key});
@@ -24,7 +25,6 @@ class _FertilizerRecommendationScreenState
   String _recommendation = '';
   String _weatherSummary = '';
   String _placeName = '';
-  final String _geminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
   final ScrollController _scrollController = ScrollController();
 
   // User inputs
@@ -176,7 +176,7 @@ class _FertilizerRecommendationScreenState
   Future<void> _saveToDatabase() async {
     try {
       final response = await http.post(
-        Uri.parse('${dotenv.env['NODE_API_URL']}/api/farmers'),
+        Uri.parse('${Secrets.nodeApiUrl}/api/farmers'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'crop': _englishCropNames[_selectedCropIndex],
@@ -195,13 +195,15 @@ class _FertilizerRecommendationScreenState
         throw Exception('Failed to save data');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${AppLocalizations.of(context).failedToSaveData}: ${e.toString()}',
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${AppLocalizations.of(context).failedToSaveData}: ${e.toString()}',
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 
@@ -258,28 +260,49 @@ class _FertilizerRecommendationScreenState
           .replaceAll('{weather}', _weatherSummary)
           .replaceAll('{language}', languageName);
 
-      final model = GenerativeModel(
-        model: 'gemini-2.5-flash',
-        apiKey: _geminiApiKey,
-        generationConfig: GenerationConfig(
-          maxOutputTokens: 8192, // Increased for full responses
-          temperature: 0.7,
-        ),
-      );
+      // Try multiple API keys with fallback
+      String? responseText;
+      List<String> apiKeys = [
+        Secrets.geminiApiKey,
+        Secrets.geminiApiKey2,
+        Secrets.geminiApiKey3,
+      ];
 
-      final response = await model.generateContent([Content.text(prompt)]);
+      for (String apiKey in apiKeys) {
+        try {
+          final model = GenerativeModel(
+            model: 'gemini-2.0-flash-exp',
+            apiKey: apiKey,
+            generationConfig: GenerationConfig(
+              maxOutputTokens: 8192,
+              temperature: 0.7,
+            ),
+          );
 
-      String cleanRecommendation =
-          (response.text ??
-                  AppLocalizations.of(context).noRecommendationAvailable)
-              .replaceAll(RegExp(r'[*#]'), '')
-              .replaceAll('**', '');
+          final response = await model.generateContent([Content.text(prompt)]);
+          responseText = response.text;
+          
+          if (responseText != null && responseText.isNotEmpty) {
+            break; // Success, exit loop
+          }
+        } catch (e) {
+          print('API key failed: $e');
+          // Continue to next API key
+          continue;
+        }
+      }
+
+      if (responseText == null || responseText.isEmpty) {
+        throw Exception('All API keys failed');
+      }
+
+      String cleanRecommendation = responseText
+          .replaceAll(RegExp(r'[*#]'), '')
+          .replaceAll('**', '');
 
       setState(() {
         _recommendation = cleanRecommendation;
       });
-
-      // Removed database saving as requested
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollController.animateTo(
@@ -289,6 +312,7 @@ class _FertilizerRecommendationScreenState
         );
       });
     } catch (e) {
+      print('Error in _getRecommendation: $e');
       setState(() {
         _recommendation = AppLocalizations.of(
           context,
@@ -668,10 +692,12 @@ class _FertilizerRecommendationScreenState
         elevation: 0,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16),
+            child: Column(
           children: [
             // Location Info
             Card(
@@ -795,6 +821,15 @@ class _FertilizerRecommendationScreenState
           ],
         ),
       ),
+      
+      // Data Source Badge
+      const DataSourceBadge(
+        source: 'Google Gemini AI',
+        sourceUrl: 'https://ai.google.dev/gemini-api',
+        isVerified: false,
+      ),
+    ],
+  ),
     );
   }
 }

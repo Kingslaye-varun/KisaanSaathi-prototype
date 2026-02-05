@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../screens/chatbot_screen.dart';
 import '../screens/weather_screen.dart';
 import '../screens/crop_recommendation.dart';
+import '../screens/crop_yield_prediction_screen.dart';
 import '../screens/fertilizer_recommendation.dart';
 import '../screens/government_schemes.dart';
 import '../screens/market_prices.dart';
@@ -32,6 +33,7 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
   final GlobalKey _weatherKey = GlobalKey();
   final GlobalKey _cropAdviceKey = GlobalKey();
   final GlobalKey _fertilizerKey = GlobalKey();
+  final GlobalKey _yieldPredictionKey = GlobalKey();
   final GlobalKey _soilHealthKey = GlobalKey();
   final GlobalKey _marketKey = GlobalKey();
   final GlobalKey _aiAssistantKey = GlobalKey();
@@ -81,6 +83,7 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
     try {
       if (_weatherKey.currentContext != null &&
           _cropAdviceKey.currentContext != null &&
+          _yieldPredictionKey.currentContext != null &&
           _aiAssistantKey.currentContext != null) {
         await TutorialOverlay.show(
           context: context,
@@ -103,6 +106,12 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
               description:
                   'अपनी फसल के लिए सही उर्वरक और मात्रा की जानकारी पाएं। NPK अनुपात, जैविक विकल्प, और उपयोग का सही समय जानें। मिट्टी की उर्वरता बढ़ाएं।\n\nGet the right fertilizer recommendations with NPK ratios, organic options, and application timing.',
               targetKey: _fertilizerKey,
+            ),
+            TutorialStep(
+              title: '📊 उपज पूर्वानुमान / Yield Prediction',
+              description:
+                  'AI-आधारित मॉडल से अपनी फसल की उपज का पूर्वानुमान लगाएं। क्षेत्र, मौसम, उर्वरक और अन्य कारकों के आधार पर सटीक अनुमान पाएं। 97% सटीकता के साथ।\n\nPredict your crop yield using AI models. Get accurate estimates based on area, weather, fertilizer, and other factors with 97% accuracy.',
+              targetKey: _yieldPredictionKey,
             ),
             TutorialStep(
               title: '🌱 मिट्टी स्वास्थ्य / Soil Health Advisor',
@@ -384,6 +393,19 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                           ),
                         ),
                         key: _fertilizerKey,
+                      ),
+                      _buildCard(
+                        Icons.analytics_outlined,
+                        'Yield Prediction',
+                        Colors.green.shade700,
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const CropYieldPredictionScreen(),
+                          ),
+                        ),
+                        key: _yieldPredictionKey,
                       ),
                       _buildCard(
                         Icons.eco_outlined,

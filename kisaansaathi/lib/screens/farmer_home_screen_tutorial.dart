@@ -7,11 +7,6 @@ import '../screens/crop_recommendation.dart';
 import '../screens/fertilizer_recommendation.dart';
 import '../screens/government_schemes.dart';
 import '../screens/market_prices.dart';
-import '../screens/news_screen.dart';
-import '../screens/soil_health_advisor.dart';
-import '../screens/nearby_store_screen.dart';
-import '../screens/farmers_list_screen.dart';
-import '../utils/image_helper.dart';
 import '../widgets/language_switcher.dart';
 import '../widgets/tutorial_overlay.dart';
 import '../widgets/daily_quote_dialog.dart';
@@ -342,7 +337,7 @@ class _FarmerHomeScreenWithTutorialState
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const MarketPricesScreen(),
+                              builder: (context) => const MarketScreen(),
                             ),
                           );
                         },

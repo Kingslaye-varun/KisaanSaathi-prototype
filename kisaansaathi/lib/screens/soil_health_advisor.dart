@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:kisaansaathi/config/secrets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../widgets/data_source_badge.dart';
 
 class SoilHealthAdvisorScreen extends StatefulWidget {
   const SoilHealthAdvisorScreen({super.key});
@@ -401,9 +402,11 @@ Error Details: $e
         backgroundColor: Colors.brown.shade700,
         elevation: 4,
       ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(16),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
@@ -1023,6 +1026,15 @@ Error Details: $e
           ),
         ),
       ),
+      
+      // Data Source Badge
+      const DataSourceBadge(
+        source: 'Soil Health Card Portal',
+        sourceUrl: 'https://soilhealth.dac.gov.in',
+        isVerified: true,
+      ),
+    ],
+  ),
     );
   }
 
