@@ -374,6 +374,8 @@ import 'screens/community_screen.dart';
 import 'screens/agristore_screen.dart';
 import 'screens/farmer_profile_view.dart';
 import 'screens/consumer_home_screen.dart';
+import 'screens/worker_home_screen.dart';
+import 'screens/hire_worker_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -393,16 +395,19 @@ void main() async {
   final String? token = prefs.getString('token');
   final String? farmerId = prefs.getString('farmerId');
   final String? consumerId = prefs.getString('consumerId');
+  final String? workerId = prefs.getString('workerId');
   final String? userType = prefs.getString('userType');
 
-  // Consider user logged in if either token or farmerId/consumerId exists
+  // Consider user logged in if either token or farmerId/consumerId/workerId exists
   final bool isLoggedIn =
-      token != null || farmerId != null || consumerId != null;
+      token != null || farmerId != null || consumerId != null || workerId != null;
   String initialRoute = '/login';
 
   if (isLoggedIn) {
     if (userType == 'consumer') {
       initialRoute = '/consumer_home';
+    } else if (userType == 'worker') {
+      initialRoute = '/worker_home';
     } else {
       initialRoute = '/home';
     }
@@ -576,6 +581,8 @@ class _KisaanSaathiAppState extends State<KisaanSaathiApp> {
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const MainAppScaffold(initialIndex: 0),
         '/consumer_home': (context) => const ConsumerHomeScreen(),
+        '/worker_home': (context) => const WorkerHomeScreen(),
+        '/hire_worker': (context) => const HireWorkerScreen(),
         '/chatbot': (context) => const ChatbotScreen(),
         '/profile': (context) => const MainAppScaffold(initialIndex: 3),
         '/chat': (context) => const ChatScreen(),

@@ -10,6 +10,7 @@ import '../screens/market_prices.dart';
 import '../screens/news_screen.dart';
 import '../screens/nearby_store_screen.dart';
 import '../screens/farmers_list_screen.dart';
+import '../screens/hire_worker_screen.dart';
 import '../utils/image_helper.dart';
 import '../widgets/language_switcher.dart';
 
@@ -237,6 +238,17 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const ChatbotScreen(),
+                          ),
+                        ),
+                      ),
+                      _buildCard(
+                        Icons.work,
+                        'Hire Worker',
+                        Colors.indigo,
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HireWorkerScreen(),
                           ),
                         ),
                       ),
