@@ -176,7 +176,7 @@ ${PromptTemplate.kisaanSaathiPrompt}''',
             'temperature': 0.7,
             'topK': 40,
             'topP': 0.95,
-            'maxOutputTokens': 1024,
+            'maxOutputTokens': 8192, // Increased to get full responses
           },
         }),
       );
@@ -217,7 +217,7 @@ ${PromptTemplate.kisaanSaathiPrompt}''',
               'temperature': 0.7,
               'topK': 40,
               'topP': 0.95,
-              'maxOutputTokens': 1024,
+              'maxOutputTokens': 8192, // Increased to get full responses
             },
           }),
         );
@@ -251,6 +251,11 @@ ${PromptTemplate.kisaanSaathiPrompt}''',
         debugPrint(
           'Gemini API error: ${response.statusCode} - ${response.body}',
         );
+
+        // If API key is leaked/blocked
+        if (response.statusCode == 403) {
+          return '🔑 API Key Error: Your Gemini API key has been reported as leaked and blocked by Google. Please:\n\n1. Go to https://aistudio.google.com/app/apikey\n2. Delete the old key\n3. Generate a NEW API key\n4. Update your .env file\n5. Restart the app\n\nNever commit API keys to Git!';
+        }
 
         // If quota exceeded, provide helpful message
         if (response.statusCode == 429) {
