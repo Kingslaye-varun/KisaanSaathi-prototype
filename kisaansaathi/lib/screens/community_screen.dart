@@ -11,8 +11,14 @@ import '../services/post_service.dart';
 
 class CommunityScreen extends StatefulWidget {
   final bool showAppBar;
+  final bool
+  isEmbedded; // New parameter to indicate if embedded in another Scaffold
 
-  const CommunityScreen({Key? key, this.showAppBar = true}) : super(key: key);
+  const CommunityScreen({
+    Key? key,
+    this.showAppBar = true,
+    this.isEmbedded = false,
+  }) : super(key: key);
 
   @override
   State<CommunityScreen> createState() => _CommunityScreenState();
@@ -788,6 +794,17 @@ class _CommunityScreenState extends State<CommunityScreen> {
             ),
           )
         : null;
+
+    // If embedded in another Scaffold (like MainAppScaffold for farmers)
+    // Return just the body content without Scaffold
+    if (widget.isEmbedded) {
+      return Stack(
+        children: [
+          bodyContent,
+          if (fab != null) Positioned(bottom: 16, right: 16, child: fab),
+        ],
+      );
+    }
 
     // Return with or without AppBar based on showAppBar parameter
     if (widget.showAppBar) {

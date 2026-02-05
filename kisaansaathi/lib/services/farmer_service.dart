@@ -392,6 +392,40 @@ class FarmerService {
   }
 
   static Future getFarmerById(String farmerId) async {}
+
+  // Get all farmers
+  Future<List<Map<String, dynamic>>> getAllFarmers() async {
+    try {
+      print('🔵 Fetching all farmers from: $baseUrl');
+
+      final response = await _makeRequest(
+        () => _client.get(Uri.parse(baseUrl), headers: defaultHeaders),
+      );
+
+      print('📡 Response status: ${response.statusCode}');
+      print('📦 Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        // Backend returns {success: true, data: [...]}
+        if (responseData['success'] == true && responseData['data'] != null) {
+          final List<dynamic> farmers = responseData['data'];
+          print('✅ Successfully fetched ${farmers.length} farmers');
+          return farmers.cast<Map<String, dynamic>>();
+        } else {
+          print('❌ Invalid response structure');
+          return [];
+        }
+      } else {
+        print('❌ Failed to load farmers: ${response.statusCode}');
+        throw Exception('Failed to load farmers: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Error getting all farmers: $e');
+      return [];
+    }
+  }
 }
 
 // Unified response class for better type safety

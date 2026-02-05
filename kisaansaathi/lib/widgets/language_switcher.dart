@@ -5,17 +5,17 @@ import '../main.dart';
 class LanguageSwitcher extends StatelessWidget {
   const LanguageSwitcher({super.key});
 
-  static const Map<String, Map<String, String>> languages = {
-    'English': {'code': 'en', 'flag': '🇬🇧'},
-    'Malayalam': {'code': 'ml', 'flag': '🇮🇳'},
-    'Hindi': {'code': 'hi', 'flag': '🇮🇳'},
-    'Punjabi': {'code': 'pa', 'flag': '🇮🇳'},
-    'Bengali': {'code': 'bn', 'flag': '🇮🇳'},
-    'Tamil': {'code': 'ta', 'flag': '🇮🇳'},
-    'Telugu': {'code': 'te', 'flag': '🇮🇳'},
-    'Marathi': {'code': 'mr', 'flag': '🇮🇳'},
-    'Gujarati': {'code': 'gu', 'flag': '🇮🇳'},
-    'Kannada': {'code': 'kn', 'flag': '🇮🇳'},
+  static const Map<String, String> languages = {
+    'English': 'en',
+    'Malayalam': 'ml',
+    'Hindi': 'hi',
+    'Punjabi': 'pa',
+    'Bengali': 'bn',
+    'Tamil': 'ta',
+    'Telugu': 'te',
+    'Marathi': 'mr',
+    'Gujarati': 'gu',
+    'Kannada': 'kn',
   };
 
   Future<void> _changeLanguage(
@@ -88,15 +88,9 @@ class LanguageSwitcher extends StatelessWidget {
                       itemCount: languages.length,
                       itemBuilder: (context, index) {
                         final languageName = languages.keys.elementAt(index);
-                        final languageData = languages[languageName]!;
-                        final languageCode = languageData['code']!;
-                        final flag = languageData['flag']!;
+                        final languageCode = languages[languageName]!;
 
                         return ListTile(
-                          leading: Text(
-                            flag,
-                            style: const TextStyle(fontSize: 28),
-                          ),
                           title: Text(
                             languageName,
                             style: const TextStyle(

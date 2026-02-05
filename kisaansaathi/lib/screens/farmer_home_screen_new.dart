@@ -10,6 +10,8 @@ import '../screens/fertilizer_recommendation.dart';
 import '../screens/government_schemes.dart';
 import '../screens/market_prices.dart';
 import '../screens/news_screen.dart';
+import '../screens/nearby_store_screen.dart';
+import '../screens/farmers_list_screen.dart';
 import '../utils/image_helper.dart';
 import '../widgets/language_switcher.dart';
 
@@ -189,6 +191,28 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                               ),
                             ),
                           ),
+                          _buildQuickActionCard(
+                            icon: Icons.ac_unit,
+                            title: 'Cold Storage',
+                            color: Colors.cyan,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NearbyStorageScreen(),
+                              ),
+                            ),
+                          ),
+                          _buildQuickActionCard(
+                            icon: Icons.chat,
+                            title: 'Chat with Farmers',
+                            color: Colors.teal,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const FarmersListScreen(),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -350,39 +374,6 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
               ),
             ),
         ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        selectedItemColor: Colors.green.shade700,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Community'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Store',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CommunityScreen()),
-            );
-          } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AgriStoreScreen()),
-            );
-          } else if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            );
-          }
-        },
       ),
     );
   }

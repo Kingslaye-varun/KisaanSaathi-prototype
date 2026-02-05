@@ -15,12 +15,14 @@ class ApiService {
   // Gemini API - Using your existing Gemini key
   static final String _geminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
   static final String _geminiApiKey2 = dotenv.env['GEMINI_API_KEY_2'] ?? '';
+
+  // Use gemini-2.5-flash - latest model
   static const String _geminiBaseUrl =
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
   // Free farming API alternatives
   static final String _agriApiKey =
-      '579b464db66ec23bdd000001217d96c60c1646086c4cc3cc5dfc348d'; // Will explain in comments how to get this
+      '579b464db66ec23bdd000001217d96c60c1646086c4cc3cc5dfc348d';
 
   // Market prices API - Farmers Portal API from data.gov.in
   static const String _marketPricesApi =
@@ -179,6 +181,56 @@ ${PromptTemplate.kisaanSaathiPrompt}''',
         }),
       );
 
+      // If first API key fails with quota error, try second key
+      if (response.statusCode == 429 && _geminiApiKey2.isNotEmpty) {
+        debugPrint('⚠️ First API key quota exceeded, trying backup key...');
+
+        final response2 = await http.post(
+          Uri.parse('$_geminiBaseUrl?key=$_geminiApiKey2'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'contents': [
+              {
+                'parts': [
+                  {
+                    'text':
+                        '''Help the farmer with their query: $message
+
+LOCATION AND WEATHER CONTEXT:
+$locationContext
+$weatherContext
+
+CONVERSATION HISTORY:
+$conversationContext
+
+LANGUAGE INSTRUCTIONS:
+$languagePrompt
+$terminologyGuidance
+$voiceFriendlyGuidance
+
+${PromptTemplate.kisaanSaathiPrompt}''',
+                  },
+                ],
+              },
+            ],
+            'generationConfig': {
+              'temperature': 0.7,
+              'topK': 40,
+              'topP': 0.95,
+              'maxOutputTokens': 1024,
+            },
+          }),
+        );
+
+        if (response2.statusCode == 200) {
+          final data = jsonDecode(response2.body);
+          String responseText =
+              data['candidates'][0]['content']['parts'][0]['text'] ??
+              'Sorry, I couldn\'t understand that.';
+          return responseText;
+        }
+      }
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         String responseText =
@@ -199,6 +251,12 @@ ${PromptTemplate.kisaanSaathiPrompt}''',
         debugPrint(
           'Gemini API error: ${response.statusCode} - ${response.body}',
         );
+
+        // If quota exceeded, provide helpful message
+        if (response.statusCode == 429) {
+          return 'API quota exceeded. Please wait a few minutes and try again, or contact support for a new API key.';
+        }
+
         throw Exception('Failed to get response: ${response.statusCode}');
       }
     } catch (e) {

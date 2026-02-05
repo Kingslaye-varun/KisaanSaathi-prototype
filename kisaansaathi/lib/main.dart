@@ -608,7 +608,9 @@ class _MainAppScaffoldState extends State<MainAppScaffold> {
 
   final List<Widget> _screens = [
     const FarmerHomeScreenNew(),
-    const CommunityScreen(),
+    const CommunityScreen(
+      isEmbedded: true,
+    ), // Embedded in MainAppScaffold - no duplicate Scaffold
     const AgriStoreScreen(),
     const ProfileScreen(),
   ];

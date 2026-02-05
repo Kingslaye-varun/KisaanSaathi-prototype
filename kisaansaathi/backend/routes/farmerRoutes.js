@@ -80,6 +80,41 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
   }
 });
 
+// Get all farmers (for chat list)
+router.get('/', async (req, res) => {
+  try {
+    const { excludePhone, excludeId } = req.query;
+    
+    // Build query to exclude current user
+    const query = {};
+    if (excludePhone) {
+      query.phoneNumber = { $ne: excludePhone };
+    }
+    if (excludeId) {
+      query._id = { $ne: excludeId };
+    }
+    
+    const farmers = await Farmer.find(query)
+      .select('name phoneNumber profileImage isVerified farmerId location')
+      .sort({ createdAt: -1 });
+    
+    console.log(`✅ Fetched ${farmers.length} farmers`);
+    
+    res.status(200).json({
+      success: true,
+      data: farmers
+    });
+    
+  } catch (error) {
+    console.error('❌ Error fetching farmers:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch farmers',
+      error: error.message
+    });
+  }
+});
+
 // Get farmer by phone number
 router.get('/:phoneNumber', async (req, res) => {
   try {
