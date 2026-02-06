@@ -6,6 +6,8 @@ const farmerRoutes = require('./routes/farmerRoutes');
 const postRoutes = require('./routes/postRoutes');
 const consumerRoutes = require('./routes/consumers');
 const chatRoutes = require('./routes/chat');
+const workerRoutes = require('./routes/workers');
+const workRequestRoutes = require('./routes/workRequests');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -33,6 +35,8 @@ app.use('/api/farmers', farmerRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/consumers', consumerRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/workers', workerRoutes);
+app.use('/api/work-requests', workRequestRoutes);
 
 // Start server
 app.listen(PORT, () => {

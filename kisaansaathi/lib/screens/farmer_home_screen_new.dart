@@ -9,6 +9,7 @@ import '../screens/government_schemes.dart';
 import '../screens/news_screen.dart';
 import '../screens/soil_health_advisor.dart';
 import '../screens/farmers_list_screen.dart';
+import '../screens/hire_worker_screen.dart';
 import '../utils/image_helper.dart';
 import '../widgets/language_switcher.dart';
 import '../widgets/tutorial_overlay.dart';
@@ -159,6 +160,17 @@ class _FarmerHomeScreenNewState extends State<FarmerHomeScreenNew> {
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      _buildCard(
+                        Icons.work,
+                        'Hire Worker',
+                        Colors.indigo,
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HireWorkerScreen(),
+                          ),
                         ),
                       ),
                     ],

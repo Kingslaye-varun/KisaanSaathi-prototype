@@ -376,6 +376,8 @@ import 'screens/farmer_profile_view.dart';
 import 'screens/consumer_home_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/tutorial_service.dart';
+import 'screens/worker_home_screen.dart';
+import 'screens/hire_worker_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -395,14 +397,15 @@ void main() async {
   final String? token = prefs.getString('token');
   final String? farmerId = prefs.getString('farmerId');
   final String? consumerId = prefs.getString('consumerId');
+  final String? workerId = prefs.getString('workerId');
   final String? userType = prefs.getString('userType');
 
   // Check if tutorial has been completed
   final bool tutorialCompleted = await TutorialService.hasCompletedTutorial();
 
-  // Consider user logged in if either token or farmerId/consumerId exists
+  // Consider user logged in if either token or farmerId/consumerId/workerId exists
   final bool isLoggedIn =
-      token != null || farmerId != null || consumerId != null;
+      token != null || farmerId != null || consumerId != null || workerId != null;
   String initialRoute = '/login';
 
   if (isLoggedIn) {
@@ -411,6 +414,8 @@ void main() async {
       initialRoute = '/onboarding';
     } else if (userType == 'consumer') {
       initialRoute = '/consumer_home';
+    } else if (userType == 'worker') {
+      initialRoute = '/worker_home';
     } else {
       initialRoute = '/home';
     }
@@ -582,6 +587,8 @@ class _KisaanSaathiAppState extends State<KisaanSaathiApp> {
         '/onboarding': (context) => const OnboardingScreen(),
         '/home': (context) => const MainAppScaffold(initialIndex: 0),
         '/consumer_home': (context) => const ConsumerHomeScreen(),
+        '/worker_home': (context) => const WorkerHomeScreen(),
+        '/hire_worker': (context) => const HireWorkerScreen(),
         '/chatbot': (context) => const ChatbotScreen(),
         '/profile': (context) => const MainAppScaffold(initialIndex: 3),
         '/chat': (context) => const ChatScreen(),

@@ -8,6 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/farmer_service.dart';
 import '../services/consumer_service.dart';
+import '../services/worker_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -139,8 +140,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
       if (_userType == 'farmer') {
         await _registerAsFarmer();
-      } else {
+      } else if (_userType == 'consumer') {
         await _registerAsConsumer();
+      } else {
+        await _registerAsWorker();
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -222,6 +225,38 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  Future<void> _registerAsWorker() async {
+    final result = await WorkerService.registerWorker(
+      name: _nameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      language: _selectedLanguage,
+      profileImage: _profileImage,
+    );
+
+    if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration successful!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');
+      KisaanSaathiApp.of(context).setLocale(newLocale);
+
+      Navigator.pushReplacementNamed(context, '/worker_home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   void _skipToHome() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selectedLanguage', _selectedLanguage);
@@ -231,6 +266,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (_userType == 'consumer') {
       Navigator.pushReplacementNamed(context, '/consumer_home');
+    } else if (_userType == 'worker') {
+      Navigator.pushReplacementNamed(context, '/worker_home');
     } else {
       Navigator.pushReplacementNamed(context, '/home');
     }
@@ -287,7 +324,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     Text(
                       _userType == 'farmer'
                           ? 'Farmer Registration'
-                          : 'Consumer Registration',
+                          : _userType == 'consumer'
+                              ? 'Consumer Registration'
+                              : 'Worker Registration',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,

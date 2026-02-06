@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../services/farmer_service.dart';
 import '../services/consumer_service.dart';
+import '../services/worker_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _keepMeLoggedIn = true;
   String _selectedLanguage = 'English';
-  String _userType = 'farmer'; // 'farmer' or 'consumer'
+  String _userType = 'farmer'; // 'farmer', 'consumer', or 'worker'
 
   final Map<String, Locale> _languageMap = {
     'English': const Locale('en'),
@@ -88,8 +89,10 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       if (_userType == 'farmer') {
         await _loginAsFarmer();
-      } else {
+      } else if (_userType == 'consumer') {
         await _loginAsConsumer();
+      } else {
+        await _loginAsWorker();
       }
     } catch (e) {
       ScaffoldMessenger.of(
@@ -180,6 +183,46 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _loginAsWorker() async {
+    final result = await WorkerService.getWorkerByPhone(
+      _phoneController.text,
+    );
+
+    if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login successful!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('keepMeLoggedIn', _keepMeLoggedIn);
+      await prefs.setString('selectedLanguage', _selectedLanguage);
+      await prefs.setString('userType', 'worker');
+
+      Locale newLocale = _languageMap[_selectedLanguage] ?? const Locale('en');
+      KisaanSaathiApp.of(context).setLocale(newLocale);
+
+      Navigator.pushReplacementNamed(context, '/worker_home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+
+      Navigator.pushNamed(
+        context,
+        '/signup',
+        arguments: {'userType': 'worker'},
+      );
+    }
+  }
+
   void _navigateToSignup() {
     Navigator.pushNamed(context, '/signup', arguments: {'userType': _userType});
   }
@@ -248,16 +291,25 @@ class _LoginScreenState extends State<LoginScreen> {
                                   'farmer',
                                   'Farmer',
                                   Icons.agriculture,
-                                  'Sell & Trade Products',
+                                  'Sell & Hire Workers',
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: _buildUserTypeCard(
                                   'consumer',
                                   'Consumer',
                                   Icons.shopping_bag,
                                   'Buy Fresh Products',
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildUserTypeCard(
+                                  'worker',
+                                  'Worker',
+                                  Icons.work,
+                                  'Find Farm Jobs',
                                 ),
                               ),
                             ],
