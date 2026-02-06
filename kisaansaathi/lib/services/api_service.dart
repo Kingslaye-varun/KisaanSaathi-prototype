@@ -176,7 +176,7 @@ ${PromptTemplate.kisaanSaathiPrompt}''',
             'temperature': 0.7,
             'topK': 40,
             'topP': 0.95,
-            'maxOutputTokens': 8192, // Increased to get full responses
+            'maxOutputTokens': 2048, // ~350 words limit
           },
         }),
       );
@@ -217,7 +217,7 @@ ${PromptTemplate.kisaanSaathiPrompt}''',
               'temperature': 0.7,
               'topK': 40,
               'topP': 0.95,
-              'maxOutputTokens': 8192, // Increased to get full responses
+              'maxOutputTokens': 2048, // ~350 words limit
             },
           }),
         );

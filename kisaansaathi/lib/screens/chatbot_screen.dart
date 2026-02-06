@@ -353,7 +353,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     }
   }
 
-  // Disease Detection Methods
+  // Disease Detection Methods using Gemini API
   Future<void> _pickImage(ImageSource source) async {
     try {
       final pickedFile = await _picker.pickImage(source: source);
@@ -362,14 +362,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           _imageFile = File(pickedFile.path);
           _diseaseDetectionResult = null;
         });
-        _detectDisease();
+        _detectDiseaseWithGemini();
       }
     } catch (e) {
       _showErrorSnackbar('Error picking image: $e');
     }
   }
 
-  Future<void> _detectDisease() async {
+  Future<void> _detectDiseaseWithGemini() async {
     if (_imageFile == null) {
       _showErrorSnackbar('No image selected. Please select an image first.');
       return;
@@ -384,179 +384,165 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       // Show a message that we're processing the image
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Processing image... Please wait.'),
+          content: Text('Analyzing plant image with AI... Please wait.'),
           duration: Duration(seconds: 2),
         ),
       );
 
-      // Use the environment config for Flask API URL
-      final serverUrls = [
-        'http://172.16.120.213:5000/predict',
-        'http://127.0.0.1:5000/predict',
-        'http://localhost:5000/predict',
-      ];
+      // Convert image to base64
+      final bytes = await _imageFile!.readAsBytes();
+      final base64Image = base64Encode(bytes);
 
-      String? errorMessage;
-      // Try each URL until one works
-      for (var url in serverUrls) {
-        try {
-          var request = http.MultipartRequest('POST', Uri.parse(url));
-
-          // Add the image file with the correct field name 'file'
-          request.files.add(
-            await http.MultipartFile.fromPath('file', _imageFile!.path),
+      // Get location context if available
+      String locationContext = '';
+      try {
+        Position? position = await _getCurrentLocation();
+        if (position != null) {
+          String locationName = await _getLocationName(
+            position.latitude,
+            position.longitude,
           );
-
-          // Add language parameter
-          request.fields['lang'] = _selectedLanguage;
-
-          // Add location data if available
-          try {
-            Position? position = await _getCurrentLocation();
-            if (position != null) {
-              request.fields['latitude'] = position.latitude.toString();
-              request.fields['longitude'] = position.longitude.toString();
-
-              // Try to get location name
-              String locationName = await _getLocationName(
-                position.latitude,
-                position.longitude,
-              );
-              request.fields['location'] = locationName;
-            }
-          } catch (e) {
-            debugPrint('Error getting location for disease detection: $e');
-            // Continue without location data
-          }
-
-          // Send the request with timeout
-          var response = await request.send().timeout(
-            const Duration(seconds: 30),
-            onTimeout: () {
-              throw Exception('Connection timeout');
-            },
-          );
-
-          // Check if the request was successful
-          if (response.statusCode == 200) {
-            var responseBody = await response.stream.bytesToString();
-
-            // Parse the JSON response
-            final result = json.decode(responseBody);
-
-            // Check if the response contains an error
-            if (result['status'] == 'error') {
-              throw Exception(result['error'] ?? 'Unknown error from server');
-            }
-
-            // Validate required fields
-            if (result['prediction'] == null || result['confidence'] == null) {
-              throw Exception('Invalid response format from server');
-            }
-
-            setState(() {
-              _diseaseDetectionResult = result;
-              _isDetectingDisease = false;
-            });
-
-            // Add disease detection result to conversation
-            _addDiseaseDetectionResultToChat(result);
-            return; // Success, exit the method
-          } else if (response.statusCode == 404) {
-            throw Exception('Endpoint not found (404)');
-          } else if (response.statusCode >= 500) {
-            throw Exception('Server error (${response.statusCode})');
-          } else {
-            throw Exception(
-              'Server returned status code: ${response.statusCode}',
-            );
-          }
-        } catch (e) {
-          errorMessage = e.toString();
-          debugPrint('Failed to connect to $url: $e');
-          continue; // Try next URL
+          locationContext =
+              'Location: $locationName (Lat: ${position.latitude}, Lon: ${position.longitude})';
         }
+      } catch (e) {
+        debugPrint('Error getting location: $e');
       }
 
-      // If we reach here, all URLs failed
-      setState(() {
-        _isDetectingDisease = false;
-      });
+      // Get language-specific prompt
+      final Map<String, String> languagePrompts = {
+        'English': 'Please respond in English.',
+        'Hindi': 'कृपया हिंदी में जवाब दें।',
+        'Malayalam': 'ദയവായി മലയാളത്തിൽ ഉത്തരം നൽകുക.',
+        'Tamil': 'தயவுசெய்து தமிழில் பதிலளிக்கவும்.',
+        'Telugu': 'దయచేసి తెలుగులో సమాధానం ఇవ్వండి.',
+        'Kannada': 'ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರ ನೀಡಿ.',
+        'Punjabi': 'ਕਿਰਪਾ ਕਰਕੇ ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ।',
+        'Bengali': 'অনুগ্রহ করে বাংলায় উত্তর দিন।',
+        'Marathi': 'कृपया मराठीत उत्तर द्या.',
+        'Gujarati': 'કૃપા કરીને ગુજરાતીમાં જવાબ આપો.',
+      };
 
-      String userFriendlyError =
-          'Cannot connect to the disease detection server. Please check if the server is running.';
+      final languagePrompt =
+          languagePrompts[_selectedLanguage] ?? languagePrompts['English']!;
 
-      if (errorMessage?.contains('404') == true) {
-        userFriendlyError =
-            'Disease detection service not found. Please check server configuration.';
-      } else if (errorMessage?.contains('timeout') == true) {
-        userFriendlyError =
-            'Connection timeout. Server might be down or unreachable.';
+      // Call Gemini API with vision (using gemini-2.5-pro for better instruction following)
+      final geminiApiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+      final response = await http.post(
+        Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=$geminiApiKey',
+        ),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'contents': [
+            {
+              'parts': [
+                {
+                  'text':
+                      '''You are an expert plant pathologist and agricultural advisor. Analyze this plant image and provide a DETAILED disease diagnosis.
+
+$locationContext
+
+CRITICAL INSTRUCTIONS:
+1. Carefully examine the plant image for any signs of disease, pest damage, or nutrient deficiency
+2. If healthy, state "Healthy Plant" and explain why it looks healthy
+3. If diseased, you MUST provide ALL of the following:
+   - Specific disease/problem name
+   - Confidence level (percentage)
+   - Detailed cause and symptoms (2-3 sentences minimum)
+   - At least 3-5 practical remedies with specific details
+   - Prevention tips (2-3 sentences)
+
+$languagePrompt
+
+FORMATTING RULES:
+- Response should be 200-250 words (comprehensive but concise)
+- Use simple language, avoid technical jargon
+- Do NOT use special symbols like asterisks, bullets, hashtags
+- Use plain text with simple numbering (1, 2, 3)
+- Separate sections with line breaks
+
+FORMAT EXACTLY LIKE THIS:
+Disease: [Specific disease name or Healthy Plant]
+Confidence: [XX percent]
+
+Cause: [Detailed explanation of what causes this disease and visible symptoms - write 2-3 sentences]
+
+Remedies:
+1. [First remedy with specific details]
+2. [Second remedy with application method]
+3. [Third remedy with dosage if applicable]
+4. [Fourth remedy - organic option]
+5. [Fifth remedy - preventive measure]
+
+Prevention: [Detailed prevention tips - write 2-3 sentences about how to avoid this in future]
+
+Be thorough, practical, and actionable. Provide complete information.''',
+                },
+                {
+                  'inline_data': {
+                    'mime_type': 'image/jpeg',
+                    'data': base64Image,
+                  },
+                },
+              ],
+            },
+          ],
+          'generationConfig': {
+            'temperature': 0.4,
+            'topK': 32,
+            'topP': 0.8,
+            'maxOutputTokens': 800, // ~250 words
+            'candidateCount': 1,
+          },
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final analysisText =
+            data['candidates'][0]['content']['parts'][0]['text'] ??
+            'Unable to analyze the image.';
+
+        // Debug: Print the full response
+        debugPrint(
+          '🔍 GEMINI RESPONSE LENGTH: ${analysisText.length} characters',
+        );
+        debugPrint('🔍 GEMINI RESPONSE: $analysisText');
+
+        setState(() {
+          _diseaseDetectionResult = {
+            'analysis': analysisText,
+            'timestamp': DateTime.now().toIso8601String(),
+          };
+          _isDetectingDisease = false;
+        });
+
+        // Add result to conversation
+        _addDiseaseDetectionResultToChat(analysisText);
+      } else {
+        throw Exception(
+          'Gemini API error: ${response.statusCode} - ${response.body}',
+        );
       }
-
-      _showConnectionErrorDialog(userFriendlyError);
-      debugPrint('All server URLs failed. Last error: $errorMessage');
     } catch (e) {
       setState(() {
         _isDetectingDisease = false;
       });
 
-      _showErrorSnackbar('Error detecting disease: $e');
+      _showErrorSnackbar('Error analyzing plant image: $e');
       debugPrint('Disease detection error: $e');
     }
   }
 
-  // Helper method to show a more detailed connection error dialog
-  void _showConnectionErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Connection Error'),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _addDiseaseDetectionResultToChat(Map<String, dynamic> result) {
+  void _addDiseaseDetectionResultToChat(String analysisText) {
     try {
-      final confidence = (result['confidence'] * 100).toStringAsFixed(2);
-      final prediction = result['prediction'].toString().replaceAll('_', ' ');
-      final cause = result['cause']?.toString() ?? 'Unknown cause';
-
-      // Handle remedies whether it's a List or String
-      List<String> remediesList = [];
-      if (result['remedies'] is List) {
-        remediesList = (result['remedies'] as List<dynamic>)
-            .map((remedy) => remedy.toString())
-            .toList();
-      } else if (result['remedies'] != null) {
-        remediesList = [result['remedies'].toString()];
-      } else {
-        remediesList = ['No remedies available'];
-      }
-
       // Create a formatted message for the chat
       String diseaseMessage =
           '''
-🌱 **Plant Disease Detection Result**
+🌱 **Plant Disease Analysis**
 
-**Prediction:** $prediction
-**Confidence:** $confidence%
-
-**Cause:** $cause
-
-**Remedies:**
-${remediesList.map((remedy) => '• $remedy').join('\n')}
+$analysisText
 ''';
 
       final diseaseEntry = {
@@ -575,9 +561,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
       _scrollToBottom();
 
       if (_autoSpeakEnabled) {
-        final speakableMessage =
-            'Disease detection completed. Prediction: $prediction with $confidence percent confidence. Cause: $cause';
-        _speak(_processTextForSpeech(speakableMessage), diseaseEntry['id']!);
+        _speak(_processTextForSpeech(analysisText), diseaseEntry['id']!);
       }
     } catch (e) {
       debugPrint('Error adding disease result to chat: $e');
@@ -1004,7 +988,9 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
                     const SizedBox(width: 8),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _isDetectingDisease ? null : _detectDisease,
+                        onPressed: _isDetectingDisease
+                            ? null
+                            : _detectDiseaseWithGemini,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green.shade600,
                         ),
@@ -1035,12 +1021,49 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
 
   Widget _buildDiseaseResultCard() {
     final result = _diseaseDetectionResult!;
-    final confidence = (result['confidence'] * 100).toStringAsFixed(2);
-    final prediction = result['prediction'].toString().replaceAll('_', ' ');
-    final remedies = result['remedies'] is List
-        ? result['remedies'] as List<dynamic>
-        : [result['remedies'].toString()];
 
+    // New format just has 'analysis' text
+    if (result.containsKey('analysis')) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.green.shade300),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.green.shade600,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Analysis Complete',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              result['analysis'].toString(),
+              style: const TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Old format fallback (shouldn't happen anymore)
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -1049,70 +1072,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.green.shade300),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '🌱 Detection Result',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            prediction,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.green.shade700,
-            ),
-          ),
-          Text(
-            'Confidence: $confidence%',
-            style: TextStyle(
-              color: Colors.green.shade600,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Cause: ${result['cause']}',
-            style: TextStyle(color: Colors.green.shade800, height: 1.5),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Remedies:',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade700,
-            ),
-          ),
-          ...remedies
-              .map(
-                (remedy) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('• ', style: TextStyle(fontSize: 14)),
-                      Expanded(
-                        child: Text(
-                          remedy.toString(),
-                          style: TextStyle(
-                            color: Colors.green.shade800,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-              .toList(),
-        ],
-      ),
+      child: const Text('Result format not recognized'),
     );
   }
 
@@ -1134,7 +1094,7 @@ ${remediesList.map((remedy) => '• $remedy').join('\n')}
                   color: Colors.white,
                 ),
                 overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+                maxLines: 10,
               ),
             ),
           ],

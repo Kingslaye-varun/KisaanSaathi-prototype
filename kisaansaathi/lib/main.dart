@@ -374,6 +374,8 @@ import 'screens/community_screen.dart';
 import 'screens/agristore_screen.dart';
 import 'screens/farmer_profile_view.dart';
 import 'screens/consumer_home_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'services/tutorial_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -395,13 +397,19 @@ void main() async {
   final String? consumerId = prefs.getString('consumerId');
   final String? userType = prefs.getString('userType');
 
+  // Check if tutorial has been completed
+  final bool tutorialCompleted = await TutorialService.hasCompletedTutorial();
+
   // Consider user logged in if either token or farmerId/consumerId exists
   final bool isLoggedIn =
       token != null || farmerId != null || consumerId != null;
   String initialRoute = '/login';
 
   if (isLoggedIn) {
-    if (userType == 'consumer') {
+    // If logged in but tutorial not completed, show onboarding
+    if (!tutorialCompleted && userType != 'consumer') {
+      initialRoute = '/onboarding';
+    } else if (userType == 'consumer') {
       initialRoute = '/consumer_home';
     } else {
       initialRoute = '/home';
@@ -418,10 +426,7 @@ void main() async {
     }
   }
 
-  if (isLoggedIn) {
-    print("User is logged in, starting with home screen");
-  } else {
-    print("User is not logged in, starting with login screen");
+  if (!isLoggedIn) {
     // Clear any stale data
     await prefs.remove('token');
     await prefs.remove('farmerData');
@@ -574,6 +579,7 @@ class _KisaanSaathiAppState extends State<KisaanSaathiApp> {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
+        '/onboarding': (context) => const OnboardingScreen(),
         '/home': (context) => const MainAppScaffold(initialIndex: 0),
         '/consumer_home': (context) => const ConsumerHomeScreen(),
         '/chatbot': (context) => const ChatbotScreen(),
@@ -597,7 +603,7 @@ class _KisaanSaathiAppState extends State<KisaanSaathiApp> {
 class MainAppScaffold extends StatefulWidget {
   final int initialIndex;
 
-  const MainAppScaffold({Key? key, this.initialIndex = 0}) : super(key: key);
+  const MainAppScaffold({super.key, this.initialIndex = 0});
 
   @override
   State<MainAppScaffold> createState() => _MainAppScaffoldState();
@@ -667,8 +673,15 @@ class _MainAppScaffoldState extends State<MainAppScaffold> {
       print("🔄 Building MainAppScaffold with index: $_currentIndex");
     }
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
         body: _screens[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(

@@ -24,30 +24,21 @@ class _FarmersListScreenState extends State<FarmersListScreen> {
   }
 
   Future<void> _loadFarmers() async {
-    print('🔵 Loading farmers list...');
-
     final prefs = await SharedPreferences.getInstance();
     _currentFarmerId = prefs.getString('farmerId') ?? '';
 
     try {
       final farmers = await _farmerService.getAllFarmers();
-
       setState(() {
-        // Filter out current farmer
         _farmers = farmers.where((f) => f['_id'] != _currentFarmerId).toList();
         _isLoading = false;
       });
-
-      print('✅ Loaded ${_farmers.length} farmers');
     } catch (e) {
-      print('❌ Error loading farmers: $e');
       setState(() => _isLoading = false);
     }
   }
 
   void _openChat(Map<String, dynamic> farmer) {
-    print('💬 Opening chat with: ${farmer['name']}');
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -76,10 +67,8 @@ class _FarmersListScreenState extends State<FarmersListScreen> {
               onRefresh: _loadFarmers,
               child: ListView.builder(
                 itemCount: _farmers.length,
-                itemBuilder: (context, index) {
-                  final farmer = _farmers[index];
-                  return _buildFarmerTile(farmer);
-                },
+                itemBuilder: (context, index) =>
+                    _buildFarmerTile(_farmers[index]),
               ),
             ),
     );
@@ -106,41 +95,125 @@ class _FarmersListScreenState extends State<FarmersListScreen> {
   }
 
   Widget _buildFarmerTile(Map<String, dynamic> farmer) {
+    final String? imageUrl = farmer['profileImage']?['url'];
+    final String name = farmer['name'] ?? 'Unknown';
+    final bool isVerified = farmer['isVerified'] ?? false;
+
     return InkWell(
       onTap: () => _openChat(farmer),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 8,
+              spreadRadius: 2,
+            ),
+          ],
         ),
         child: Row(
           children: [
-            ImageHelper.getProfileImage(
-              imageUrl: farmer['profileImage']?['url'],
-              name: farmer['name'] ?? 'Farmer',
-              radius: 28,
+            Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.green.shade300, width: 2),
+                  ),
+                  child: ImageHelper.getProfileImage(
+                    imageUrl: imageUrl,
+                    name: name,
+                    radius: 32,
+                  ),
+                ),
+                if (isVerified)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade600,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    farmer['name'] ?? 'Unknown',
+                    name,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    farmer['location'] ?? 'Location not specified',
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  Row(
+                    children: [
+                      Icon(Icons.phone, size: 14, color: Colors.grey.shade600),
+                      const SizedBox(width: 4),
+                      Text(
+                        farmer['phoneNumber'] ?? 'No phone',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
                   ),
+                  if (farmer['farmerId'] != null) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.badge,
+                          size: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'ID: ${farmer['farmerId']}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
-            Icon(Icons.chat_bubble_outline, color: Colors.green.shade700),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.chat_bubble,
+                color: Colors.green.shade700,
+                size: 24,
+              ),
+            ),
           ],
         ),
       ),
